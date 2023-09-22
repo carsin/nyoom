@@ -21,6 +21,9 @@
 #### Local areas
 #### Specific cars (brands, models, years(?)) 
 ## Competitors
+### Throdle
+### Carmeets.app
+### Roadstr (defunct)
 ### Instagram
 ### Facebook
 ## User Stories (3 per member)

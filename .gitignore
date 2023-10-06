@@ -31,4 +31,5 @@ npm-debug.log*
 /plugins
 /www
 
-ios/
+ios/*
+android/*

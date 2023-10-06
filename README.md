@@ -1,15 +1,4 @@
-# HW (due 9/24/23):
-1. Intro
-    * Aim of document
-    * Overview of defined system.
-    * Operational settings (HW & SW constraints)
-    * Competitors (at least 2)
-2. 3 user stories per member
-3. 3 functional requirements per member.
-4. Use cases
-    * Overview diagram (1)
-  
-# CarClique
+# Nyoom
 ## Overview
 ## Operational Features
 ### Car Garage

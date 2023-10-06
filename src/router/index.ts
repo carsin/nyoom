@@ -5,27 +5,35 @@ import TabsPage from '../views/TabsPage.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/tabs/tab1'
+    redirect: '/home'
   },
   {
-    path: '/tabs/',
+    path: '/',
     component: TabsPage,
     children: [
       {
         path: '',
-        redirect: '/tabs/tab1'
+        redirect: '/home'
       },
       {
-        path: 'tab1',
-        component: () => import('@/views/Tab1Page.vue')
+        path: 'home',
+        component: () => import('@/views/FeedPage.vue')
       },
       {
-        path: 'tab2',
-        component: () => import('@/views/Tab2Page.vue')
+        path: 'search',
+        component: () => import('@/views/SearchPage.vue')
       },
       {
-        path: 'tab3',
-        component: () => import('@/views/Tab3Page.vue')
+        path: 'events',
+        component: () => import('@/views/EventPage.vue')
+      },
+      {
+        path: 'market',
+        component: () => import('@/views/MarketPage.vue')
+      },
+      {
+        path: 'profile',
+        component: () => import('@/views/ProfilePage.vue')
       }
     ]
   }

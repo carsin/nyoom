@@ -188,7 +188,7 @@
       </ion-card> -->
 
     </ion-header>
-    <ion-content :fullscreen="true">
+    <!-- <ion-content :fullscreen="true">
       <ion-header collapse="condense">
         <ion-toolbar>
           <ion-title size="large">Search</ion-title>
@@ -196,7 +196,7 @@
       </ion-header>
 
       <ExploreContainer name="Search Page" />
-    </ion-content>
+    </ion-content> -->
   </ion-page>
 </template>
 

@@ -1,0 +1,7 @@
+{
+  "name": "nyoom",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}

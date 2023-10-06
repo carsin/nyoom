@@ -5,7 +5,7 @@
         <ion-title>Market</ion-title>
       </ion-toolbar>
       <ion-toolbar>
-        <ion-searchbar show-clear-button="focus" value="Search parts"></ion-searchbar>
+        <ion-searchbar show-clear-button="focus" placeholder="Search parts"></ion-searchbar>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">

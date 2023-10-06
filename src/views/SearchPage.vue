@@ -5,7 +5,7 @@
         <ion-title>Search</ion-title>
       </ion-toolbar>
       <ion-toolbar>
-        <ion-searchbar show-clear-button="focus" value="Search vehicles by make, model, or owner"></ion-searchbar>
+        <ion-searchbar show-clear-button="focus" placeholder="Search vehicles by make, model, or owner"></ion-searchbar>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">

@@ -4,6 +4,9 @@
       <ion-toolbar>
         <ion-title>Search</ion-title>
       </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar show-clear-button="focus" value="Search for profiles, events, tips, and deals"></ion-searchbar>
+      </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">

@@ -152,7 +152,7 @@
     <!-- <ion-content :fullscreen="true">
       <ion-header collapse="condense">
         <ion-toolbar>
-          <ion-title size="large">Market</ion-title>
+          <ion-title size="large">Mar`ket</ion-title>
         </ion-toolbar> -->
       <!-- </ion-header>
 

@@ -14,16 +14,16 @@
           </ion-toolbar>
         </ion-header>
         <ion-item>
-            <ion-input label="Email:" placeholder="Enter your email"></ion-input>
+            <ion-input label="Email:" type="email" placeholder="email@domain.com"></ion-input>
         </ion-item>
         <ion-item>
             <ion-input label="Username:" placeholder="Enter a username"></ion-input>
         </ion-item>
         <ion-item>
-            <ion-input label="Password:" placeholder="Enter a password"></ion-input>
+            <ion-input label="Password:" type="password" placeholder="Enter a password"></ion-input>
         </ion-item>
         <ion-item>
-            <ion-input label="Confirm Password:" placeholder="Enter the same password"></ion-input>
+            <ion-input label="Confirm Password:" type="password" placeholder="Renter password"></ion-input>
         </ion-item>
         <ion-button>
             <ion-title>Register</ion-title>

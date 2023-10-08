@@ -17,7 +17,7 @@
             <ion-input label="Username:" placeholder="Enter username"></ion-input>
         </ion-item>
         <ion-item>
-            <ion-input label="Password:" placeholder="Enter password"></ion-input>
+            <ion-input label="Password:" type="password" placeholder="Enter password"></ion-input>
         </ion-item>
         <ion-button>
             <ion-title>Login</ion-title>

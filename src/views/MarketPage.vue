@@ -4,10 +4,10 @@
       <ion-toolbar>
         <ion-title>Market</ion-title>
         <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
-        <ion-button slot="end" fill="outline" href="/register"
-          >Register</ion-button
-        >
+        <ion-button slot="end" fill="outline" href="/register">Register</ion-button>
       </ion-toolbar>
+    </ion-header>
+        
       <ion-toolbar>
         <ion-searchbar
           show-clear-button="focus"
@@ -23,8 +23,7 @@
         <!-- change the row size somehow? -->
         <ion-col size="2">
           <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png"
-            />
+            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
             <ion-card-header>
               <ion-card-title>Part Title</ion-card-title>
               <ion-card-subtitle>Part Description</ion-card-subtitle>

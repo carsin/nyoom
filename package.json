@@ -9,13 +9,14 @@
     "preview": "vite preview",
     "test:e2e": "cypress run",
     "test:unit": "vitest",
-    "lint": "eslint"
+    "lint": "eslint",
+    "ionic:serve": "vite dev --host"
   },
   "dependencies": {
     "@capacitor/app": "5.0.6",
     "@capacitor/core": "5.4.2",
     "@capacitor/haptics": "5.0.6",
-    "@capacitor/ios": "^5.4.2",
+    "@capacitor/ios": "5.4.2",
     "@capacitor/keyboard": "5.0.6",
     "@capacitor/status-bar": "5.0.6",
     "@ionic/pwa-elements": "^3.2.2",

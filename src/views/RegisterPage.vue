@@ -17,7 +17,7 @@
             <ion-input label="Email:" type="email" placeholder="email@domain.com"></ion-input>
         </ion-item>
         <ion-item>
-            <ion-input label="Username:" placeholder="Enter a username"></ion-input>
+            <ion-input label="Username:" type="username" placeholder="Enter a username"></ion-input>
         </ion-item>
         <ion-item>
             <ion-input label="Password:" type="password" placeholder="Enter a password"></ion-input>

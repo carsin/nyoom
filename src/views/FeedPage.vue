@@ -3,8 +3,6 @@
         <ion-header>
             <ion-toolbar>
                 <ion-title>Feed</ion-title>
-                <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
-          <ion-button slot="end" fill="outline" href="/register">Register</ion-button>
             </ion-toolbar>
         </ion-header>
         <ion-content :fullscreen="true">
@@ -26,7 +24,6 @@
                     Here's a small text description for the card content. Nothing more, nothing less.
                 </ion-card-content>
             </ion-card>
-
         </ion-content>
     </ion-page>
 </template>

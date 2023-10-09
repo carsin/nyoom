@@ -6,6 +6,8 @@
         <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
           <ion-button slot="end" fill="outline" href="/register">Register</ion-button>
       </ion-toolbar>
+    </ion-header>
+        
       <ion-toolbar>
         <ion-searchbar show-clear-button="focus" placeholder="Search parts"></ion-searchbar>
       </ion-toolbar>
@@ -149,7 +151,6 @@
         </ion-row>
       </ion-grid>
 
-    </ion-header>
 
     <!-- <ion-content :fullscreen="true">
       <ion-header collapse="condense">
@@ -163,7 +164,7 @@
   </ion-page>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import ExploreContainer from '@/components/ExploreContainer.vue';
 </script>

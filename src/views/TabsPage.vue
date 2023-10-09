@@ -9,7 +9,7 @@
         </ion-tab-button>
 
         <ion-tab-button tab="tab2" href="/search">
-          <ion-icon aria-hidden="true" :icon="search"/>
+          <ion-icon aria-hidden="true" :icon="search" />
           <ion-label>Search</ion-label>
         </ion-tab-button>
 
@@ -34,6 +34,5 @@
 
 <script setup lang="ts">
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import { search, home, balloon, cart, person } from "ionicons/icons";
-
+import { home, search, balloon, cart, person } from 'ionicons/icons';
 </script>

@@ -23,7 +23,7 @@
             <ion-input label="Password:" type="password" placeholder="Enter a password"></ion-input>
         </ion-item>
         <ion-item>
-            <ion-input label="Confirm Password:" type="password" placeholder="Renter password"></ion-input>
+            <ion-input label="Confirm Password:" type="password" placeholder="Re-enter password"></ion-input>
         </ion-item>
         <ion-button>
             <ion-title>Register</ion-title>

@@ -14,7 +14,6 @@
           placeholder="Search parts"
         ></ion-searchbar>
       </ion-toolbar>
-    </ion-header>
     <ion-toolbar>
       <ion-title size="large">Local Parts</ion-title>
     </ion-toolbar>

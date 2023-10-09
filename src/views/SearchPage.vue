@@ -13,6 +13,7 @@
         <ion-title size="large">Select Make</ion-title>
       </ion-toolbar>
 
+    </ion-header>
       <ion-grid>
         <ion-row> <!-- change the row size somehow? -->
 
@@ -177,32 +178,11 @@
             </ion-card-header>
           </ion-card>
         </ion-col>
-
         </ion-row>
-
       </ion-grid>
-
-      <!-- <ion-card>
-        <img alt="Audi logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>
-        <ion-card-header>
-            <ion-card-title>Audi</ion-card-title>
-        </ion-card-header>
-      </ion-card> -->
-
-    </ion-header>
-    <!-- <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Search</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
-      <ExploreContainer name="Search Page" />
-    </ion-content> -->
   </ion-page>
 </template>
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
-import ExploreContainer from '@/components/ExploreContainer.vue';
 </script>

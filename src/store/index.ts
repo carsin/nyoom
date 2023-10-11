@@ -82,6 +82,9 @@ const store = createStore({
   },
   getters: {
     parts: (state) => state.parts,
+    part: (state) => (partId: any) => {
+      return state.parts.find((part) => part.id === partId);
+    },
     offers: (state) => state.offers,
   },
 });

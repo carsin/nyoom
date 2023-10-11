@@ -17,7 +17,9 @@
               <img alt="Part image" :src="part.imageUrl" />
               <ion-card-header>
                 <ion-card-title>{{ part.title }}</ion-card-title>
-                <ion-card-subtitle>{{ part.description }}</ion-card-subtitle>
+                <ion-card-subtitle>{{ part.price }}</ion-card-subtitle>
+                <ion-card-subtitle>{{ part.condition }}</ion-card-subtitle>
+
               </ion-card-header>
             </ion-card>
           </ion-col>

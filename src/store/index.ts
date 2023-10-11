@@ -7,63 +7,70 @@ const store = createStore({
         {
           id: "1",
           title: "M3 engine",
-          description: "brand new, never used",
+          description: "This engine is super awesome and goes vroom vroom!",
+          condition: "brand new, never used",
           price: "$1000",
-          distance: "12 miles",
+          location: "San Luis Obispo, CA",
           imageUrl:
             "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
         },
         {
           id: "2",
           title: "M3 engine",
-          description: "brand new, never used",
+          description: "This engine is super awesome and goes vroom vroom!",
+          condition: "brand new, never used",
           price: "$1000",
-          distance: "12 miles",
+          location: "San Luis Obispo, CA",
           imageUrl:
             "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
         },
         {
           id: "3",
           title: "M3 engine",
-          description: "brand new, never used",
+          description: "This engine is super awesome and goes vroom vroom!",
+          condition: "brand new, never used",
           price: "$1000",
-          distance: "12 miles",
+          location: "San Luis Obispo, CA",
           imageUrl:
             "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
         },
         {
           id: "4",
           title: "M3 engine",
-          description: "brand new, never used",
+          description: "This engine is super awesome and goes vroom vroom!",
+          condition: "brand new, never used",
           price: "$1000",
-          distance: "12 miles",
+          location: "San Luis Obispo, CA",
           imageUrl:
             "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
         },
         {
           id: "5",
           title: "M3 engine",
-          description: "brand new, never used",
+          description: "This engine is super awesome and goes vroom vroom!",
+          condition: "brand new, never used",
           price: "$1000",
-          distance: "12 miles",
+          location: "San Luis Obispo, CA",
           imageUrl:
             "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
         },
         {
           id: "6",
           title: "M3 engine",
-          description: "brand new, never used",
+          description: "This engine is super awesome and goes vroom vroom!",
+          condition: "brand new, never used",
           price: "$1000",
-          distance: "12 miles",
+          location: "San Luis Obispo, CA",
           imageUrl:
             "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
         },
         {
           id: "7",
           title: "M3 engine",
-          description: "brand new, never used",
+          description: "This engine is super awesome and goes vroom vroom!",
+          condition: "brand new, never used",
           price: "$1000",
-          distance: "12 miles",
+          location: "San Luis Obispo, CA",
           imageUrl:
             "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
         },
@@ -86,6 +93,9 @@ const store = createStore({
       return state.parts.find((part) => part.id === partId);
     },
     offers: (state) => state.offers,
+    offer: (state) => (offerId: any) => {
+      return state.offers.find((offer) => offer.id === offerId);
+    },
   },
 });
 

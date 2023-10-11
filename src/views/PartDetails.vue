@@ -1,6 +1,6 @@
 <template>
     <ion-page>
-      <ion-header>
+        <ion-header class="header-margin">
         <ion-toolbar>
           <ion-buttons slot="start">
             <ion-button @click="goBack" class="back-button">
@@ -11,16 +11,26 @@
         </ion-toolbar>
       </ion-header>
       <ion-content>
-        <!-- Details content here -->
-        <h2 v-if="!loadedPart"> Could not find a part for the given id</h2>
-        <h2 v-else>Loaded it</h2>
+        <!-- Test if component loads -->
+        <!-- <h2 v-if="!loadedPart"> Could not find a part for the given id</h2>
+        <h2 v-else>Loaded it</h2> -->
+        <img alt="Part image" :src="loadedPart.imageUrl" />
+          <ion-card-subtitle>{{ loadedPart.price }}</ion-card-subtitle>
+          <ion-card-subtitle>{{ loadedPart.condition }}</ion-card-subtitle>
+          <ion-card-subtitle>{{ loadedPart.description }}</ion-card-subtitle>
+          <ion-card-subtitle>{{ loadedPart.distance }} away from you</ion-card-subtitle>
+
       </ion-content>
     </ion-page>
   </template>
   
   <style scoped>
+  .header-margin {
+    margin-top: 20px; /* You can adjust the margin as needed */
+  }
+  
   .back-button {
-    --color: var(--ion-color-back-button);
+    --color: var(--ion-color-primary); 
   }
   </style>
   
@@ -34,7 +44,8 @@
       partId: this.$route.params.id
     };
   },
-  watch: { "$route"(currentRoute) {this.partId = currentRoute.params.id}},
+  //only need in case of change while on page rather than on load
+  //watch: { "$route"(currentRoute) {this.partId = currentRoute.params.id}},
   computed: {
   loadedPart(): any {
     return this.$store.getters.part(this.partId);

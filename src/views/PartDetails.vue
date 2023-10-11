@@ -14,11 +14,11 @@
         <!-- Test if component loads -->
         <!-- <h2 v-if="!loadedPart"> Could not find a part for the given id</h2>
         <h2 v-else>Loaded it</h2> -->
-        <img alt="Part image" :src="loadedPart.imageUrl" />
+        <img alt="Part image" :src="loadedPart.imageUrl" class="image-resize" />
           <ion-card-subtitle>{{ loadedPart.price }}</ion-card-subtitle>
           <ion-card-subtitle>{{ loadedPart.condition }}</ion-card-subtitle>
           <ion-card-subtitle>{{ loadedPart.description }}</ion-card-subtitle>
-          <ion-card-subtitle>{{ loadedPart.distance }} away from you</ion-card-subtitle>
+          <ion-card-subtitle class="underline-text">{{ loadedPart.location }}</ion-card-subtitle>
 
       </ion-content>
     </ion-page>
@@ -32,6 +32,14 @@
   .back-button {
     --color: var(--ion-color-primary); 
   }
+  .underline-text {
+  text-decoration: underline;
+}
+  .image-resize {
+  max-width: 100%; /* Set the maximum width you desire */
+  max-height: 500px; /* Set the maximum height you desire */
+  margin: 0 auto;
+}
   </style>
   
 

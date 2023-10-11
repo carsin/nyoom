@@ -8,6 +8,10 @@ const routes: Array<RouteRecordRaw> = [
     redirect: "/home",
   },
   {
+    path: "/market/:id",
+    component: () => import("../views/PartDetails.vue"),
+  },
+  {
     path: "/",
     component: TabsPage,
     children: [
@@ -43,21 +47,12 @@ const routes: Array<RouteRecordRaw> = [
         path: "register",
         component: () => import("@/views/RegisterPage.vue"),
       },
-      {
-        path: "market/:id",
-        component: () => import("../views/PartDetails.vue"),
-      },
+      // {
+      //   path: "market/:id",
+      //   component: () => import("../views/PartDetails.vue"),
+      // },
     ],
   },
-  // {
-  //   path: "/",
-  //   children: [
-  //     {
-  //       path: "market/:id",
-  //       component: () => import("../views/PartDetails.vue"),
-  //     },
-  //   ],
-  // },
 ];
 
 const router = createRouter({

@@ -1,11 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Profile</ion-title>
-        <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
-        <ion-button slot="end" fill="outline" href="/register">Register</ion-button>
-      </ion-toolbar>
+    <!-- <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button>
@@ -16,12 +11,47 @@
           <ion-button>
             <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon>
           </ion-button>
+          <ion-button>
+            <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
+          </ion-button>
         </ion-buttons>
         <ion-title align="center">@username</ion-title>
       </ion-toolbar>
-    </ion-header>
+      <ion-toolbar>
+        <ion-button fill="clear">
+          <ion-img src="src\sources\modified-race-car.jpg"></ion-img>
+        </ion-button>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-title align="center" size="small">here is where the bio goes. There will be a word/letter limit on the bio in the future.</ion-title>
+      </ion-toolbar>
+    </ion-header> -->
+
     <ion-content :fullscreen="true">
-     
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button>
+            <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+          <ion-button>
+            <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon>
+          </ion-button>
+          <ion-button>
+            <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title align="center">@username</ion-title>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-button fill="clear">
+          <ion-img src="src\sources\modified-race-car.jpg"></ion-img>
+        </ion-button>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-title align="center" size="small">here is where the bio goes. There will be a word/letter limit on the bio in the future.</ion-title>
+      </ion-toolbar>
       <ion-list>
         <ion-item>
           <ion-card>
@@ -59,26 +89,19 @@
               </ion-card-header>
           </ion-card>
         </ion-item>
-        <ion-item>
-          <ExploreContainer name="Profile page" />
-        </ion-item>
       </ion-list>
-
-      
     </ion-content>
-    
   </ion-page>
 </template>
 
 <script lang="ts">
-import { IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonCard, IonItem, } from '@ionic/vue';
-import { settingsSharp, peopleSharp } from 'ionicons/icons';
+import { IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonCard, IonItem, IonImg } from '@ionic/vue';
+import { settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
 import { defineComponent } from 'vue';
-//import ExploreContainer from '@/components/ExploreContainer.vue';
 export default defineComponent({
-    components: { IonButton, IonButtons, IonIcon, IonTitle, IonToolbar, IonList, IonItem, IonCard },
+    components: { IonButton, IonButtons, IonIcon, IonTitle, IonToolbar, IonList, IonItem, IonCard, IonImg, IonGrid, IonRow, IonCol },
     setup() {
-      return { settingsSharp, peopleSharp };
+      return { settingsSharp, peopleSharp, carSportSharp };
     },
   });
 </script>

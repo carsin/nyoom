@@ -8,7 +8,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>        
+    <ion-content :fullscreen="true">
       <ion-toolbar>
         <ion-searchbar
           show-clear-button="focus"
@@ -82,7 +82,7 @@
             </ion-col>
           </ion-row>
         </ion-grid>
-        
+
       <ion-toolbar>
         <ion-title size="large">Autoshop Offers</ion-title>
       </ion-toolbar>

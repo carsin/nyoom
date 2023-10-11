@@ -14,7 +14,7 @@
       </ion-toolbar>
 
     </ion-header>
-      <ion-content>
+      <ion-content :fullscreen="true">
         <ion-grid>
           <ion-row> <!-- change the row size somehow? -->
             <ion-col size="4">
@@ -164,7 +164,7 @@
                 </ion-card-header>
               </ion-card>
             </ion-col>
-            
+
             <ion-col size="4">
               <ion-card>
                 <img alt="Make logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>

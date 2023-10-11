@@ -19,7 +19,7 @@
 
           <ion-col size="4">
             <ion-card>
-              <img alt="Audi logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>
+              <img alt="Audi logo" src="../assets/audi-logo-2.png" height='200' width='250'/>
               <ion-card-header>
                   <ion-card-subtitle>Audi</ion-card-subtitle>
               </ion-card-header>
@@ -28,7 +28,7 @@
 
           <ion-col size="4">
             <ion-card>
-              <img alt="Mazda logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>
+              <img alt="Mazda logo" src="../assets/mazda.png" height='200' width='250'/>
               <ion-card-header>
                 <ion-card-subtitle>Mazda</ion-card-subtitle>
               </ion-card-header>
@@ -37,7 +37,7 @@
 
           <ion-col size="4">
             <ion-card>
-              <img alt="Porsche logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>
+              <img alt="Porsche logo" src="../assets/porsche.png" height='200' width='170'/>
               <ion-card-header>
                 <ion-card-subtitle>Porsche</ion-card-subtitle>
               </ion-card-header>
@@ -46,7 +46,7 @@
 
           <ion-col size="4">
             <ion-card>
-              <img alt="Toyota logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>
+              <img alt="Toyota logo" src="../assets/toyota.png" height='200' width='250'/>
               <ion-card-header>
                 <ion-card-subtitle>Toyota</ion-card-subtitle>
               </ion-card-header>
@@ -55,7 +55,7 @@
 
           <ion-col size="4">
             <ion-card>
-              <img alt="Tesla logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>
+              <img alt="Tesla logo" src="../assets/tesla.png" height='200' width='250'/>
               <ion-card-header>
                 <ion-card-subtitle>Tesla</ion-card-subtitle>
               </ion-card-header>
@@ -64,7 +64,7 @@
 
           <ion-col size="4">
             <ion-card>
-              <img alt="BMW logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>
+              <img alt="BMW logo" src="../assets/bmw logo.png" height='200' width='200'/>
               <ion-card-header>
                 <ion-card-subtitle>BMW</ion-card-subtitle>
               </ion-card-header>
@@ -73,7 +73,7 @@
 
           <ion-col size="4">
             <ion-card>
-              <img alt="Subaru logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>
+              <img alt="Subaru logo" src="../assets/subaru logo.png" height='200' width='250'/>
               <ion-card-header>
                   <ion-card-subtitle>Subaru</ion-card-subtitle>
               </ion-card-header>
@@ -82,7 +82,7 @@
 
           <ion-col size="4">
             <ion-card>
-              <img alt="Ford logo" src="https://ionicframework.com/docs/img/demos/card-media.png"/>
+              <img alt="Ford logo" src="../assets/ford.png" height='200' width='250'/>
               <ion-card-header>
                 <ion-card-subtitle>Ford</ion-card-subtitle>
               </ion-card-header>

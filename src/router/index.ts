@@ -1,55 +1,68 @@
-import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { RouteRecordRaw } from 'vue-router';
-import TabsPage from '../views/TabsPage.vue'
+import { createRouter, createWebHistory } from "@ionic/vue-router";
+import { RouteRecordRaw } from "vue-router";
+import TabsPage from "../views/TabsPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    redirect: '/home'
+    path: "/",
+    redirect: "/home",
   },
   {
-    path: '/',
+    path: "/",
     component: TabsPage,
     children: [
       {
-        path: '',
-        redirect: '/home'
+        path: "",
+        redirect: "/home",
       },
       {
-        path: 'home',
-        component: () => import('@/views/FeedPage.vue')
+        path: "home",
+        component: () => import("@/views/FeedPage.vue"),
       },
       {
-        path: 'search',
-        component: () => import('@/views/SearchPage.vue')
+        path: "search",
+        component: () => import("@/views/SearchPage.vue"),
       },
       {
-        path: 'events',
-        component: () => import('@/views/EventPage.vue')
+        path: "events",
+        component: () => import("@/views/EventPage.vue"),
       },
       {
-        path: 'market',
-        component: () => import('@/views/MarketPage.vue')
+        path: "market",
+        component: () => import("@/views/MarketPage.vue"),
       },
       {
-        path: 'profile',
-        component: () => import('@/views/ProfilePage.vue')
+        path: "profile",
+        component: () => import("@/views/ProfilePage.vue"),
       },
       {
-        path: 'login',
-        component: () => import('@/views/LoginPage.vue')
+        path: "login",
+        component: () => import("@/views/LoginPage.vue"),
       },
       {
-        path: 'register',
-        component: () => import('@/views/RegisterPage.vue')
-      }
-    ]
-  }
-]
+        path: "register",
+        component: () => import("@/views/RegisterPage.vue"),
+      },
+      {
+        path: "market/:id",
+        component: () => import("../views/PartDetails.vue"),
+      },
+    ],
+  },
+  // {
+  //   path: "/",
+  //   children: [
+  //     {
+  //       path: "market/:id",
+  //       component: () => import("../views/PartDetails.vue"),
+  //     },
+  //   ],
+  // },
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;

@@ -1,158 +1,56 @@
 <template>
-  <ion-page>
-    <ion-header>
+  <base-layout page-title="Market">
+  </base-layout>
+    <ion-content>
       <ion-toolbar>
-        <ion-title>Market</ion-title>
-        <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
-        <ion-button slot="end" fill="outline" href="/register">Register</ion-button>
+        <ion-searchbar show-clear-button="focus" placeholder="Search parts"></ion-searchbar>
       </ion-toolbar>
-    </ion-header>
-        
+
       <ion-toolbar>
-        <ion-searchbar
-          show-clear-button="focus"
-          placeholder="Search parts"
-        ></ion-searchbar>
+        <ion-title size="large">Local Parts</ion-title>
       </ion-toolbar>
-    <ion-toolbar>
-      <ion-title size="large">Local Parts</ion-title>
-    </ion-toolbar>
-    <ion-grid>
-      <ion-row>
-        <!-- change the row size somehow? -->
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
 
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
+      <ion-grid>
+        <ion-row>
+          <ion-col v-for="part in parts" :key="part.id" size="2">
+            <ion-card :href="'market/' + part.id">
+              <img alt="Part image" :src="part.imageUrl" />
+              <ion-card-header>
+                <ion-card-title>{{ part.title }}</ion-card-title>
+                <ion-card-subtitle>{{ part.description }}</ion-card-subtitle>
+              </ion-card-header>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
 
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
+      <ion-toolbar>
+        <ion-title size="large">Autoshop Offers</ion-title>
+      </ion-toolbar>
+      <ion-grid>
+        <ion-row>
+          <ion-col v-for="offer in offers" :key="offer.id" size="2">
+            <ion-card :router-link="'market/' + offer.id">
+              <img alt="Offer image" :src="offer.imageUrl" />
+              <ion-card-header>
+                <ion-card-title>{{ offer.shopName }}</ion-card-title>
+                <ion-card-subtitle>{{ offer.deal }}</ion-card-subtitle>
+              </ion-card-header>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-content>
 
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
-
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
-
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-
-    <ion-toolbar>
-      <ion-title size="large">Autoshop Offers</ion-title>
-    </ion-toolbar>
-
-    <ion-grid>
-      <ion-row>
-        <!-- change the row size somehow? -->
-
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
-
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
-
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
-
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
-
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
-
-        <ion-col size="2">
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Part Title</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ion-page>
 </template>
+
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import { useStore } from "vuex";
+import { computed } from "vue";
+
+const store = useStore();
+
+const parts = computed(() => store.getters.parts);
+const offers = computed(() => store.getters.offers);
 </script>
+

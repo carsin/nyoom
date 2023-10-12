@@ -94,14 +94,7 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import { IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonCard, IonItem, IonImg } from '@ionic/vue';
-import { settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
-import { defineComponent } from 'vue';
-export default defineComponent({
-    components: { IonButton, IonButtons, IonIcon, IonTitle, IonToolbar, IonList, IonItem, IonCard, IonImg, IonGrid, IonRow, IonCol },
-    setup() {
-      return { settingsSharp, peopleSharp, carSportSharp };
-    },
-  });
+<script setup lang="ts">
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import ExploreContainer from '@/components/ExploreContainer.vue';
 </script>

@@ -27,7 +27,7 @@
       </ion-toolbar>
     </ion-header> -->
 
-    <ion-content :fullscreen="true">
+    <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button>
@@ -44,11 +44,14 @@
         </ion-buttons>
         <ion-title align="center">@username</ion-title>
       </ion-toolbar>
-      <ion-toolbar>
+    </ion-header>
+
+    <ion-content :fullscreen="true">
+      <ion-title align="center">
         <ion-button fill="clear">
           <ion-img src="src\sources\modified-race-car.jpg"></ion-img>
         </ion-button>
-      </ion-toolbar>
+      </ion-title>
       <ion-toolbar>
         <ion-title align="center" size="small">here is where the bio goes. There will be a word/letter limit on the bio in the future.</ion-title>
       </ion-toolbar>
@@ -94,7 +97,23 @@
   </ion-page>
 </template>
 
-<script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
-import ExploreContainer from '@/components/ExploreContainer.vue';
+<script lang="ts">
+import { IonText, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonCard, IonItem, IonImg } from '@ionic/vue';
+import { settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
+import { defineComponent } from 'vue';
+export default defineComponent({
+  components: { IonButton, IonButtons, IonIcon, IonTitle, IonToolbar, IonList, IonItem, IonCard, IonImg, IonGrid, IonRow, IonCol },
+  setup() {
+    return { settingsSharp, peopleSharp, carSportSharp };
+  },
+});
 </script>
+
+<style>
+ ion-button {
+    
+    .circle{
+      --border-radius: 50;
+    }
+  }
+</style>

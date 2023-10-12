@@ -3,6 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Search</ion-title>
+        <!-- <img alt="Group 1" src="../assets/Group 1.png" height='50' width='400'/> -->
         <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
           <ion-button slot="end" fill="outline" href="/register">Register</ion-button>
       </ion-toolbar>
@@ -16,9 +17,9 @@
     </ion-header>
       <ion-content :fullscreen="true">
         <ion-grid>
-          <ion-row> <!-- change the row size somehow? -->
+          <ion-row>
             <ion-col size="4">
-              <ion-card href="audi models">
+              <ion-card href="audiModels">
                 <img alt="Audi logo" src="../assets/audi-logo-2.png" height='200' width='250'/>
                 <ion-card-header>
                     <ion-card-subtitle>Audi</ion-card-subtitle>

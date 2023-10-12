@@ -12,7 +12,7 @@
               </ion-buttons>
             </ion-col>
             <ion-col class="ion-text-center" size="10">
-              <ion-title align="center">@username</ion-title>
+              <ion-title class="ion-margin-bottom">@username</ion-title>
               <img id="profile-avatar" src="/src/assets/modified-race-car.jpg"/>
             </ion-col>
             <ion-col size="1">
@@ -33,7 +33,19 @@
             </ion-col>
           </ion-row>
           <ion-row class="ion-text-center">
-            <ion-title size="small">here is where the bio goes. There will be a word/letter limit on the bio in the future.</ion-title>
+            <ion-col>
+              <ion-chip color="primary">
+                <ion-text> <b>83482</b> Followers </ion-text>
+              </ion-chip>
+              <ion-chip color="primary">
+                <ion-text> <b>232</b> Following </ion-text>
+              </ion-chip>
+            </ion-col>
+          </ion-row>
+          <ion-row class="ion-text-center">
+            <ion-col>
+              <ion-title size="small">here is where the bio goes. There will be a word/letter limit on the bio in the future.</ion-title>
+            </ion-col>
           </ion-row>
         </ion-grid>
       </ion-toolbar>
@@ -89,7 +101,7 @@
 </style>
 
 <script lang="ts">
-  import { IonAvatar, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonCard, IonItem, IonImg } from '@ionic/vue';
+  import { IonText, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonCard, IonItem, IonImg } from '@ionic/vue';
   import { settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
   import { defineComponent } from 'vue';
   export default defineComponent({

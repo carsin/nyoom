@@ -13,13 +13,6 @@
     <!-- Content for the "Parts" tab -->
     <div v-if="isPartsTab" class="content-with-margin">
       <ion-toolbar>
-        <ion-searchbar
-          show-clear-button="focus"
-          placeholder="Search parts"
-        ></ion-searchbar>
-      </ion-toolbar>
-
-      <ion-toolbar>
         <ion-title size="large">Local Parts</ion-title>
       </ion-toolbar>
 

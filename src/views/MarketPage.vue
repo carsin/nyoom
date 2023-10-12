@@ -87,8 +87,6 @@
       </ion-toolbar>
         <ion-grid>
           <ion-row>
-            <!-- change the row size somehow? -->
-
             <ion-col size="2">
               <ion-card>
                 <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />

@@ -3,8 +3,9 @@
         <ion-header class="header-margin">
         <ion-toolbar>
           <ion-buttons slot="start">
+            <!-- <ion-back-button default-href="/market" @click="goBack"></ion-back-button> -->
             <ion-button @click="goBack" class="back-button">
-              <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+              <ion-icon slot="icon-only" name="arrow-back" class="icon-color"></ion-icon>
             </ion-button>
           </ion-buttons>
           <ion-title>{{loadedPart.title}}</ion-title>
@@ -32,6 +33,10 @@
   .back-button {
     --color: var(--ion-color-primary); 
   }
+
+  .back-button .icon-color {
+    color: red; /* Change the icon color to red */
+  }
   .underline-text {
   text-decoration: underline;
 }
@@ -45,7 +50,7 @@
 
   <script lang="ts">
   import { defineComponent } from 'vue';
-  import { IonButton } from '@ionic/vue';
+  import { IonButton, IonBackButton } from '@ionic/vue';
   export default defineComponent({
   data() {
     return {
@@ -61,6 +66,7 @@
 },  
 components: {
     IonButton,
+    IonBackButton
   },
   methods: {
     goBack() {

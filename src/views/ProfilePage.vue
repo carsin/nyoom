@@ -56,42 +56,21 @@
         </ion-grid>
       </ion-toolbar>
       <ion-list>
-        <ion-item>
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Car #1</ion-card-title>
-              <ion-card-subtitle>Car Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-item>
-        <ion-item>
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Car #2</ion-card-title>
-              <ion-card-subtitle>Car Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-item>
-        <ion-item>
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Car #3</ion-card-title>
-              <ion-card-subtitle>Car Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-item>
-        <ion-item>
-          <ion-card>
-            <img alt="Part image" src="https://ionicframework.com/docs/img/demos/card-media.png" />
-            <ion-card-header>
-              <ion-card-title>Car #4</ion-card-title>
-              <ion-card-subtitle>Part Description</ion-card-subtitle>
-            </ion-card-header>
-          </ion-card>
-        </ion-item>
+        <FeedCardComponent username="@testmanposting1993"
+          caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
+          upvotes="23563" downvotes="230" image_src="../src/assets/carpic1.png" />
+        <FeedCardComponent username="@justanotherpostah42"
+          caption="Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat."
+          upvotes="2832" downvotes="91" image_src="../src/assets/carpic2.png" />
+        <FeedCardComponent username="@thisguylovesposting1973"
+          caption="Caption blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah "
+          upvotes="2822" downvotes="232" image_src="../src/assets/carpic3.png" />
+        <FeedCardComponent username="@thisguylovesposting1973"
+          caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
+          upvotes="9232" downvotes="822" image_src="../src/assets/carpic4.png" />
+        <FeedCardComponent username="@thisguylovesposting1973"
+          caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
+          upvotes="10203" downvotes="920" image_src="../src/assets/carpic5.png" />
       </ion-list>
     </ion-content>
   </ion-page>
@@ -106,14 +85,8 @@
 }
 </style>
 
-<script lang="ts">
-import { IonText, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonCard, IonItem, IonImg } from '@ionic/vue';
+<script setup lang="ts">
+import { IonText, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
 import { settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
-import { defineComponent } from 'vue';
-export default defineComponent({
-  components: { IonButton, IonButtons, IonIcon, IonTitle, IonToolbar, IonList, IonItem, IonCard, IonImg, IonGrid, IonRow, IonCol },
-  setup() {
-    return { settingsSharp, peopleSharp, carSportSharp };
-  },
-});
+import FeedCardComponent from '@/components/FeedCardComponent.vue';
 </script>

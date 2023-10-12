@@ -8,6 +8,7 @@
         </ion-toolbar>
       </ion-header>
       <ion-content :fullscreen="true">
+      <ion-list>
         <ion-item>
             <ion-input label="Email:" type="email" placeholder="email@domain.com"></ion-input>
         </ion-item>
@@ -20,14 +21,13 @@
         <ion-item>
             <ion-input label="Confirm Password:" type="password" placeholder="Re-enter password"></ion-input>
         </ion-item>
-        <ion-button>
-            <ion-title>Register</ion-title>
-        </ion-button>
+        <ion-button expand="block"> Register </ion-button>
+      </ion-list>
       </ion-content>
     </ion-page>
   </template>
   
   <script setup lang="ts">
-  import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+  import { IonPage, IonItem, IonList, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
   </script>
   

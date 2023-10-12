@@ -12,6 +12,10 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../views/PartDetails.vue"),
   },
   {
+    path: "/market/autoshop/:id",
+    component: () => import("../views/OfferDetails.vue"),
+  },
+  {
     path: "/",
     component: TabsPage,
     children: [

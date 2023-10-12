@@ -11,8 +11,8 @@
     </ion-segment>
 
     <!-- Content for the "Parts" tab -->
-    <div v-if="isPartsTab" class="content-with-margin">     
-       <ion-toolbar>
+    <div v-if="isPartsTab" class="content-with-margin">
+      <ion-toolbar>
         <ion-searchbar
           show-clear-button="focus"
           placeholder="Search parts"
@@ -53,7 +53,7 @@
       <ion-grid>
         <ion-row>
           <ion-col v-for="offer in offers" :key="offer.id" size="2">
-            <ion-card :router-link="'market/' + offer.id">
+            <ion-card :href="'market/autoshop/' + offer.id">
               <img alt="Offer image" :src="offer.imageUrl" />
               <ion-card-header>
                 <ion-card-title>{{ offer.shopName }}</ion-card-title>
@@ -75,21 +75,14 @@ const store = useStore();
 const parts = computed(() => store.getters.parts);
 const offers = computed(() => store.getters.offers);
 
+const selectedTab = computed(() => store.state.tabs.selectedTab);
 
+const selectTab = (tab: String) => {
+  store.commit("tabs/setSelectedTab", tab);
+};
 
-  const selectedTab = computed(() => store.state.tabs.selectedTab);
-
-  const selectTab = (tab:String) => {
-    store.commit('tabs/setSelectedTab', tab);
-  };
-
-
-// Define a computed property to determine if the selectedTab is 'parts'
-const isPartsTab = computed(() => selectedTab.value === 'parts');
-
-// Define a computed property to determine if the selectedTab is 'auto-shop'
-const isAutoShopTab = computed(() => selectedTab.value === 'auto-shop');
-
+const isPartsTab = computed(() => selectedTab.value === "parts");
+const isAutoShopTab = computed(() => selectedTab.value === "auto-shop");
 </script>
 
 <style scoped>

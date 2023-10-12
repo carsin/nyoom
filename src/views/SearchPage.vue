@@ -18,7 +18,7 @@
         <ion-grid>
           <ion-row> <!-- change the row size somehow? -->
             <ion-col size="4">
-              <ion-card>
+              <ion-card href="audi models">
                 <img alt="Audi logo" src="../assets/audi-logo-2.png" height='200' width='250'/>
                 <ion-card-header>
                     <ion-card-subtitle>Audi</ion-card-subtitle>

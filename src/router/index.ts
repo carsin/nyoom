@@ -42,6 +42,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'register',
         component: () => import('@/views/RegisterPage.vue')
+      },
+      {
+        path: 'audiModels',
+        component: () => import('@/views/AudiModelsPage.vue')
       }
     ]
   }

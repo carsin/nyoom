@@ -32,8 +32,12 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/MarketPage.vue')
       },
       {
-        path: 'profile',
-        component: () => import('@/views/ProfilePage.vue')
+        path: 'myProfile',
+        component: () => import('@/views/MyProfilePage.vue')
+      },
+      {
+        path: 'otherProfile',
+        component: () => import('@/views/OtherProfilePage.vue')
       },
       {
         path: 'login',

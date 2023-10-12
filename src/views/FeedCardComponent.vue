@@ -2,9 +2,7 @@
   <ion-card>
     <ion-grid>
       <ion-row class="ion-align-self-end ion-justify-content-center">
-        <ion-button fill="clear" href="otherProfile">
-          <ion-card-title color="primary"> {{ username }} </ion-card-title>
-        </ion-button>
+          <ion-card-title class="ion-margin-bottom"> {{ username }} </ion-card-title>
       </ion-row>
       <ion-row class="ion-justify-content-center">
         <img id="post-image" v-bind:src="image_src" /> <!-- v-bind: use prop in attribute -->
@@ -35,7 +33,7 @@
 </style>
 
 <script setup lang="ts">
-import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/vue';
+import { IonCard, IonLabel, IonChip, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/vue';
 defineProps({
   username: String,
   caption: String,

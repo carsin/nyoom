@@ -40,6 +40,10 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/OtherProfilePage.vue')
       },
       {
+        path: 'settings',
+        component: () => import('@/views/ProfileSettingsPage.vue')
+      },
+      {
         path: 'login',
         component: () => import('@/views/LoginPage.vue')
       },

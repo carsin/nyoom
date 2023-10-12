@@ -8,11 +8,6 @@
         </ion-toolbar>
       </ion-header>
       <ion-content :fullscreen="true">
-        <ion-header collapse="condense">
-          <ion-toolbar>
-            <ion-title size="large">Register</ion-title>
-          </ion-toolbar>
-        </ion-header>
         <ion-item>
             <ion-input label="Email:" type="email" placeholder="email@domain.com"></ion-input>
         </ion-item>

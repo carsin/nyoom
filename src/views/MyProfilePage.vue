@@ -11,14 +11,14 @@
           <ion-row>
             <ion-col size="1">
               <ion-buttons>
-                <ion-button>
+                <ion-button href="/settings">
                   <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
                 </ion-button>
               </ion-buttons>
             </ion-col>
             <ion-col class="ion-text-center" size="10">
               <ion-title class="ion-margin-bottom">@myusername</ion-title>
-              <img id="profile-avatar" src="/src/assets/modified-race-car.jpg" />
+              <img id="profile-avatar" src="/src/assets/carpic3.png" />
             </ion-col>
             <ion-col size="1">
               <ion-buttons class="ion-float-right">

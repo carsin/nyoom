@@ -5,28 +5,64 @@
         <ion-title>@myusername</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+    <ion-menu side="end" content-id="main-content">
+      <ion-header>
+        <ion-toolbar>
+          <ion-grid>
+            <ion-row class="ion-align-items-center">
+              <ion-col size="9">
+                <ion-title>My Friends</ion-title>
+              </ion-col>
+              <ion-col size="3">
+                <ion-menu-toggle>
+                  <ion-button fill="clear">
+                    <ion-icon slot="icon-only" size="medium" :icon="closeCircle"></ion-icon>
+                  </ion-button>
+                </ion-menu-toggle>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list>
+          <FriendListItemComponent username="@friend1" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend2" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend3" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend4" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend5" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend6" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend7" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend8" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend9" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend10" avatar_src="/src/assets/avatar.svg"/>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+    <ion-content id="main-content" :fullscreen="true">
       <ion-toolbar>
         <ion-grid>
           <ion-row>
             <ion-col size="1">
               <ion-buttons>
-                <ion-button>
+                <ion-button href="/settings">
                   <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
                 </ion-button>
               </ion-buttons>
             </ion-col>
             <ion-col class="ion-text-center" size="10">
               <ion-title class="ion-margin-bottom">@myusername</ion-title>
-              <img id="profile-avatar" src="/src/assets/modified-race-car.jpg" />
+              <img id="profile-avatar" src="/src/assets/carpic3.png" />
             </ion-col>
             <ion-col size="1">
               <ion-buttons class="ion-float-right">
                 <ion-list>
                   <ion-item>
-                    <ion-button>
-                      <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon>
-                    </ion-button>
+                    <ion-menu-toggle>
+                      <ion-button>
+                        <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon>
+                      </ion-button>
+                    </ion-menu-toggle>
                   </ion-item>
                   <ion-item>
                     <ion-button>
@@ -74,10 +110,15 @@
   height: 100px;
   object-fit: cover;
 }
+
+#friends-title {
+  display: inline-block;
+}
 </style>
 
 <script setup lang="ts">
-import { IonText, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
-import { settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
+import { IonText, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
+import { closeCircle, settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
 import FeedCardComponent from '@/components/FeedCardComponent.vue';
+import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
 </script>

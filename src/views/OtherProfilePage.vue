@@ -5,7 +5,41 @@
         <ion-title>@notmyusername</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+    <ion-menu side="end" content-id="main-content">
+      <ion-header>
+        <ion-toolbar>
+          <ion-grid>
+            <ion-row class="ion-align-items-center">
+              <ion-col size="9">
+                <ion-title>User's Friends</ion-title>
+              </ion-col>
+              <ion-col size="3">
+                <ion-menu-toggle>
+                  <ion-button fill="clear">
+                    <ion-icon slot="icon-only" size="medium" :icon="closeCircle"></ion-icon>
+                  </ion-button>
+                </ion-menu-toggle>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list>
+          <FriendListItemComponent username="@friend1" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend2" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend3" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend4" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend5" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend6" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend7" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend8" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend9" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend10" avatar_src="/src/assets/avatar.svg"/>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+    <ion-content id="main-content" :fullscreen="true">
       <ion-toolbar>
         <ion-grid>
           <ion-row>
@@ -19,9 +53,11 @@
               <ion-buttons class="ion-float-right">
                 <ion-list>
                   <ion-item>
-                    <ion-button>
-                      <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon>
-                    </ion-button>
+                    <ion-menu-toggle>
+                      <ion-button>
+                        <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon>
+                      </ion-button>
+                    </ion-menu-toggle>
                   </ion-item>
                   <ion-item>
                     <ion-button>
@@ -40,7 +76,7 @@
               <ion-chip color="primary">
                 <ion-text> <b>232</b> Following </ion-text>
               </ion-chip>
-              <ion-button fill="clear" aria-label="Add Friend">
+              <ion-button id="add-friend" fill="clear" aria-label="Add Friend">
                 <ion-icon slot="icon-only" size="medium" :icon="personAddSharp"></ion-icon>
               </ion-button>
             </ion-col>
@@ -61,6 +97,7 @@
           caption="Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat."
           upvotes="2832" downvotes="91" image_src="../src/assets/carpic5.png" />
       </ion-list>
+      <ion-toast trigger="add-friend" message="Follow request sent to @notmyusername!" :duration="3000"></ion-toast>
     </ion-content>
   </ion-page>
 </template>
@@ -79,7 +116,8 @@
 </style>
 
 <script setup lang="ts">
-import { IonText, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
-import { personAddSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
+import { IonText, IonToast, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
+import { personAddSharp, closeCircle, peopleSharp, carSportSharp } from 'ionicons/icons';
 import FeedCardComponent from '@/components/FeedCardComponent.vue';
+import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
 </script>

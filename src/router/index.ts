@@ -32,8 +32,20 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/MarketPage.vue')
       },
       {
-        path: 'profile',
-        component: () => import('@/views/ProfilePage.vue')
+        path: 'myProfile',
+        component: () => import('@/views/MyProfilePage.vue')
+      },
+      {
+        path: 'otherProfile',
+        component: () => import('@/views/OtherProfilePage.vue')
+      },
+      {
+        path: 'settings',
+        component: () => import('@/views/ProfileSettingsPage.vue')
+      },
+      {
+        path: 'friends',
+        component: () => import('@/views/FriendsPage.vue')
       },
       {
         path: 'login',
@@ -42,6 +54,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'register',
         component: () => import('@/views/RegisterPage.vue')
+      },
+      {
+        path: 'audiModels',
+        component: () => import('@/views/AudiModelsPage.vue')
       }
     ]
   }

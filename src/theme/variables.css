@@ -234,3 +234,12 @@ http://ionicframework.com/docs/theming/ */
     --ion-card-background: #1e1e1e;
   }
 }
+
+  /*
+   * Nyoom Changes to Ionic Components
+   * -------------------------------------------
+   */
+
+ion-button {
+ text-transform: none;
+}

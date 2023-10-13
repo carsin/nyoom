@@ -8,25 +8,20 @@
         </ion-toolbar>
       </ion-header>
       <ion-content :fullscreen="true">
-        <ion-header collapse="condense">
-          <ion-toolbar>
-            <ion-title size="large">Login</ion-title>
-          </ion-toolbar>
-        </ion-header>
-        <ion-item>
-            <ion-input label="Username:" placeholder="Enter username"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input label="Password:" type="password" placeholder="Enter password"></ion-input>
-        </ion-item>
-        <ion-button>
-            <ion-title>Login</ion-title>
-        </ion-button>
+        <ion-list>
+          <ion-item>
+              <ion-input label="Username:" placeholder="Enter username"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-input label="Password:" type="password" placeholder="Enter password"></ion-input>
+          </ion-item>
+          <ion-button expand="block"> Login </ion-button>
+        </ion-list>
       </ion-content>
     </ion-page>
   </template>
   
   <script setup lang="ts">
-  import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+  import { IonPage, IonItem, IonList, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
   </script>
   

@@ -1,71 +1,79 @@
-import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { RouteRecordRaw } from 'vue-router';
-import TabsPage from '../views/TabsPage.vue'
+import { createRouter, createWebHistory } from "@ionic/vue-router";
+import { RouteRecordRaw } from "vue-router";
+import TabsPage from "../views/TabsPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    redirect: '/home'
+    path: "/",
+    redirect: "/home",
   },
   {
-    path: '/',
+    path: "/market/:id",
+    component: () => import("../views/PartDetails.vue"),
+  },
+  {
+    path: "/market/autoshop/:id",
+    component: () => import("../views/OfferDetails.vue"),
+  },
+  {
+    path: "/",
     component: TabsPage,
     children: [
       {
-        path: '',
-        redirect: '/home'
+        path: "",
+        redirect: "/home",
       },
       {
-        path: 'home',
-        component: () => import('@/views/FeedPage.vue')
+        path: "home",
+        component: () => import("@/views/FeedPage.vue"),
       },
       {
-        path: 'search',
-        component: () => import('@/views/SearchPage.vue')
+        path: "search",
+        component: () => import("@/views/SearchPage.vue"),
       },
       {
-        path: 'events',
-        component: () => import('@/views/EventPage.vue')
+        path: "events",
+        component: () => import("@/views/EventPage.vue"),
       },
       {
-        path: 'market',
-        component: () => import('@/views/MarketPage.vue')
+        path: "market",
+        component: () => import("@/views/MarketPage.vue"),
       },
       {
-        path: 'myProfile',
-        component: () => import('@/views/MyProfilePage.vue')
+        path: "myProfile",
+        component: () => import("@/views/MyProfilePage.vue"),
       },
       {
-        path: 'otherProfile',
-        component: () => import('@/views/OtherProfilePage.vue')
+        path: "otherProfile",
+        component: () => import("@/views/OtherProfilePage.vue"),
       },
       {
-        path: 'settings',
-        component: () => import('@/views/ProfileSettingsPage.vue')
+        path: "settings",
+        component: () => import("@/views/ProfileSettingsPage.vue"),
       },
       {
-        path: 'friends',
-        component: () => import('@/views/FriendsPage.vue')
+        path: "friends",
+        component: () => import("@/views/FriendsPage.vue"),
       },
       {
-        path: 'login',
-        component: () => import('@/views/LoginPage.vue')
+        path: "login",
+        component: () => import("@/views/LoginPage.vue"),
       },
       {
-        path: 'register',
-        component: () => import('@/views/RegisterPage.vue')
+        path: "register",
+        component: () => import("@/views/RegisterPage.vue"),
       },
       {
-        path: 'audiModels',
-        component: () => import('@/views/AudiModelsPage.vue')
-      }
-    ]
-  }
-]
+        path: "audiModels",
+        component: () => import("@/views/AudiModelsPage.vue"),
+      },
+    ],
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;

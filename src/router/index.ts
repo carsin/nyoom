@@ -52,10 +52,6 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/views/ProfileSettingsPage.vue"),
       },
       {
-        path: "friends",
-        component: () => import("@/views/FriendsPage.vue"),
-      },
-      {
         path: "login",
         component: () => import("@/views/LoginPage.vue"),
       },

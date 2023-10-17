@@ -4,8 +4,8 @@
       <ion-toolbar>
         <ion-title>Search</ion-title>
         <!-- <img alt="Group 1" src="../assets/Group 1.png" height='50' width='400'/> -->
-        <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
-          <ion-button slot="end" fill="outline" href="/register">Register</ion-button>
+        <!-- <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
+          <ion-button slot="end" fill="outline" href="/register">Register</ion-button> -->
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar show-clear-button="focus" placeholder="Search vehicles by make, model, or owner"></ion-searchbar>

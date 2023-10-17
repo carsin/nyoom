@@ -5,18 +5,26 @@ import TabsPage from '../views/TabsPage.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/home'
+    component: () => import('@/views/TitlePage.vue')
   },
   {
-    path: '/',
+    path: '/login',
+    component: () => import('@/views/LoginPage.vue')
+  },
+  {
+    path: '/register',
+    component: () => import('@/views/RegisterPage.vue')
+  },
+  {
+    path: '/home',
     component: TabsPage,
     children: [
       {
-        path: '',
-        redirect: '/home'
+        path: '/home',
+        redirect: '/feed'
       },
       {
-        path: 'home',
+        path: 'feed',
         component: () => import('@/views/FeedPage.vue')
       },
       {
@@ -46,14 +54,6 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'friends',
         component: () => import('@/views/FriendsPage.vue')
-      },
-      {
-        path: 'login',
-        component: () => import('@/views/LoginPage.vue')
-      },
-      {
-        path: 'register',
-        component: () => import('@/views/RegisterPage.vue')
       },
       {
         path: 'audiModels',

@@ -3,8 +3,8 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Events</ion-title>
-        <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
-        <ion-button slot="end" fill="outline" href="/register">Register</ion-button>
+        <!-- <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
+        <ion-button slot="end" fill="outline" href="/register">Register</ion-button> -->
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar show-clear-button="focus" placeholder="Search events"></ion-searchbar>

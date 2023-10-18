@@ -1,11 +1,19 @@
-import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { RouteRecordRaw } from 'vue-router';
-import TabsPage from '../views/TabsPage.vue'
+import { createRouter, createWebHistory } from "@ionic/vue-router";
+import { RouteRecordRaw } from "vue-router";
+import TabsPage from "../views/TabsPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    redirect: '/home'
+    path: "/",
+    redirect: "/home",
+  },
+  {
+    path: "/market/:id",
+    component: () => import("../views/PartDetails.vue"),
+  },
+  {
+    path: "/market/autoshop/:id",
+    component: () => import("../views/OfferDetails.vue"),
   },
   {
     path: '/home',
@@ -66,6 +74,6 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-})
+});
 
-export default router
+export default router;

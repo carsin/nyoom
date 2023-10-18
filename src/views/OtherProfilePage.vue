@@ -47,7 +47,7 @@
             </ion-col>
             <ion-col class="ion-text-center" size="10">
               <ion-title class="ion-margin-bottom">@notmyusername</ion-title>
-              <img id="profile-avatar" src="/src/assets/carpic5.png" />
+              <img id="profile-avatar" src="/src/assets/carpic5.png" alt="Avatar image"/>
             </ion-col>
             <ion-col size="1">
               <ion-buttons class="ion-float-right">
@@ -90,10 +90,10 @@
         </ion-grid>
       </ion-toolbar>
       <ion-list>
-        <FeedCardComponent username=""
+        <PostCardComponent username=""
           caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
           upvotes="23563" downvotes="230" image_src="../src/assets/carpic1.png" />
-        <FeedCardComponent username=""
+        <PostCardComponent username=""
           caption="Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat."
           upvotes="2832" downvotes="91" image_src="../src/assets/carpic5.png" />
       </ion-list>
@@ -118,6 +118,6 @@
 <script setup lang="ts">
 import { IonText, IonToast, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
 import { personAddSharp, closeCircle, peopleSharp, carSportSharp } from 'ionicons/icons';
-import FeedCardComponent from '@/components/FeedCardComponent.vue';
+import PostCardComponent from '@/components/PostCardComponent.vue';
 import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
 </script>

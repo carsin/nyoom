@@ -7,7 +7,7 @@
         </ion-button>
       </ion-row>
       <ion-row class="ion-justify-content-center">
-        <img id="post-image" v-bind:src="image_src" /> <!-- v-bind: use prop in attribute -->
+        <img id="post-image" v-bind:src="image_src" alt="Post image content"/> <!-- v-bind: use prop in attribute -->
       </ion-row>
       <ion-row>
         <ion-col class="ion-text-left ion-align-self-end" size="10">

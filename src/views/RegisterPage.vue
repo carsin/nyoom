@@ -3,9 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Register</ion-title>
-        <ion-button class="back" slot="end" href="/">Back</ion-button>
-        <!-- <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
-        <ion-button slot="end" fill="solid" href="/register">Register</ion-button> -->
+        <ion-button class="back" slot="end" fill="outline" href="/">Back</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -22,7 +20,7 @@
       <ion-item>
           <ion-input label="Confirm Password:" type="password" placeholder="Re-enter password"></ion-input>
       </ion-item>
-      <ion-button expand="block" href="/tabs"> Register </ion-button>
+      <ion-button expand="block" fill="outline" href="/tabs"> Register </ion-button>
     </ion-list>
     </ion-content>
   </ion-page>
@@ -30,7 +28,7 @@
 
 <style>
 .back{
-  padding-right: 20px;
+  padding-right: 15px;
 }
 </style>
   

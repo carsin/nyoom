@@ -3,8 +3,7 @@
     <ion-header>
       <ion-toolbar collapse="condense">
         <ion-title>Feed</ion-title>
-        <!-- <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
-        <ion-button slot="end" fill="outline" href="/register">Register</ion-button> -->
+        <ion-button class="back" slot="end" fill="outline" href="/">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -26,6 +25,12 @@
     </ion-content>
   </ion-page>
 </template>
+
+<style>
+.back{
+  padding-right: 15px;
+}
+</style>
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonButton, IonToolbar, IonTitle, IonContent } from '@ionic/vue';

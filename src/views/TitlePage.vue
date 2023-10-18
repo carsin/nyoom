@@ -1,19 +1,19 @@
 <template>
-    <ion-page>
-        <ion-content id="main-content" :fullscreen="true">
-            <ion-grid>
-                <ion-row class="ion-justify-content-center">
-                    <img id="logo" src="/src/assets/Group 1.png"/>
-                </ion-row>
-                <ion-row class="ion-justify-content-center">
-                    <ion-button class="button-adjust" fill="outline" href="/login">Login</ion-button>
-                </ion-row>
-                <ion-row class="ion-justify-content-center">
-                    <ion-button class="button-adjust" fill="outline" href="/register">Register</ion-button>
-                </ion-row>
-            </ion-grid>
-        </ion-content>
-    </ion-page>
+  <ion-page>
+    <ion-content id="main-content" :fullscreen="true">
+      <ion-grid>
+        <ion-row class="ion-justify-content-center">
+          <img id="logo" src="/src/assets/Group 1.png"/>
+        </ion-row>
+        <ion-row class="ion-justify-content-center">
+          <ion-button class="button-adjust" fill="outline" href="/login">Login</ion-button>
+        </ion-row>
+        <ion-row class="ion-justify-content-center">
+          <ion-button class="button-adjust" fill="outline" href="/register">Register</ion-button>
+        </ion-row>
+      </ion-grid>
+    </ion-content>
+  </ion-page>
 </template>
 
 <style>

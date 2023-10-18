@@ -3,6 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>@myusername</ion-title>
+        <ion-button class="back" slot="end" fill="outline" href="/">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-menu side="end" content-id="main-content">
@@ -113,6 +114,10 @@
 
 #friends-title {
   display: inline-block;
+}
+
+.back{
+  padding-right: 15px;
 }
 </style>
 

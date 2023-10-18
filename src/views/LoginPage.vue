@@ -16,7 +16,7 @@
         <ion-item>
             <ion-input label="Password:" type="password" placeholder="Enter password"></ion-input>
         </ion-item>
-        <ion-button expand="block" href="/home"> Login </ion-button>
+        <ion-button expand="block" href="/tabs"> Login </ion-button>
       </ion-list>
     </ion-content>
   </ion-page>

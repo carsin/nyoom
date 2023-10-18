@@ -22,7 +22,7 @@
       <ion-item>
           <ion-input label="Confirm Password:" type="password" placeholder="Re-enter password"></ion-input>
       </ion-item>
-      <ion-button expand="block" href="/home"> Register </ion-button>
+      <ion-button expand="block" href="/tabs"> Register </ion-button>
     </ion-list>
     </ion-content>
   </ion-page>

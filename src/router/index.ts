@@ -5,6 +5,10 @@ import TabsPage from '../views/TabsPage.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
+    redirect: '/home'
+  },
+  {
+    path: '/home',
     component: () => import('@/views/TitlePage.vue')
   },
   {
@@ -16,47 +20,43 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/RegisterPage.vue')
   },
   {
-    path: '/home',
+    path: '/tabs',
     component: TabsPage,
     children: [
       {
-        path: '/home',
+        path: '/tabs',
         redirect: '/feed'
       },
       {
-        path: 'feed',
+        path: '/feed',
         component: () => import('@/views/FeedPage.vue')
       },
       {
-        path: 'search',
+        path: '/search',
         component: () => import('@/views/SearchPage.vue')
       },
       {
-        path: 'events',
+        path: '/events',
         component: () => import('@/views/EventPage.vue')
       },
       {
-        path: 'market',
+        path: '/market',
         component: () => import('@/views/MarketPage.vue')
       },
       {
-        path: 'myProfile',
+        path: '/myProfile',
         component: () => import('@/views/MyProfilePage.vue')
       },
       {
-        path: 'otherProfile',
+        path: '/otherProfile',
         component: () => import('@/views/OtherProfilePage.vue')
       },
       {
-        path: 'settings',
+        path: '/settings',
         component: () => import('@/views/ProfileSettingsPage.vue')
       },
       {
-        path: 'friends',
-        component: () => import('@/views/FriendsPage.vue')
-      },
-      {
-        path: 'audiModels',
+        path: '/audiModels',
         component: () => import('@/views/AudiModelsPage.vue')
       }
     ]
@@ -65,7 +65,7 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
+  routes,
 })
 
 export default router

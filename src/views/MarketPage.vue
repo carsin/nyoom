@@ -34,7 +34,7 @@
   <img alt="Part image" :src="part.imageUrl" class="custom-image"/>
   <ion-card-header>
     <ion-card-subtitle>{{ part.condition }}</ion-card-subtitle>
-    <ion-card-subtitle>{{ part.price }}</ion-card-subtitle>
+    <ion-card-subtitle class="card-price">{{ part.price }}</ion-card-subtitle>
     <ion-card-subtitle class="card-title">{{ part.title }}</ion-card-subtitle>
   </ion-card-header>
 </ion-card>
@@ -86,6 +86,12 @@
 .card-title {
   color: black;
   font-size: 16px;
+  font-weight: "bold";
+  max-width: 200px;
+  overflow: hidden; 
+}
+.card-price {
+  color: green;
   font-weight: "bold";
   max-width: 200px;
   overflow: hidden; 

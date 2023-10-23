@@ -16,56 +16,60 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../views/OfferDetails.vue"),
   },
   {
-    path: "/",
+    path: '/home',
+    component: () => import('@/views/TitlePage.vue')
+  },
+  {
+    path: '/login',
+    component: () => import('@/views/LoginPage.vue')
+  },
+  {
+    path: '/register',
+    component: () => import('@/views/RegisterPage.vue')
+  },
+  {
+    path: '/tabs',
     component: TabsPage,
     children: [
       {
-        path: "",
-        redirect: "/home",
+        path: '/tabs',
+        redirect: '/feed'
       },
       {
-        path: "home",
-        component: () => import("@/views/FeedPage.vue"),
+        path: '/feed',
+        component: () => import('@/views/FeedPage.vue')
       },
       {
-        path: "search",
-        component: () => import("@/views/SearchPage.vue"),
+        path: '/search',
+        component: () => import('@/views/SearchPage.vue')
       },
       {
-        path: "events",
-        component: () => import("@/views/EventPage.vue"),
+        path: '/events',
+        component: () => import('@/views/EventPage.vue')
       },
       {
-        path: "market",
-        component: () => import("@/views/MarketPage.vue"),
+        path: '/market',
+        component: () => import('@/views/MarketPage.vue')
       },
       {
-        path: "myProfile",
-        component: () => import("@/views/MyProfilePage.vue"),
+        path: '/myProfile',
+        component: () => import('@/views/MyProfilePage.vue')
       },
       {
-        path: "otherProfile",
-        component: () => import("@/views/OtherProfilePage.vue"),
+        path: '/otherProfile',
+        component: () => import('@/views/OtherProfilePage.vue')
       },
       {
-        path: "settings",
-        component: () => import("@/views/ProfileSettingsPage.vue"),
+        path: '/settings',
+        component: () => import('@/views/ProfileSettingsPage.vue')
       },
       {
-        path: "login",
-        component: () => import("@/views/LoginPage.vue"),
-      },
-      {
-        path: "register",
-        component: () => import("@/views/RegisterPage.vue"),
-      },
-      {
-        path: "audiModels",
-        component: () => import("@/views/AudiModelsPage.vue"),
-      },
-    ],
-  },
-];
+        path: '/audiModels',
+        component: () => import('@/views/AudiModelsPage.vue')
+      }
+    ]
+  }
+]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

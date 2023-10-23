@@ -2,8 +2,7 @@
   <ion-page>
     <ion-toolbar collapse="condense">
         <ion-title>Market</ion-title>
-        <ion-button slot="end" fill="outline" href="/login">Login</ion-button>
-        <ion-button slot="end" fill="outline" href="/register">Register</ion-button>
+        <ion-button class="back" slot="end" fill="outline" href="/">Log Out</ion-button>
       </ion-toolbar>
     <ion-content :fullscreen="true">
       <ion-segment v-model="selectedTab">
@@ -71,6 +70,15 @@
   </ion-page>
 </template>
 
+<style scoped>
+.content-with-margin {
+  margin-bottom: 40px; /* Adjust the margin size as needed */
+}
+.back{
+  padding-right: 15px;
+}
+</style>
+
 <script setup lang="ts">
 import { useStore } from "vuex";
 import { computed } from "vue";
@@ -88,11 +96,6 @@ const selectTab = (tab: String) => {
 const isPartsTab = computed(() => selectedTab.value === "parts");
 const isAutoShopTab = computed(() => selectedTab.value === "auto-shop");
 
-import { IonLabel, IonSegment, IonCardTitle, IonCard, IonSegmentButton, IonGrid, IonRow, IonCol, IonCardSubtitle, IonPage, IonToolbar, IonTitle, IonContent, IonCardHeader, IonSearchbar } from '@ionic/vue';
+import { IonLabel, IonSegment, IonCardTitle, IonCard, IonSegmentButton, IonGrid, IonRow, IonCol, IonCardSubtitle, IonPage, IonToolbar, IonTitle, IonContent, IonCardHeader, IonSearchbar, IonButton } from '@ionic/vue';
 </script>
 
-<style scoped>
-.content-with-margin {
-  margin-bottom: 40px; /* Adjust the margin size as needed */
-}
-</style>

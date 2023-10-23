@@ -15,7 +15,30 @@
     </ion-header>
       <ion-content :fullscreen="true">
         <ion-grid>
-          <ion-row>
+          <ion-row v-for="brand in brandList">
+            <ion-col size="6">
+              <ion-card :href="brand[0].link">
+                <ion-title align="center">
+                  <img :alt="brand[0].brandName" :src="brand[0].picture" :height="brand[0].height" :width="brand[0].width"/>
+                </ion-title>
+                <ion-card-header>
+                    <ion-card-subtitle>{{ brand[0].brandName }}</ion-card-subtitle>
+                </ion-card-header>
+              </ion-card>
+            </ion-col>
+            <ion-col size="6">
+              <ion-card :href="brand[1].link">
+                <ion-title align="center"> 
+                  <img :alt="brand[1].brandName" :src="brand[1].picture" :height=brand[1].height :width="brand[1].width"/>
+                </ion-title>
+                <ion-card-header>
+                    <ion-card-subtitle>{{ brand[1].brandName }}</ion-card-subtitle>
+                </ion-card-header>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+  
+          <!-- <ion-row>
             <ion-col size="4">
               <ion-card href="audiModels">
                 <ion-title align="center">
@@ -475,7 +498,7 @@
                 </ion-card-header>
               </ion-card>
             </ion-col>
-          </ion-row>
+          </ion-row> -->
 
         </ion-grid>
       </ion-content>
@@ -494,4 +517,55 @@
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar } from '@ionic/vue';
+import { CarBrands } from "../types/CarBrads";
+
+const acura = new CarBrands("Acura", "audiModels", "150", "250", "src/assets/logos/acura.png");
+const alfoRomeo = new CarBrands("Alfo Romeo", "audiModels", "150", "250", "src/assets/logos/alfo_romeo.png");
+const astonMartin = new CarBrands("Aston Martin", "audiModels", "200", "250", "src/assets/logos/aston_martin.png");
+const audi = new CarBrands("Audi", "audiModels", "200", "250", "src/assets/logos/audi.png");
+const bentley = new CarBrands("Bentley", "audiModels", "200", "250", "src/assets/logos/bentley.png");
+const bmw = new CarBrands("BMW", "audiModels", "200", "250", "src/assets/logos/bmw.png");
+const buick = new CarBrands("Buick", "audiModels", "200", "250", "src/assets/logos/buick.png");
+const cadillac = new CarBrands("Cadillac", "audiModels", "200", "250", "src/assets/logos/cadillac.png");
+const chevrolet = new CarBrands("Chevrolet", "audiModels", "200", "250", "src/assets/logos/chevrolet.png");
+const chrysler = new CarBrands("Chrysler", "audiModels", "200", "250", "src/assets/logos/chrysler.png");
+const corvette = new CarBrands("Corvette", "audiModels", "200", "250", "src/assets/logos/corvette.png");
+const dodge = new CarBrands("Dodge", "audiModels", "200", "250", "src/assets/logos/dodge.png");
+const ferrari = new CarBrands("Ferrari", "audiModels", "200", "250", "src/assets/logos/ferrari.png");
+const fiat = new CarBrands("Fiat", "audiModels", "200", "250", "src/assets/logos/fiat.png");
+const ford = new CarBrands("Ford", "audiModels", "200", "250", "src/assets/logos/ford.png");
+const gmc = new CarBrands("GMC", "audiModels", "200", "250", "src/assets/logos/gmc.png");
+const honda = new CarBrands("Honda", "audiModels", "200", "250", "src/assets/logos/honda.png");
+const hyundai = new CarBrands("Hyundai", "audiModels", "200", "250", "src/assets/logos/hyundai.png");
+const infiniti = new CarBrands("Infiniti", "audiModels", "200", "250", "src/assets/logos/infiniti.png");
+const jaguar = new CarBrands("Jaguar", "audiModels", "200", "250", "src/assets/logos/jaguar.png");
+const jeep = new CarBrands("Jeep", "audiModels", "200", "250", "src/assets/logos/jeep.png");
+const kia = new CarBrands("Kia", "audiModels", "200", "250", "src/assets/logos/kia.png");
+const koenigsegg = new CarBrands("Koenigsegg", "audiModels", "200", "250", "src/assets/logos/koenigsegg.png");
+const lamborghini = new CarBrands("Lamborghini", "audiModels", "200", "250", "src/assets/logos/lamborghini.png");
+const landRover = new CarBrands("Land Rover", "audiModels", "200", "250", "src/assets/logos/land_rover.png");
+const lexus = new CarBrands("Lexus", "audiModels", "200", "250", "src/assets/logos/lexus.png");
+const lotus = new CarBrands("Lotus", "audiModels", "200", "250", "src/assets/logos/lotus.png");
+const maserati = new CarBrands("Maserati", "audiModels", "200", "250", "src/assets/logos/maserati.png");
+const mazda = new CarBrands("Mazda", "audiModels", "200", "250", "src/assets/logos/mazda.png");
+const mclaren = new CarBrands("McLaren", "audiModels", "200", "250", "src/assets/logos/mclaren.png");
+const mercedes = new CarBrands("Mercedes-Benz", "audiModels", "200", "250", "src/assets/logos/mercedes.png");
+const mini = new CarBrands("Mini", "audiModels", "200", "250", "src/assets/logos/mini.png");
+const mitsubishi = new CarBrands("Mitsubishi", "audiModels", "200", "250", "src/assets/logos/mitsubishi.png");
+const nissan = new CarBrands("Nissan", "audiModels", "200", "250", "src/assets/logos/nissan.png");
+const porsche = new CarBrands("Porsche", "audiModels", "200", "250", "src/assets/logos/porsche.png");
+const ram = new CarBrands("Ram", "audiModels", "200", "250", "src/assets/logos/ram.png");
+const rollsRoyce = new CarBrands("Rolls Royce", "audiModels", "200", "250", "src/assets/logos/rolls_royce.png");
+const subaru = new CarBrands("Subaru", "audiModels", "200", "250", "src/assets/logos/subaru.png");
+const tesla = new CarBrands("Tesla", "audiModels", "200", "250", "src/assets/logos/tesla.png");
+const toyota = new CarBrands("Toyota", "audiModels", "200", "250", "src/assets/logos/toyota.png");
+const volkswagen = new CarBrands("Volkswagen", "audiModels", "200", "250", "src/assets/logos/volkswagen.png");
+const volvo = new CarBrands("Volvo", "audiModels", "200", "250", "src/assets/logos/volvo.png");
+
+const brandList = [
+  [acura, alfoRomeo], [astonMartin, audi], [bentley, bmw], [buick, cadillac], [chevrolet, chrysler],
+  [corvette, dodge], [ferrari, fiat], [ford, gmc], [honda, hyundai], [infiniti, jaguar],[jeep, kia],
+  [koenigsegg, lamborghini], [landRover, lexus], [lotus, maserati],[mazda, mclaren], [mercedes, mini],
+  [mitsubishi, nissan], [porsche, ram], [rollsRoyce, subaru],[tesla, toyota], [volkswagen, volvo]
+  ];
 </script>

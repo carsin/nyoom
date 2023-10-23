@@ -519,7 +519,7 @@
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar, IonImg } from '@ionic/vue';
 import { CarBrands } from "../types/CarBrads";
 
-const acura = new CarBrands("Acura", "audiModels", "150", "250", "@src/assets/logos/acura.png");
+const acura = new CarBrands("Acura", "audiModels", "150", "250", "src/assets/logos/acura.png");
 const alfoRomeo = new CarBrands("Alfo Romeo", "audiModels", "150", "250", "src/assets/logos/alfo_romeo.png");
 const astonMartin = new CarBrands("Aston Martin", "audiModels", "200", "250", "src/assets/logos/aston_martin.png");
 const audi = new CarBrands("Audi", "audiModels", "200", "250", "src/assets/logos/audi.png");

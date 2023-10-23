@@ -270,7 +270,7 @@
             <ion-col size="4">
               <ion-card>
                 <ion-title align="center">
-                  <img alt="Lamborghini logo" src="../assets/logos/Lamborghini.png" height='200' width='300'/>
+                  <img alt="Lamborghini logo" src="../assets/logos/lamborghini.png" height='200' width='300'/>
                 </ion-title>
                 <ion-card-header>
                   <ion-card-subtitle>Lamborghini</ion-card-subtitle>

@@ -30,5 +30,5 @@ padding-bottom: 25px;
 </style>
 
 <script setup lang="ts">
-  import { IonPage, IonGrid, IonRow, IonButton, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+  import { IonPage, IonGrid, IonRow, IonButton, IonContent } from '@ionic/vue';
 </script>

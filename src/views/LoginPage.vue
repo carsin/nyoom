@@ -16,37 +16,62 @@
         </ion-item>
         <ion-button @click="handleLogin" expand="block" fill="outline"> Login </ion-button>
       </ion-list>
+      <ion-toast
+        v-if="showToast"
+        :message="toastMessage"
+        duration="2000"
+        :color="toastColor"
+        :onDidDismiss="handleToastDismiss"
+      ></ion-toast>
     </ion-content>
   </ion-page>
 </template>
 
-<style>
-.back{
-  padding-right: 15px;
-}
-</style>
-
 <script setup lang="ts">
-import { IonPage, IonItem, IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput } from '@ionic/vue';
+import { IonPage, IonItem, IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonToast } from '@ionic/vue';
 import { ref } from 'vue';
-import { signInWithEmailAndPassword, } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from 'vue-router';
 import { firebaseAuth } from '../firebase-service'; // make sure to export it correctly
 
 const email = ref('');
 const password = ref('');
-
+const showToast = ref(false);
+const toastMessage = ref('');
+const toastColor = ref('');
 
 const router = useRouter(); // Getting access to the router instance
 
 const handleLogin = async () => {
   try {
     await signInWithEmailAndPassword(firebaseAuth, email.value, password.value);
-    router.push("/feed");
+    // TEMP: send success browser alert
+    alert("Login successful!"); 
+    // TODO: fix toast message not appearing
+    toastMessage.value = "Login successful!";
+    toastColor.value = "success";
+    showToast.value = true;
+    setTimeout(() => {
+      showToast.value = false;
+      router.push("/feed");
+    }, 1000);
     // Navigation to another page after successful login
   } catch (error) {
+    // TEMP: send success browser alert
+    alert("Error: " + error.message); 
+    // TODO: fix toast message not appearing
+    toastMessage.value = "Error during login: " + error.message;
+    toastColor.value = "danger";
+    showToast.value = true;
+    setTimeout(() => {
+      showToast.value = false;
+    }, 2000);
     // Handling error (you can display a user-friendly message)
     console.error(error.message);
   }
+};
+
+const handleToastDismiss = () => {
+  showToast.value = false;
 };
 </script>

@@ -17,7 +17,7 @@
             <ion-row>
               <ion-col size="4">
                 <ion-card>
-                  <img alt="Audi logo" src="../assets/audi.png" height='200' width='250'/>
+                  <img alt="Audi logo" src="../assets/logos/audi.png" height='200' width='250'/>
                   <ion-card-header>
                       <ion-card-subtitle>Audi</ion-card-subtitle>
                   </ion-card-header>

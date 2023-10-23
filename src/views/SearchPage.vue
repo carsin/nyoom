@@ -62,7 +62,7 @@
             <ion-col size="4">
               <ion-card>
                 <ion-title align="center">
-                  <img alt="Bentley logo" src="../assets/logos/bentley.png" height='200' width='300'/>
+                  <img alt="Bentley logo" src="../assets/logos/bentley.png" height='200' width='350'/>
                 </ion-title>
                 <ion-card-header>
                   <ion-card-subtitle>Bentley</ion-card-subtitle>
@@ -95,7 +95,7 @@
             <ion-col size="4">
               <ion-card>
                 <ion-title align="center">
-                  <img alt="Cadillac logo" src="../assets/logos/cadillac.png" height='200' width='250'/>
+                  <img alt="Cadillac logo" src="../assets/logos/cadillac.png" height='200' width='350'/>
                 </ion-title>
                 <ion-card-header>
                   <ion-card-subtitle>Cadillac</ion-card-subtitle>
@@ -105,7 +105,7 @@
             <ion-col size="4">
               <ion-card>
                 <ion-title align="center">
-                  <img alt="Chevrolet logo" src="../assets/logos/chevrolet.png" height='200' width='275'/>
+                  <img alt="Chevrolet logo" src="../assets/logos/chevrolet.png" height='200' width='350'/>
                 </ion-title>
                 <ion-card-header>
                   <ion-card-subtitle>Chevrolet</ion-card-subtitle>
@@ -160,7 +160,7 @@
             </ion-col>
             <ion-col size="4">
               <ion-card>
-                <ion-title align="center">
+                <ion-title align="center" class="wide">
                   <img alt="Fiat logo" src="../assets/logos/fiat.png" height='200' width='400'/>
                 </ion-title>
                 <ion-card-header>
@@ -485,6 +485,10 @@
 <style>
 .back{
   padding-right: 15px;
+}
+
+.wide{
+  padding-inline: 0px;
 }
 </style>
 

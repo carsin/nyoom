@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar collapse="condense">
         <ion-title>Feed</ion-title>
-        <ion-button class="back" slot="end" fill="outline" href="/">Log Out</ion-button>
+        <ion-button @click="handleLogout" class="back" slot="end" fill="outline">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -35,4 +35,20 @@
 <script setup lang="ts">
 import { IonPage, IonHeader, IonButton, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import PostCardComponent from '@/components/PostCardComponent.vue';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'vue-router';
+import { firebaseAuth } from '../firebase-service'; 
+
+const router = useRouter(); // Getting access to the router instance
+
+const handleLogout = async () => {
+  try {
+    await signOut(firebaseAuth);
+    router.push('/home')
+    // You might want to navigate the user to the login page or perform some cleanup
+  } catch (error) {
+    // Handling error during the logout process
+    console.error(error.message);
+  }
+};
 </script>

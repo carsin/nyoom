@@ -3,7 +3,7 @@
     <ion-content id="main-content" :fullscreen="true">
       <ion-grid>
         <ion-row class="ion-justify-content-center">
-          <img alt="Nyoom logo" id="logo" src="/src/assets/Group 1.png"/>
+          <img alt="Nyoom logo" id="logo" src="/src/assets/Group1.png"/>
         </ion-row>
         <ion-row class="ion-justify-content-center">
           <ion-button class="button-adjust" fill="outline" href="/login">Login</ion-button>

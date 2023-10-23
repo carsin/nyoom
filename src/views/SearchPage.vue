@@ -29,7 +29,7 @@
             <ion-col size="6">
               <ion-card :href="brand[1].link">
                 <ion-title align="center"> 
-                  <img :alt="brand[1].brandName" :src="brand[1].picture" :height=brand[1].height :width="brand[1].width"/>
+                  <img :alt="brand[1].brandName" :src="brand[1].picture" :height="brand[1].height" :width="brand[1].width"/>
                 </ion-title>
                 <ion-card-header>
                     <ion-card-subtitle>{{ brand[1].brandName }}</ion-card-subtitle>
@@ -516,10 +516,10 @@
 </style>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar, IonImg } from '@ionic/vue';
 import { CarBrands } from "../types/CarBrads";
 
-const acura = new CarBrands("Acura", "audiModels", "150", "250", "src/assets/logos/acura.png");
+const acura = new CarBrands("Acura", "audiModels", "150", "250", "@src/assets/logos/acura.png");
 const alfoRomeo = new CarBrands("Alfo Romeo", "audiModels", "150", "250", "src/assets/logos/alfo_romeo.png");
 const astonMartin = new CarBrands("Aston Martin", "audiModels", "200", "250", "src/assets/logos/aston_martin.png");
 const audi = new CarBrands("Audi", "audiModels", "200", "250", "src/assets/logos/audi.png");

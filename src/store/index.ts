@@ -33,7 +33,7 @@ const store = createStore({
         },
         {
           id: "2",
-          title: "M3 engine",
+          title: "Actually Cool Rare Engine - 1 of a kind",
           description: "This engine is super awesome and goes vroom vroom!",
           condition: "brand new, never used",
           price: "$1000",
@@ -81,21 +81,28 @@ const store = createStore({
           imageUrl:
             "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
         },
-        {
-          id: "7",
-          title: "M3 engine",
-          description: "This engine is super awesome and goes vroom vroom!",
-          condition: "brand new, never used",
-          price: "$1000",
-          location: "San Luis Obispo, CA",
-          imageUrl:
-            "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
-        },
+        // {
+        //   id: "7",
+        //   title: "M3 engine",
+        //   description: "This engine is super awesome and goes vroom vroom!",
+        //   condition: "brand new, never used",
+        //   price: "$1000",
+        //   location: "San Luis Obispo, CA",
+        //   imageUrl:
+        //     "https://upload.wikimedia.org/wikipedia/commons/7/78/BMW_M3_Coup%C3%A9_Motor.JPG",
+        // },
       ],
       offers: [
         {
           id: "1",
           shopName: "O'Reilly Auto Shop",
+          deal: "50% off oil change",
+          imageUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/a/a5/O%27Reilly_Auto_Parts_Logo.svg",
+        },
+        {
+          id: "2",
+          shopName: "Something different",
           deal: "50% off oil change",
           imageUrl:
             "https://upload.wikimedia.org/wikipedia/commons/a/a5/O%27Reilly_Auto_Parts_Logo.svg",

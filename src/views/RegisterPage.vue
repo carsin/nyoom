@@ -22,37 +22,20 @@
         </ion-item>
         <ion-button expand="block" fill="outline" @click="register"> Register </ion-button>
       </ion-list>
-      <ion-toast
-        v-if="toastMessage"
-        :message="toastMessage"
-        :duration="2000"
-        :color="toastColor"
-        @didDismiss="toastMessage = ''"
-      ></ion-toast>
+      <ion-toast :is-open="isOpen" :message="toastMessage" :duration="4000" :color="toastColor" @didDismiss="setOpen(false)"></ion-toast>
     </ion-content>
   </ion-page>
 </template>
 
 <style>
-.back{
+.back {
   padding-right: 15px;
 }
 </style>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonList,
-  IonItem,
-  IonInput,
-  IonButton,
-  IonToast
-} from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonInput, IonButton, IonToast } from '@ionic/vue';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { firebaseAuth } from "../firebase-service";
 
@@ -61,23 +44,32 @@ const username = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const toastMessage = ref('');
-const toastColor = ref('');
+const toastColor = ref(''); 
+const isOpen = ref(false);
+
+const setOpen = (state: boolean) => {
+  isOpen.value = state;
+};
 
 const register = async () => {
   if (password.value === confirmPassword.value) {
     try {
-      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email.value.toString(), password.value.toString());
-      console.log('Account created:', userCredential.user);
-      toastMessage.value = 'Account created successfully!';
+      await createUserWithEmailAndPassword(firebaseAuth, email.value.toString(), password.value.toString());
       toastColor.value = 'success';
-      // You can add navigation or other actions here
-    } catch (error) {
+      toastMessage.value = 'Account created successfully!';
+      setOpen(true);
+      // Navigation or other actions can be added here
+    } catch (error: any) {
       console.error('Error creating account:', error.message);
-      toastMessage.value = error.message;
       toastColor.value = 'danger';
+      toastMessage.value = error.message;
+      setOpen(true);
       // You might want to show an error message to the user
     }
   } else {
+    toastMessage.value = 'Passwords do not match';
+    toastColor.value = 'danger';
+    setOpen(true);
     console.error('Passwords do not match');
     // You might want to show an error message to the user
   }

@@ -9,16 +9,16 @@
     <ion-content :fullscreen="true">
       <ion-list>
         <ion-item>
-          <ion-input v-model="email" placeholder="email@domain.com"></ion-input>
+          <ion-input label="Email: " v-model="email" placeholder="email@domain.com"></ion-input>
         </ion-item>
         <ion-item>
-          <ion-input v-model="username" placeholder="Enter a username"></ion-input>
+          <ion-input label="Username: " v-model="username" placeholder="hehexd123"></ion-input>
         </ion-item>
         <ion-item>
-          <ion-input v-model="password" type="password" placeholder="Enter a password"></ion-input>
+          <ion-input label="Password:" v-model="password" type="password" placeholder="••••••••"></ion-input>
         </ion-item>
         <ion-item>
-          <ion-input v-model="confirmPassword" type="password" placeholder="Re-enter password"></ion-input>
+          <ion-input label="Confirm Password: " v-model="confirmPassword" type="password" placeholder="••••••••"></ion-input>
         </ion-item>
         <ion-button expand="block" fill="outline" @click="register"> Register </ion-button>
       </ion-list>
@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonInput, IonButton, IonToast } from '@ionic/vue';
-import { createUserWithEmailAndPassword, sendEmailVerification, User } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { useRouter } from 'vue-router';
 import { firebaseAuth, db } from "../firebase-service";
 import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
@@ -69,7 +69,9 @@ const register = async () => {
         const userDocRef = doc(db, 'users', user.uid);
         await setDoc(userDocRef, {
           username: username.value,
-          email: email.value
+          email: email.value,
+          followers: 0,
+          following: 0,
           // add other fields as needed
         });
 

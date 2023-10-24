@@ -9,10 +9,10 @@
     <ion-content :fullscreen="true">
       <ion-list>
         <ion-item>
-          <ion-input v-model="email" label="Email:" placeholder="Enter email"></ion-input>
+          <ion-input v-model="email" label="Email:" placeholder="email@domain.com"></ion-input>
         </ion-item>
         <ion-item>
-          <ion-input v-model="password" label="Password:" type="password" placeholder="Enter password"></ion-input>
+          <ion-input label="Password: " v-model="password" type="password" placeholder="••••••••"></ion-input>
         </ion-item>
         <ion-button @click="handleLogin" expand="block" fill="outline"> Login </ion-button>
       </ion-list>

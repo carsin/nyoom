@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar collapse="condense">
         <ion-title>Feed</ion-title>
-        <ion-button @click="handleLogout" class="back" slot="end" fill="outline">Log Out</ion-button>
+        <ion-button class="back" slot="end" fill="outline" href="/create-post">Create Post</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -22,7 +22,13 @@
       <PostCardComponent username="@Thisguylovesposting1973"
         caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
         upvotes="10203" downvotes="920" image_src="../src/assets/carpic5.png" />
-      <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000" @didDismiss="toast.isOpen = false"></ion-toast> </ion-content>
+      <!-- TODO: Fix floating fix button -->
+      <ion-fab>
+        <ion-fab-button slot="fixed" vertical="bottom" horizontal="end">
+          <ion-icon :icon="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </ion-content>
   </ion-page>
 </template>
 
@@ -33,24 +39,7 @@
 </style>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonButton, IonToolbar, IonTitle, IonContent, IonToast } from '@ionic/vue';
+import { IonIcon, IonPage, IonFab, IonFabButton, IonHeader, IonButton, IonToolbar, IonTitle, IonContent, IonToast } from '@ionic/vue';
 import PostCardComponent from '@/components/PostCardComponent.vue';
-import { signOut } from 'firebase/auth';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { firebaseAuth } from '../firebase-service';
-const router = useRouter(); // Getting access to the router instance
-const toast = ref({ isOpen: false, message: '', color: '' });
-
-
-const handleLogout = async () => {
-  try {
-    await signOut(firebaseAuth);
-    toast.value = { isOpen: true, message: 'Logout successful!', color: 'success'}
-    router.push('/onboard')
-  } catch (error: any) { // Handling error during the logout process
-    toast.value = { isOpen: true, message: 'An error occurred during logout: ' + error.message, color: 'danger'}
-    console.error(error.message);
-  }
-};
+import { add } from 'ionicons/icons';
 </script>

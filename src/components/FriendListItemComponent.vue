@@ -14,7 +14,7 @@
 
 
 <script setup lang="ts">
-import { IonItem, IonChip, IonAvatar, IonLabel, IonButton } from '@ionic/vue';
+import { IonItem, IonChip, IonAvatar, IonLabel, IonButton, IonIcon } from '@ionic/vue';
 defineProps({
   username: String,
   avatar_src: String,

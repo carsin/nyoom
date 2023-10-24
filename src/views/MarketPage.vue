@@ -132,6 +132,26 @@
 <script setup lang="ts">
 import { useStore } from "vuex";
 import { computed } from "vue";
+import {
+  IonHeader,
+  modalController,
+  IonSegment,
+  IonCardTitle,
+  IonCard,
+  IonSegmentButton,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonCardSubtitle,
+  IonPage,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonCardHeader,
+  IonSearchbar,
+  IonButton,
+} from "@ionic/vue";
+import { funnel } from "ionicons/icons";
 
 const store = useStore();
 const parts = computed(() => store.getters.parts);
@@ -166,25 +186,4 @@ const openModal = async () => {
     message.value = `Sort by: ${data}`;
   }
 };
-
-import {
-  IonHeader,
-  modalController,
-  IonSegment,
-  IonCardTitle,
-  IonCard,
-  IonSegmentButton,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonCardSubtitle,
-  IonPage,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonCardHeader,
-  IonSearchbar,
-  IonButton,
-} from "@ionic/vue";
-import { funnel } from "ionicons/icons";
 </script>

@@ -1,10 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import { getApp, initializeApp } from "firebase/app";
-import {
-  getAuth,
-  indexedDBLocalPersistence,
-  initializeAuth,
-} from "firebase/auth";
+import { getStorage } from "firebase/storage";
+import { getAuth, indexedDBLocalPersistence, initializeAuth, } from "firebase/auth";
 import { getFirestore, collection } from "firebase/firestore";
 
 export const firebaseApp = initializeApp({
@@ -31,6 +28,10 @@ export const firebaseAuth = _firebaseAuth;
 
 // get database from firestore
 export const db = getFirestore(firebaseApp);
-// Initialize Analytics TODO: use when project deployed
+export const users_collection = collection(db, "users");
+export const storage = getStorage(firebaseApp);
+
+// TODO: use when project deployed
+// Initialize Analytics 
 // import { getAnalytics } from "firebase/analytics";
 // const analytics = getAnalytics(fireBaseApp);

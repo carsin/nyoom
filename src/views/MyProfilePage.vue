@@ -1,8 +1,11 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
-        <ion-title>@myusername</ion-title>
+      <ion-toolbar v-if="isLoading">
+        <ion-progress-bar type="indeterminate"></ion-progress-bar>
+      </ion-toolbar>
+      <ion-toolbar v-else>
+        <ion-title> @{{ userData.username }} </ion-title>
         <ion-button @click="handleLogout" class="back" slot="end" fill="outline">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
@@ -27,20 +30,20 @@
       </ion-header>
       <ion-content class="ion-padding">
         <ion-list>
-          <FriendListItemComponent username="@friend1" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend2" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend3" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend4" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend5" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend6" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend7" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend8" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend9" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend10" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend1" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend2" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend3" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend4" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend5" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend6" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend7" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend8" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend9" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend10" avatar_src="/src/assets/avatar.svg" />
         </ion-list>
       </ion-content>
     </ion-menu>
-    <ion-content id="main-content" :fullscreen="true">
+    <ion-content v-if="!isLoading" id="main-content" :fullscreen="true">
       <ion-toolbar>
         <ion-grid>
           <ion-row>
@@ -52,8 +55,8 @@
               </ion-buttons>
             </ion-col>
             <ion-col class="ion-text-center" size="10">
-              <ion-title class="ion-margin-bottom">@myusername</ion-title>
-              <img id="profile-avatar" src="/src/assets/carpic3.png" alt="Avatar image"/>
+              <ion-title class="ion-margin-bottom"> @{{ userData.username }} </ion-title>
+              <img id="profile-avatar" src="/src/assets/carpic3.png" alt="Avatar image" />
             </ion-col>
             <ion-col size="1">
               <ion-buttons class="ion-float-right">
@@ -77,10 +80,10 @@
           <ion-row class="ion-text-center">
             <ion-col>
               <ion-chip color="primary">
-                <ion-text> <b>83482</b> Followers </ion-text>
+                <ion-text> <b> {{ userData.followers }} </b> Followers </ion-text>
               </ion-chip>
               <ion-chip color="primary">
-                <ion-text> <b>232</b> Following </ion-text>
+                <ion-text> <b> {{ userData.following }} </b> Following </ion-text>
               </ion-chip>
             </ion-col>
           </ion-row>
@@ -93,15 +96,13 @@
         </ion-grid>
       </ion-toolbar>
       <ion-list>
-        <PostCardComponent username=""
-          caption="Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat."
-          upvotes="2832" downvotes="91" image_src="../src/assets/carpic2.png" />
-        <PostCardComponent username=""
-          caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
-          upvotes="9232" downvotes="822" image_src="../src/assets/carpic4.png" />
+        <ion-list>
+          <PostCardComponent v-for="post in posts" :key="post.id" :username="userData.username" :caption="post.caption"
+            :upvotes="post.upvotes" :downvotes="post.downvotes" :image_src="post.imageURL" />
+        </ion-list>
       </ion-list>
-      <ion-toast :is-open="isOpen" :message="toastMessage" :color="toastColor" :duration="3000" @didDismiss="setOpen(false)"></ion-toast> 
-
+      <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
+        @didDismiss="toast.isOpen = false"></ion-toast>
     </ion-content>
   </ion-page>
 </template>
@@ -118,42 +119,53 @@
   display: inline-block;
 }
 
-.back{
+.back {
   padding-right: 15px;
 }
 </style>
 
 <script setup lang="ts">
-import { IonText, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
+import { IonText, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
 import { closeCircle, settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
-
+import { ref, onMounted } from 'vue';
+import { doc, getDoc, getDocs, query, collection, where } from "firebase/firestore";
+import { firebaseAuth, db } from "../firebase-service"; // Adjust the import based on your file structure
 import { signOut } from 'firebase/auth';
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { firebaseAuth } from '../firebase-service';
-const router = useRouter(); // Getting access to the router instance
-const isOpen = ref(false);
-const toastMessage = ref('');
-const toastColor = ref('');
 
-const setOpen = (state: boolean) => {
-  isOpen.value = state;
-};
+const router = useRouter(); // Getting access to the router instance
+const isLoading = ref(true); // Variable to manage loading state
+const userData = ref({}); // Reactive variable to store user data
+const toast = ref({ isOpen: false, message: '', color: '' });
+const posts = ref([]); // Variable to hold the user's posts
+
+onMounted(async () => {
+  const user = firebaseAuth.currentUser;
+  if (user) {
+    // get user data
+    const userDocRef = doc(db, 'users', user.uid);
+    const usersDocSnap = await getDoc(userDocRef);
+    if (usersDocSnap.exists()) {
+      userData.value = usersDocSnap.data();
+    }
+
+    // get user posts
+    const postsQuery = query(collection(db, 'posts'), where('userId', '==', user.uid));
+    const querySnapshot = await getDocs(postsQuery);
+    posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    isLoading.value = false; // Set loading to false when data is loaded
+  }
+});
 
 const handleLogout = async () => {
   try {
     await signOut(firebaseAuth);
-    toastColor.value = 'success';
-    toastMessage.value = 'Logged out successfully';
-    setOpen(true);
+    toast.value = { isOpen: true, message: 'Logout successful!', color: 'success' }
     router.push('/onboard')
   } catch (error: any) { // Handling error during the logout process
-    
-    toastColor.value = 'danger';
-    toastMessage.value = 'An error occurred during logout';
-    setOpen(true);
+    toast.value = { isOpen: true, message: 'An error occurred during logout: ' + error.message, color: 'danger' }
     console.error(error.message);
   }
 };

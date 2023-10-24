@@ -23,7 +23,7 @@
           <ion-label>Market</ion-label>
         </ion-tab-button>
                 
-        <ion-tab-button tab="tab5" href="/myProfile">
+        <ion-tab-button tab="tab5" href="/my-profile">
           <ion-icon aria-hidden="true" :icon="person" />
           <ion-label>My Profile</ion-label>
         </ion-tab-button>

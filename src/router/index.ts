@@ -12,12 +12,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/market/:id",
     component: () => import("../views/PartDetails.vue"),
-    meta: { requiresAuth: true }, 
+    meta: { requiresAuth: true },
   },
   {
     path: "/market/autoshop/:id",
     component: () => import("../views/OfferDetails.vue"),
-    meta: { requiresAuth: true }, 
+    meta: { requiresAuth: true },
   },
   {
     path: '/onboard',
@@ -32,6 +32,10 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/RegisterPage.vue'),
   },
   {
+    path: '/verify-email',
+    component: () => import('@/views/VerifyEmail.vue'),
+  },
+  {
     path: '/tabs',
     component: TabsPage,
     children: [
@@ -42,42 +46,47 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/feed',
         component: () => import('@/views/FeedPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/search',
         component: () => import('@/views/SearchPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/events',
         component: () => import('@/views/EventPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/market',
         component: () => import('@/views/MarketPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
-        path: '/myProfile',
+        path: '/my-profile',
         component: () => import('@/views/MyProfilePage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/otherProfile',
         component: () => import('@/views/OtherProfilePage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/settings',
         component: () => import('@/views/ProfileSettingsPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/create-post',
+        component: () => import('@/views/CreatePost.vue'),
+        meta: { requiresAuth: true },
       },
       {
         path: '/audiModels',
         component: () => import('@/views/AudiModelsPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       }
     ]
   }
@@ -88,19 +97,28 @@ const router = createRouter({
   routes,
 });
 
-
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  onAuthStateChanged(firebaseAuth, (user) => {
-    const isAuthenticated = firebaseAuth.currentUser;
-    console.log("authenticated:" + isAuthenticated);
-    
-    if (requiresAuth && !isAuthenticated) {
-      next('/onboard'); // Redirect to login if not authenticated
-    } else if ((to.path === '/onboard' || to.path === '/login' || to.path === '/register') && isAuthenticated) {
-      next('/feed'); // Redirect to feed if already authenticated
-    } else {
-      next(); // Proceed with the navigation
+  
+  let isNavigationConfirmed = false; // To track if next() has been called
+  
+  const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
+    if (!isNavigationConfirmed) { // Ensure next() is called only once
+      const isAuthenticated = user !== null;
+      const isEmailVerified = user?.emailVerified || false;
+
+      if (requiresAuth && !isAuthenticated) {
+        next('/onboard');
+      } else if (isAuthenticated && !isEmailVerified && to.path !== '/verify-email' && to.path !== '/login') {
+        next('/verify-email');
+      } else if ((to.path === '/onboard' || to.path === '/login' || to.path === '/register' || to.path == '/verify-email') && isAuthenticated && isEmailVerified) {
+        next('/feed');
+      } else {
+        next();
+      }
+      
+      isNavigationConfirmed = true; // Mark next() as called
+      unsubscribe(); // Cleanup the observer to prevent memory leaks
     }
   });
 });

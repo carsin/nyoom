@@ -146,7 +146,7 @@ const selectTab = (tab: String) => {
 const isPartsTab = computed(() => selectedTab.value === "parts");
 const isAutoShopTab = computed(() => selectedTab.value === "auto-shop");
 
-import Modal from "../popups/Modal.vue";
+import MarketFilter from "../popups/MarketFilter.vue";
 import { ref } from "vue";
 
 const message = ref(
@@ -155,7 +155,7 @@ const message = ref(
 
 const openModal = async () => {
   const modal = await modalController.create({
-    component: Modal,
+    component: MarketFilter,
   });
 
   modal.present();

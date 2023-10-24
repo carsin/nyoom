@@ -70,6 +70,7 @@ const register = async () => {
         await setDoc(userDocRef, {
           username: username.value,
           email: email.value,
+          biography: "",
           followers: 0,
           following: 0,
           // add other fields as needed

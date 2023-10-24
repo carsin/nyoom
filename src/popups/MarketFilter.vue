@@ -14,7 +14,7 @@
     <ion-list>
       <ion-item :class="{ 'selected-option': selectedOption === 'Featured' }" @click="selectOption('Featured')">Featured</ion-item>
       <ion-item :class="{ 'selected-option': selectedOption === 'Price: Low to High' }" @click="selectOption('Price: Low to High')">Price: Low to High</ion-item>
-      <ion-item :class="{ 'selected-option': selectedOption === 'Price: Hight to Low' }" @click="selectOption('Price: Hight to Low')">Price: Hight to Low</ion-item>
+      <ion-item :class="{ 'selected-option': selectedOption === 'Price: High to Low' }" @click="selectOption('Price: High to Low')">Price: High to Low</ion-item>
       <ion-item :class="{ 'selected-option': selectedOption === 'Distance: Closest to Furthest' }" @click="selectOption('Distance: Closest to Furthest')">Distance: Closest to Furthest</ion-item>
       <ion-item :class="{ 'selected-option': selectedOption === 'Newest Arrivals' }" @click="selectOption('Newest Arrivals')">Newest Arrivals</ion-item>
     </ion-list>

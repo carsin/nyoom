@@ -43,66 +43,67 @@
         </ion-list>
       </ion-content>
     </ion-menu>
-    <ion-content v-if="!isLoading" id="main-content" :fullscreen="true">
-      <ion-toolbar>
-        <ion-grid>
-          <ion-row>
-            <ion-col size="1">
-              <ion-buttons>
-                <ion-button href="/settings">
-                  <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
-                </ion-button>
-              </ion-buttons>
-            </ion-col>
-            <ion-col class="ion-text-center" size="10">
-              <ion-title class="ion-margin-bottom"> @{{ userData.username }} </ion-title>
-              <img id="profile-avatar" src="/src/assets/carpic3.png" alt="Avatar image" />
-            </ion-col>
-            <ion-col size="1">
-              <ion-buttons class="ion-float-right">
-                <ion-list>
-                  <ion-item>
-                    <ion-menu-toggle>
+    <ion-content id="main-content" :fullscreen="true">
+      <div v-if="!isLoading">
+        <ion-toolbar>
+          <ion-grid>
+            <ion-row>
+              <ion-col size="1">
+                <ion-buttons>
+                  <ion-button href="/settings">
+                    <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+              </ion-col>
+              <ion-col class="ion-text-center" size="10">
+                <ion-title class="ion-margin-bottom"> @{{ userData.username }} </ion-title>
+                <img id="profile-avatar" src="/src/assets/carpic3.png" alt="Avatar image" />
+              </ion-col>
+              <ion-col size="1">
+                <ion-buttons class="ion-float-right">
+                  <ion-list>
+                    <ion-item>
+                      <ion-menu-toggle>
+                        <ion-button>
+                          <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon>
+                        </ion-button>
+                      </ion-menu-toggle>
+                    </ion-item>
+                    <ion-item>
                       <ion-button>
-                        <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon>
+                        <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
                       </ion-button>
-                    </ion-menu-toggle>
-                  </ion-item>
-                  <ion-item>
-                    <ion-button>
-                      <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
-                    </ion-button>
-                  </ion-item>
-                </ion-list>
-              </ion-buttons>
-            </ion-col>
-          </ion-row>
-          <ion-row class="ion-text-center">
-            <ion-col>
-              <ion-chip color="primary">
-                <ion-text> <b> {{ userData.followers }} </b> Followers </ion-text>
-              </ion-chip>
-              <ion-chip color="primary">
-                <ion-text> <b> {{ userData.following }} </b> Following </ion-text>
-              </ion-chip>
-            </ion-col>
-          </ion-row>
-          <ion-row class="ion-text-center">
-            <ion-col>
-              <ion-title size="small">here is where the bio goes. There will be a word/letter limit on the bio in the
-                future.</ion-title>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-toolbar>
-      <ion-list>
+                    </ion-item>
+                  </ion-list>
+                </ion-buttons>
+              </ion-col>
+            </ion-row>
+            <ion-row class="ion-text-center">
+              <ion-col>
+                <ion-chip color="primary">
+                  <ion-text> <b> {{ userData.followers }} </b> Followers </ion-text>
+                </ion-chip>
+                <ion-chip color="primary">
+                  <ion-text> <b> {{ userData.following }} </b> Following </ion-text>
+                </ion-chip>
+              </ion-col>
+            </ion-row>
+            <ion-row class="ion-text-center">
+              <ion-col>
+                <ion-title size="small"> {{ userData.biography }} </ion-title>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-toolbar>
         <ion-list>
-          <PostCardComponent v-for="post in posts" :key="post.id" :username="userData.username" :caption="post.caption"
-            :upvotes="post.upvotes" :downvotes="post.downvotes" :image_src="post.imageURL" />
+          <ion-list>
+            <PostCardComponent v-for="post in posts" :key="post.id" :username="userData.username" :caption="post.caption"
+              :upvotes="post.upvotes.toString()" :downvotes="post.downvotes.toString()" :image_src="post.imageURL" />
+          </ion-list>
         </ion-list>
-      </ion-list>
-      <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
-        @didDismiss="toast.isOpen = false"></ion-toast>
+        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
+            @didDismiss="toast.isOpen = false"></ion-toast>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -125,13 +126,13 @@
 </style>
 
 <script setup lang="ts">
-import { IonText, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
+import { IonText, IonMenu, IonToast, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
 import { closeCircle, settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
 import { ref, onMounted } from 'vue';
-import { doc, getDoc, getDocs, query, collection, where } from "firebase/firestore";
-import { firebaseAuth, db } from "../firebase-service"; // Adjust the import based on your file structure
+import { doc, getDoc, getDocs, query, collection, where, orderBy } from "firebase/firestore";
+import { firebaseAuth, db } from "../firebase-service"; 
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 
@@ -152,7 +153,12 @@ onMounted(async () => {
     }
 
     // get user posts
-    const postsQuery = query(collection(db, 'posts'), where('userId', '==', user.uid));
+    const postsQuery = query(
+      collection(db, 'posts'),
+      where('userId', '==', user.uid),
+      orderBy('timestamp', 'desc') // Ordering by timestamp in descending order
+    );
+    
     const querySnapshot = await getDocs(postsQuery);
     posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     isLoading.value = false; // Set loading to false when data is loaded
@@ -164,7 +170,7 @@ const handleLogout = async () => {
     await signOut(firebaseAuth);
     toast.value = { isOpen: true, message: 'Logout successful!', color: 'success' }
     router.push('/onboard')
-  } catch (error: any) { // Handling error during the logout process
+  } catch (error: any) { 
     toast.value = { isOpen: true, message: 'An error occurred during logout: ' + error.message, color: 'danger' }
     console.error(error.message);
   }

@@ -5,7 +5,7 @@
         <ion-progress-bar type="indeterminate"></ion-progress-bar>
       </ion-toolbar>
       <ion-toolbar v-else>
-        <ion-title> @{{ userData.username }} </ion-title>
+        <ion-title> @{{ username }} </ion-title>
         <ion-button @click="handleLogout" class="back" slot="end" fill="outline">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
@@ -56,7 +56,7 @@
                 </ion-buttons>
               </ion-col>
               <ion-col class="ion-text-center" size="10">
-                <ion-title class="ion-margin-bottom"> @{{ userData.username }} </ion-title>
+                <ion-title class="ion-margin-bottom"> @{{ username }} </ion-title>
                 <img id="profile-avatar" src="/src/assets/carpic3.png" alt="Avatar image" />
               </ion-col>
               <ion-col size="1">
@@ -134,34 +134,35 @@ import { ref, onMounted } from 'vue';
 import { doc, getDoc, getDocs, query, collection, where, orderBy } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service"; 
 import { signOut } from 'firebase/auth';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
-const router = useRouter(); // Getting access to the router instance
 const isLoading = ref(true); // Variable to manage loading state
+const route = useRoute();
+const router = useRouter();
+const username = ref(route.params.username);
 const userData = ref({}); // Reactive variable to store user data
 const toast = ref({ isOpen: false, message: '', color: '' });
 const posts = ref([]); // Variable to hold the user's posts
 
 onMounted(async () => {
-  const user = firebaseAuth.currentUser;
-  if (user) {
-    // get user data
-    const userDocRef = doc(db, 'users', user.uid);
-    const usersDocSnap = await getDoc(userDocRef);
-    if (usersDocSnap.exists()) {
-      userData.value = usersDocSnap.data();
-    }
+  // Check if the user exists in the 'users' collection
+  const userQuery = query(collection(db, 'users'), where('username', '==', username.value));
+  const userSnapshot = await getDocs(userQuery);
 
-    // get user posts
+  if (userSnapshot.empty) {
+    router.push('/404'); // Redirect to 404 page if user doesn't exist
+  } else { // user exists
+    userData.value = userSnapshot.docs[0].data(); // get user data
+    // query all users posts
     const postsQuery = query(
       collection(db, 'posts'),
-      where('userId', '==', user.uid),
-      orderBy('timestamp', 'desc') // Ordering by timestamp in descending order
+      where('username', '==', username.value),
+      orderBy('timestamp', 'desc')
     );
     
     const querySnapshot = await getDocs(postsQuery);
     posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    isLoading.value = false; // Set loading to false when data is loaded
+    isLoading.value = false;
   }
 });
 

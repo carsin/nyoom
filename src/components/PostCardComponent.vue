@@ -2,8 +2,10 @@
   <ion-card>
     <ion-grid>
       <ion-row class="ion-align-self-end ion-justify-content-center">
-        <ion-button fill="clear" href="/otherProfile">
-          <ion-card-title color="primary"> {{ username }} </ion-card-title>
+        <ion-button fill="clear">
+          <router-link :to="{ path: `/user/${username}` }">
+            <ion-card-title color="primary"> {{ username }} </ion-card-title>
+          </router-link>
         </ion-button>
       </ion-row>
       <ion-row class="ion-justify-content-center">

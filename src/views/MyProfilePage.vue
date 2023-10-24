@@ -1,7 +1,10 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar v-if="isLoading">
+        <ion-progress-bar type="indeterminate"></ion-progress-bar>
+      </ion-toolbar>
+      <ion-toolbar v-else>
         <ion-title> @{{ userData.username }} </ion-title>
         <ion-button class="back" slot="end" fill="outline" href="/">Log Out</ion-button>
       </ion-toolbar>
@@ -40,7 +43,7 @@
         </ion-list>
       </ion-content>
     </ion-menu>
-    <ion-content id="main-content" :fullscreen="true">
+    <ion-content v-if="!isLoading" id="main-content" :fullscreen="true">
       <ion-toolbar>
         <ion-grid>
           <ion-row>
@@ -122,31 +125,28 @@
 </style>
 
 <script setup lang="ts">
-import { IonText, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
+import { IonText, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
 import { closeCircle, settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service"; // Adjust the import based on your file structure
 
+const isLoading = ref(true); // Variable to manage loading state
 const userData = ref({}); // Reactive variable to store user data
 
 onMounted(async () => {
   const user = firebaseAuth.currentUser;
   
   if (user) {
+    // get user data
     const userDocRef = doc(db, 'users', user.uid);
-    
-    const unsubscribe = onSnapshot(userDocRef, (doc) => {
-      if (doc.exists()) {
-        userData.value = doc.data();
-      }
-    });
-
-    onUnmounted(() => {
-      unsubscribe(); // Cleanup the listener
-    });
+    const docSnap = await getDoc(userDocRef);
+    if (docSnap.exists()) {
+      userData.value = docSnap.data();
+      isLoading.value = false; // Set loading to false when data is loaded
+    }
   }
 });
 

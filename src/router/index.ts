@@ -64,7 +64,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true },
       },
       {
-        path: '/myProfile',
+        path: '/my-profile',
         component: () => import('@/views/MyProfilePage.vue'),
         meta: { requiresAuth: true },
       },
@@ -76,6 +76,11 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/settings',
         component: () => import('@/views/ProfileSettingsPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/create-post',
+        component: () => import('@/views/CreatePost.vue'),
         meta: { requiresAuth: true },
       },
       {

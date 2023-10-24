@@ -2,7 +2,7 @@
   <ion-card>
     <ion-grid>
       <ion-row class="ion-align-self-end ion-justify-content-center">
-        <ion-button fill="clear" href="otherProfile">
+        <ion-button fill="clear" href="/otherProfile">
           <ion-card-title color="primary"> {{ username }} </ion-card-title>
         </ion-button>
       </ion-row>
@@ -35,7 +35,7 @@
 </style>
 
 <script setup lang="ts">
-import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/vue';
+import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol } from '@ionic/vue';
 defineProps({
   username: String,
   caption: String,

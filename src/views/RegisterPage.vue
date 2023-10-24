@@ -22,8 +22,7 @@
         </ion-item>
         <ion-button expand="block" fill="outline" @click="register"> Register </ion-button>
       </ion-list>
-      <ion-toast :is-open="isOpen" :message="toastMessage" :duration="3000" :color="toastColor"
-        @didDismiss="setOpen(false)"></ion-toast>
+      <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="3000" :color="toast.color" @didDismiss="toast.isOpen = false"></ion-toast>
     </ion-content>
   </ion-page>
 </template>
@@ -37,7 +36,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonInput, IonButton, IonToast } from '@ionic/vue';
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, User } from "firebase/auth";
 import { useRouter } from 'vue-router';
 import { firebaseAuth } from "../firebase-service";
 
@@ -46,32 +45,22 @@ const email = ref('');
 const username = ref('');
 const password = ref('');
 const confirmPassword = ref('');
-const toastMessage = ref('');
-const toastColor = ref('');
-const isOpen = ref(false);
-
-const setOpen = (state: boolean) => {
-  isOpen.value = state;
-};
+const toast = ref({ isOpen: false, message: '', color: '' });
 
 const register = async () => {
   if (password.value === confirmPassword.value) {
     try {
-      await createUserWithEmailAndPassword(firebaseAuth, email.value.toString(), password.value.toString());
-      toastColor.value = 'success';
-      toastMessage.value = 'Account created successfully!';
-      setOpen(true);
-      router.push("/feed");
+      const userCredentials = await createUserWithEmailAndPassword(firebaseAuth, email.value.toString(), password.value.toString());
+      const user = userCredentials.user;
+      await sendEmailVerification(user);
+      toast.value = { isOpen: true, message: 'Account created successfully! Please verify your email in the link sent to ' + email.value, color: 'success'}
+      router.push("/verify-email");
     } catch (error: any) {
       console.error('Error creating account:', error.message);
-      toastColor.value = 'danger';
-      toastMessage.value = error.message;
-      setOpen(true);
+      toast.value = { isOpen: true, message: "Error creating account:" + error.message, color: 'danger'}
     }
   } else {
-    toastMessage.value = 'Passwords do not match';
-    toastColor.value = 'danger';
-    setOpen(true);
+    toast.value = { isOpen: true, message: 'Passwords don\'t match, please try again', color: 'danger'}
     console.error('Passwords do not match');
   }
 };

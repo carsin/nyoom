@@ -32,6 +32,10 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/RegisterPage.vue'),
   },
   {
+    path: '/verify-email',
+    component: () => import('@/views/VerifyEmail.vue'),
+  },
+  {
     path: '/tabs',
     component: TabsPage,
     children: [
@@ -90,16 +94,26 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  onAuthStateChanged(firebaseAuth, (user) => {
-    const isAuthenticated = firebaseAuth.currentUser;
-    console.log("authenticated:" + isAuthenticated);
+  
+  let isNavigationConfirmed = false; // To track if next() has been called
+  
+  const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
+    if (!isNavigationConfirmed) { // Ensure next() is called only once
+      const isAuthenticated = user !== null;
+      const isEmailVerified = user?.emailVerified || false;
 
-    if (requiresAuth && !isAuthenticated) {
-      next('/onboard'); // Redirect to login if not authenticated
-    } else if ((to.path === '/onboard' || to.path === '/login' || to.path === '/register') && isAuthenticated) {
-      next('/feed'); // Redirect to feed if already authenticated
-    } else {
-      next(); // Proceed with the navigation
+      if (requiresAuth && !isAuthenticated) {
+        next('/onboard');
+      } else if (isAuthenticated && !isEmailVerified && to.path !== '/verify-email' && to.path !== '/login') {
+        next('/verify-email');
+      } else if ((to.path === '/onboard' || to.path === '/login' || to.path === '/register' || to.path == '/verify-email') && isAuthenticated && isEmailVerified) {
+        next('/feed');
+      } else {
+        next();
+      }
+      
+      isNavigationConfirmed = true; // Mark next() as called
+      unsubscribe(); // Cleanup the observer to prevent memory leaks
     }
   });
 });

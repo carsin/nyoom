@@ -16,8 +16,8 @@
         </ion-item>
         <ion-button @click="handleLogin" expand="block" fill="outline"> Login </ion-button>
       </ion-list>
-      <ion-toast :is-open="isOpen" :message="toastMessage" :color="toastColor" :duration="2000"
-        @didDismiss="setOpen(false)"></ion-toast>
+      <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000"
+        @didDismiss="toast.isOpen = false"></ion-toast>
     </ion-content>
   </ion-page>
 </template>
@@ -32,26 +32,23 @@ import { firebaseAuth } from '../firebase-service';
 const router = useRouter();
 const email = ref('');
 const password = ref('');
-const isOpen = ref(false);
-const toastMessage = ref('');
-const toastColor = ref('');
-
-const setOpen = (state: boolean) => {
-  isOpen.value = state;
-};
+const toast = ref({ isOpen: false, message: '', color: '' });
 
 const handleLogin = async () => {
   try {
-    await signInWithEmailAndPassword(firebaseAuth, email.value, password.value);
-    toastColor.value = 'success';
-    toastMessage.value = "Login successful!";
-    router.push("/feed");
+    const userCredentials = await signInWithEmailAndPassword(firebaseAuth, email.value, password.value);
+    const user = userCredentials.user;
+
+    if (user.emailVerified) {
+      toast.value = { isOpen: true, message: 'Login successful!', color: 'success'}
+      router.push("/feed");
+    } else {
+      toast.value = { isOpen: true, message: 'Please verify your email before logging in with the link sent to ' + email.value, color: 'danger'}
+    }
   } catch (error: any) {
-    toastColor.value = 'danger';
-    toastMessage.value = error.message;
+    toast.value = { isOpen: true, message: "Error while logging in: " + error.message, color: 'danger'}
     console.error(error.message);
   } finally {
-    setOpen(true);
   }
 };
 </script>

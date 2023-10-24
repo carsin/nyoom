@@ -9,7 +9,10 @@
         </ion-button>
       </ion-row>
       <ion-row class="ion-justify-content-center">
-        <img id="post-image" v-bind:src="image_src" alt="Post image content"/> <!-- v-bind: use prop in attribute -->
+        <img id="post-image" v-bind:src="image_src" alt="Post image content" /> <!-- v-bind: use prop in attribute -->
+      </ion-row>
+      <ion-row class="ion-align-self-end ion-justify-content-center">
+        <ion-card-subtitle> {{ formattedTimestamp }} </ion-card-subtitle>
       </ion-row>
       <ion-row>
         <ion-col class="ion-text-left ion-align-self-end" size="10">
@@ -37,15 +40,25 @@
 </style>
 
 <script setup lang="ts">
+import { defineProps, computed } from 'vue';
 import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol } from '@ionic/vue';
-defineProps({
+import { arrowUpCircle, arrowDownCircle } from 'ionicons/icons';
+
+const props = defineProps({
   username: String,
   caption: String,
   upvotes: String,
   downvotes: String,
   image_src: String,
+  timestamp: Object,
 });
 
-import { arrowUpCircle, arrowDownCircle } from 'ionicons/icons';
+const formattedTimestamp = computed(() => {
+  if (props.timestamp) {
+    const date = props.timestamp.toDate(); // Convert Firestore timestamp to JavaScript Date
+    return date.toLocaleString();
+  }
+  return '';
+});
 </script>
 

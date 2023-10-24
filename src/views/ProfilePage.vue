@@ -98,7 +98,7 @@
         <ion-list>
           <ion-list>
             <PostCardComponent v-for="post in posts" :key="post.id" :username="userData.username" :caption="post.caption"
-              :upvotes="post.upvotes.toString()" :downvotes="post.downvotes.toString()" :image_src="post.imageURL" />
+              :upvotes="post.upvotes.toString()" :downvotes="post.downvotes.toString()" :image_src="post.imageURL" :timestamp="post.timestamp"  />
           </ion-list>
         </ion-list>
         <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"

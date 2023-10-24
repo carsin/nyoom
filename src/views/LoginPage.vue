@@ -16,7 +16,8 @@
         </ion-item>
         <ion-button @click="handleLogin" expand="block" fill="outline"> Login </ion-button>
       </ion-list>
-      <ion-toast :is-open="isOpen" :message="toastMessage" :color="toastColor" :duration="4000" @didDismiss="setOpen(false)"></ion-toast>
+      <ion-toast :is-open="isOpen" :message="toastMessage" :color="toastColor" :duration="2000"
+        @didDismiss="setOpen(false)"></ion-toast>
     </ion-content>
   </ion-page>
 </template>
@@ -26,19 +27,18 @@ import { IonPage, IonItem, IonList, IonHeader, IonToolbar, IonTitle, IonContent,
 import { ref } from 'vue';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from 'vue-router';
-import { firebaseAuth } from '../firebase-service'; 
+import { firebaseAuth } from '../firebase-service';
 
+const router = useRouter();
 const email = ref('');
 const password = ref('');
 const isOpen = ref(false);
 const toastMessage = ref('');
-const toastColor = ref(''); 
+const toastColor = ref('');
 
 const setOpen = (state: boolean) => {
   isOpen.value = state;
 };
-
-const router = useRouter(); // Getting access to the router instance
 
 const handleLogin = async () => {
   try {

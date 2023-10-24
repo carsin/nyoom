@@ -7,7 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    redirect: "/home",
+    redirect: "/onboard",
   },
   {
     path: "/market/:id",
@@ -20,7 +20,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true }, 
   },
   {
-    path: '/home',
+    path: '/onboard',
     component: () => import('@/views/TitlePage.vue'),
   },
   {
@@ -96,8 +96,8 @@ router.beforeEach((to, from, next) => {
     console.log("authenticated:" + isAuthenticated);
     
     if (requiresAuth && !isAuthenticated) {
-      next('/home'); // Redirect to login if not authenticated
-    } else if ((to.path === '/home' || to.path === '/login' || to.path === '/register') && isAuthenticated) {
+      next('/onboard'); // Redirect to login if not authenticated
+    } else if ((to.path === '/onboard' || to.path === '/login' || to.path === '/register') && isAuthenticated) {
       next('/feed'); // Redirect to feed if already authenticated
     } else {
       next(); // Proceed with the navigation

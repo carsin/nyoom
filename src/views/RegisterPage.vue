@@ -22,7 +22,8 @@
         </ion-item>
         <ion-button expand="block" fill="outline" @click="register"> Register </ion-button>
       </ion-list>
-      <ion-toast :is-open="isOpen" :message="toastMessage" :duration="4000" :color="toastColor" @didDismiss="setOpen(false)"></ion-toast>
+      <ion-toast :is-open="isOpen" :message="toastMessage" :duration="3000" :color="toastColor"
+        @didDismiss="setOpen(false)"></ion-toast>
     </ion-content>
   </ion-page>
 </template>
@@ -37,14 +38,16 @@
 import { ref } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonInput, IonButton, IonToast } from '@ionic/vue';
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from 'vue-router';
 import { firebaseAuth } from "../firebase-service";
 
+const router = useRouter();
 const email = ref('');
 const username = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const toastMessage = ref('');
-const toastColor = ref(''); 
+const toastColor = ref('');
 const isOpen = ref(false);
 
 const setOpen = (state: boolean) => {
@@ -58,20 +61,18 @@ const register = async () => {
       toastColor.value = 'success';
       toastMessage.value = 'Account created successfully!';
       setOpen(true);
-      // Navigation or other actions can be added here
+      router.push("/feed");
     } catch (error: any) {
       console.error('Error creating account:', error.message);
       toastColor.value = 'danger';
       toastMessage.value = error.message;
       setOpen(true);
-      // You might want to show an error message to the user
     }
   } else {
     toastMessage.value = 'Passwords do not match';
     toastColor.value = 'danger';
     setOpen(true);
     console.error('Passwords do not match');
-    // You might want to show an error message to the user
   }
 };
 </script>

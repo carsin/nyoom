@@ -64,13 +64,13 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true },
       },
       {
-        path: '/my-profile',
-        component: () => import('@/views/MyProfilePage.vue'),
+        path: '/user/:username',
+        component: () => import('@/views/ProfilePage.vue'),
         meta: { requiresAuth: true },
       },
       {
-        path: '/otherProfile',
-        component: () => import('@/views/OtherProfilePage.vue'),
+        path: '/users/:username',
+        component: () => import('@/views/ProfilePage.vue'),
         meta: { requiresAuth: true },
       },
       {
@@ -87,7 +87,15 @@ const routes: Array<RouteRecordRaw> = [
         path: '/audiModels',
         component: () => import('@/views/AudiModelsPage.vue'),
         meta: { requiresAuth: true },
-      }
+      },
+      {
+        path: '/404',
+        component: () => import('@/views/404Page.vue'),
+      },
+      {
+        path: '/:catchAll(.*)',
+        component: () => import('@/views/404Page.vue'),
+      },
     ]
   }
 ]
@@ -99,9 +107,9 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  
+
   let isNavigationConfirmed = false; // To track if next() has been called
-  
+
   const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
     if (!isNavigationConfirmed) { // Ensure next() is called only once
       const isAuthenticated = user !== null;
@@ -116,7 +124,7 @@ router.beforeEach((to, from, next) => {
       } else {
         next();
       }
-      
+
       isNavigationConfirmed = true; // Mark next() as called
       unsubscribe(); // Cleanup the observer to prevent memory leaks
     }

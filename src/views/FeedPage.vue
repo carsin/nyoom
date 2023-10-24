@@ -4,26 +4,10 @@
       <ion-toolbar collapse="condense">
         <ion-title>Feed</ion-title>
         <ion-button class="back" slot="end" fill="outline" href="/create-post">Create Post</ion-button>
-
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <PostCardComponent username="@Testmanposting1993"
-        caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
-        upvotes="23563" downvotes="230" image_src="../src/assets/carpic1.png" />
-      <PostCardComponent username="@JustAnotherPoStAh42"
-        caption="Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat."
-        upvotes="2832" downvotes="91" image_src="../src/assets/carpic2.png" />
-      <PostCardComponent username="@Thisguylovesposting1973"
-        caption="Caption blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah "
-        upvotes="2822" downvotes="232" image_src="../src/assets/carpic3.png" />
-      <PostCardComponent username="@Thisguylovesposting1973"
-        caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
-        upvotes="9232" downvotes="822" image_src="../src/assets/carpic4.png" />
-      <PostCardComponent username="@Thisguylovesposting1973"
-        caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
-        upvotes="10203" downvotes="920" image_src="../src/assets/carpic5.png" />
-      <!-- TODO: Fix floating fix button -->
+      <PostCardComponent v-for="post in posts" :key="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvotes.toString()" :downvotes="post.downvotes.toString()" :image_src="post.imageURL" :timestamp="post.timestamp" />
       <ion-fab>
         <ion-fab-button slot="fixed" vertical="bottom" horizontal="end">
           <ion-icon :icon="add"></ion-icon>
@@ -33,14 +17,25 @@
   </ion-page>
 </template>
 
-<style>
-.back{
-  padding-right: 15px;
-}
-</style>
-
 <script setup lang="ts">
-import { IonIcon, IonPage, IonFab, IonFabButton, IonHeader, IonButton, IonToolbar, IonTitle, IonContent, IonToast } from '@ionic/vue';
-import PostCardComponent from '@/components/PostCardComponent.vue';
+import { ref, onMounted } from 'vue';
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { db } from "../firebase-service"; // Adjust the import based on your file structure
+import { IonIcon, IonPage, IonFab, IonFabButton, IonHeader, IonButton, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import { add } from 'ionicons/icons';
+import PostCardComponent from '@/components/PostCardComponent.vue';
+
+const posts = ref([]); // Variable to hold the posts
+
+onMounted(async () => {
+  // Query all posts and order by timestamp
+    const postsQuery = query(
+    collection(db, 'posts'),
+    orderBy('timestamp', 'desc') // Ordering by timestamp in descending order
+  );
+  const querySnapshot = await getDocs(postsQuery);
+  
+  posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+});
+
 </script>

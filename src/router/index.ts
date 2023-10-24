@@ -12,12 +12,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/market/:id",
     component: () => import("../views/PartDetails.vue"),
-    meta: { requiresAuth: true }, 
+    meta: { requiresAuth: true },
   },
   {
     path: "/market/autoshop/:id",
     component: () => import("../views/OfferDetails.vue"),
-    meta: { requiresAuth: true }, 
+    meta: { requiresAuth: true },
   },
   {
     path: '/onboard',
@@ -42,42 +42,42 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/feed',
         component: () => import('@/views/FeedPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/search',
         component: () => import('@/views/SearchPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/events',
         component: () => import('@/views/EventPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/market',
         component: () => import('@/views/MarketPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/myProfile',
         component: () => import('@/views/MyProfilePage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/otherProfile',
         component: () => import('@/views/OtherProfilePage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/settings',
         component: () => import('@/views/ProfileSettingsPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       },
       {
         path: '/audiModels',
         component: () => import('@/views/AudiModelsPage.vue'),
-        meta: { requiresAuth: true }, 
+        meta: { requiresAuth: true },
       }
     ]
   }
@@ -88,13 +88,12 @@ const router = createRouter({
   routes,
 });
 
-
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   onAuthStateChanged(firebaseAuth, (user) => {
     const isAuthenticated = firebaseAuth.currentUser;
     console.log("authenticated:" + isAuthenticated);
-    
+
     if (requiresAuth && !isAuthenticated) {
       next('/onboard'); // Redirect to login if not authenticated
     } else if ((to.path === '/onboard' || to.path === '/login' || to.path === '/register') && isAuthenticated) {

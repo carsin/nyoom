@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Profile Settings</ion-title>
-        <ion-button class="back" slot="end" fill="outline" href="/myProfile">Back</ion-button>
+        <ion-button class="back" slot="end" fill="outline" href="/my-profile">Back</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">

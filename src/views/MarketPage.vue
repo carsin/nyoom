@@ -1,39 +1,48 @@
 <template>
   <ion-page>
-    <ion-toolbar collapse="condense">
+    <ion-header>
+      <ion-toolbar collapse="condense">
         <ion-title>Market</ion-title>
-        <ion-button class="back" slot="end" fill="outline" href="/">Log Out</ion-button>
       </ion-toolbar>
+    </ion-header>
     <ion-content :fullscreen="true">
       <ion-segment v-model="selectedTab">
-        <ion-segment-button @click="selectTab('parts')">
+        <ion-segment-button @click="selectTab('parts')" value="Parts" checked>
           <ion-label>Parts</ion-label>
         </ion-segment-button>
-        <ion-segment-button @click="selectTab('auto-shop')">
+        <ion-segment-button @click="selectTab('auto-shop')" value="Autoshop Offers">
           <ion-label>Autoshop Offers</ion-label>
         </ion-segment-button>
       </ion-segment>
 
       <!-- Content for the "Parts" tab -->
-      <div v-if="isPartsTab" class="content-with-margin">
+      <div v-if="isPartsTab">
         <ion-toolbar>
-          <ion-searchbar
-            show-clear-button="focus"
-            placeholder="Search parts"
-          ></ion-searchbar>
+          <ion-title class="ion-text-center">Local Parts</ion-title>
         </ion-toolbar>
         <ion-toolbar>
-          <ion-title size="large">Local Parts</ion-title>
+          <ion-searchbar show-clear-button="focus" placeholder="Search parts"
+            class="ion-padding-start ion-padding-end"></ion-searchbar>
+          <ion-buttons slot="end">
+            <ion-button expand="block" @click="openModal">
+              <ion-icon :icon="funnel" />
+            </ion-button>
+          </ion-buttons>
+          <p>{{ message }}</p>
         </ion-toolbar>
         <ion-grid>
           <ion-row>
-            <ion-col v-for="part in parts" :key="part.id" size="2">
-              <ion-card :href="'/market/' + part.id">
-                <img alt="Part image" :src="part.imageUrl" />
+            <ion-col v-for="part in parts" :key="part.id" size="6">
+              <ion-card :href="'/market/' + part.id" class="custom-card">
+                <img alt="Part image" :src="part.imageUrl" class="custom-image" />
                 <ion-card-header>
-                  <ion-card-title>{{ part.title }}</ion-card-title>
-                  <ion-card-subtitle>{{ part.price }}</ion-card-subtitle>
                   <ion-card-subtitle>{{ part.condition }}</ion-card-subtitle>
+                  <ion-card-subtitle class="card-price">{{
+                    part.price
+                  }}</ion-card-subtitle>
+                  <ion-card-subtitle class="card-title">{{
+                    part.title
+                  }}</ion-card-subtitle>
                 </ion-card-header>
               </ion-card>
             </ion-col>
@@ -42,24 +51,30 @@
       </div>
 
       <!-- Content for the "Autoshop" tab -->
-      <div v-if="isAutoShopTab" class="content-with-margin">
+      <div v-if="isAutoShopTab">
         <ion-toolbar>
-          <ion-searchbar
-            show-clear-button="focus"
-            placeholder="Search deals"
-          ></ion-searchbar>
+          <ion-title class="ion-text-center">Autoshop Offers</ion-title>
         </ion-toolbar>
         <ion-toolbar>
-          <ion-title size="large">Autoshop Offers</ion-title>
+          <ion-searchbar show-clear-button="focus" placeholder="Search deals"></ion-searchbar>
+          <ion-buttons slot="end">
+            <ion-button expand="block" @click="openModal">
+              <ion-icon :icon="funnel" />
+            </ion-button>
+          </ion-buttons>
+          <p>{{ message }}</p>
         </ion-toolbar>
+
         <ion-grid>
           <ion-row>
-            <ion-col v-for="offer in offers" :key="offer.id" size="2">
-              <ion-card :href="'/market/autoshop/' + offer.id">
-                <img alt="Offer image" :src="offer.imageUrl" />
+            <ion-col v-for="offer in offers" :key="offer.id" size="6">
+              <ion-card :href="'/market/autoshop/' + offer.id" class="custom-card">
+                <img alt="Offer image" :src="offer.imageUrl" class="custom-image" />
                 <ion-card-header>
-                  <ion-card-title>{{ offer.shopName }}</ion-card-title>
                   <ion-card-subtitle>{{ offer.deal }}</ion-card-subtitle>
+                  <ion-card-title class="card-title">{{
+                    offer.shopName
+                  }}</ion-card-title>
                 </ion-card-header>
               </ion-card>
             </ion-col>
@@ -71,22 +86,44 @@
 </template>
 
 <style scoped>
-.content-with-margin {
-  margin-bottom: 40px; /* Adjust the margin size as needed */
+.custom-card {
+  height: 250px;
+  margin: 0px;
+  overflow: hidden;
 }
-.back{
-  padding-right: 15px;
+
+.custom-image {
+  height: 100px;
+  width: 200px;
+}
+
+.card-title {
+  color: black;
+  font-size: 16px;
+  font-weight: "bold";
+  max-width: 200px;
+  overflow: hidden;
+}
+
+.card-price {
+  color: green;
+  font-weight: "bold";
+  max-width: 200px;
+  overflow: hidden;
 }
 </style>
 
 <script setup lang="ts">
 import { useStore } from "vuex";
 import { computed } from "vue";
+import { IonHeader, modalController, IonSegment, IonCardTitle, IonCard, IonSegmentButton, IonGrid, IonRow, IonCol, IonCardSubtitle, IonPage,
+  IonToolbar, IonTitle, IonContent, IonCardHeader, IonSearchbar, IonButton,
+} from "@ionic/vue";
+import { funnel } from "ionicons/icons";
 
 const store = useStore();
 const parts = computed(() => store.getters.parts);
 const offers = computed(() => store.getters.offers);
-
 const selectedTab = computed(() => store.state.tabs.selectedTab);
 
 const selectTab = (tab: String) => {
@@ -96,6 +133,24 @@ const selectTab = (tab: String) => {
 const isPartsTab = computed(() => selectedTab.value === "parts");
 const isAutoShopTab = computed(() => selectedTab.value === "auto-shop");
 
-import { IonLabel, IonSegment, IonCardTitle, IonCard, IonSegmentButton, IonGrid, IonRow, IonCol, IonCardSubtitle, IonPage, IonToolbar, IonTitle, IonContent, IonCardHeader, IonSearchbar, IonButton } from '@ionic/vue';
-</script>
+import MarketFilter from "../popups/MarketFilter.vue";
+import { ref } from "vue";
 
+const message = ref(
+  "Sort by: Featured (default)"
+);
+
+const openModal = async () => {
+  const modal = await modalController.create({
+    component: MarketFilter,
+  });
+
+  modal.present();
+
+  const { data, role } = await modal.onWillDismiss();
+
+  if (role === "confirm") {
+    message.value = `Sort by: ${data}`;
+  }
+};
+</script>

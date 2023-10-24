@@ -3,10 +3,7 @@
         <ion-header class="header-margin">
         <ion-toolbar>
           <ion-buttons slot="start">
-            <!-- <ion-back-button default-href="/market" @click="goBack"></ion-back-button> -->
-            <ion-button @click="goBack" class="back-button">
-              <ion-icon slot="icon-only" name="arrow-back" class="icon-color"></ion-icon>
-            </ion-button>
+            <ion-back-button default-href="/market" @click="goBack"></ion-back-button>
           </ion-buttons>
           <ion-title>{{loadedPart.title}}</ion-title>
         </ion-toolbar>
@@ -50,7 +47,7 @@
 
   <script lang="ts">
   import { defineComponent } from 'vue';
-  import { IonButton, IonBackButton } from '@ionic/vue';
+  import { IonButton, IonBackButton, IonIcon } from '@ionic/vue';
   export default defineComponent({
   data() {
     return {

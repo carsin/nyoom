@@ -31,6 +31,9 @@ export const firebaseAuth = _firebaseAuth;
 
 // get database from firestore
 export const db = getFirestore(firebaseApp);
-// Initialize Analytics TODO: use when project deployed
+export const users_collection = collection(db, "users");
+
+// TODO: use when project deployed
+// Initialize Analytics 
 // import { getAnalytics } from "firebase/analytics";
 // const analytics = getAnalytics(fireBaseApp);

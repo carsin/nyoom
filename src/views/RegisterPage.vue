@@ -38,7 +38,8 @@ import { ref } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonInput, IonButton, IonToast } from '@ionic/vue';
 import { createUserWithEmailAndPassword, sendEmailVerification, User } from "firebase/auth";
 import { useRouter } from 'vue-router';
-import { firebaseAuth } from "../firebase-service";
+import { firebaseAuth, db } from "../firebase-service";
+import { doc, setDoc } from "firebase/firestore"; 
 
 const router = useRouter();
 const email = ref('');
@@ -53,6 +54,15 @@ const register = async () => {
       const userCredentials = await createUserWithEmailAndPassword(firebaseAuth, email.value.toString(), password.value.toString());
       const user = userCredentials.user;
       await sendEmailVerification(user);
+      
+      // Store user info in Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, {
+        username: username.value,
+        email: email.value
+        // add other fields as needed
+      });
+      
       toast.value = { isOpen: true, message: 'Account created successfully! Please verify your email in the link sent to ' + email.value, color: 'success'}
       router.push("/verify-email");
     } catch (error: any) {

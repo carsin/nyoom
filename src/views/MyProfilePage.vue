@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>@myusername</ion-title>
+        <ion-title> @{{ userData.username }} </ion-title>
         <ion-button class="back" slot="end" fill="outline" href="/">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
@@ -27,16 +27,16 @@
       </ion-header>
       <ion-content class="ion-padding">
         <ion-list>
-          <FriendListItemComponent username="@friend1" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend2" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend3" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend4" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend5" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend6" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend7" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend8" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend9" avatar_src="/src/assets/avatar.svg"/>
-          <FriendListItemComponent username="@friend10" avatar_src="/src/assets/avatar.svg"/>
+          <FriendListItemComponent username="@friend1" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend2" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend3" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend4" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend5" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend6" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend7" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend8" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend9" avatar_src="/src/assets/avatar.svg" />
+          <FriendListItemComponent username="@friend10" avatar_src="/src/assets/avatar.svg" />
         </ion-list>
       </ion-content>
     </ion-menu>
@@ -52,8 +52,8 @@
               </ion-buttons>
             </ion-col>
             <ion-col class="ion-text-center" size="10">
-              <ion-title class="ion-margin-bottom">@myusername</ion-title>
-              <img id="profile-avatar" src="/src/assets/carpic3.png" alt="Avatar image"/>
+              <ion-title class="ion-margin-bottom"> @{{ userData.username }} </ion-title>
+              <img id="profile-avatar" src="/src/assets/carpic3.png" alt="Avatar image" />
             </ion-col>
             <ion-col size="1">
               <ion-buttons class="ion-float-right">
@@ -116,7 +116,7 @@
   display: inline-block;
 }
 
-.back{
+.back {
   padding-right: 15px;
 }
 </style>
@@ -126,4 +126,28 @@ import { IonText, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonI
 import { closeCircle, settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { doc, onSnapshot } from "firebase/firestore";
+import { firebaseAuth, db } from "../firebase-service"; // Adjust the import based on your file structure
+
+const userData = ref({}); // Reactive variable to store user data
+
+onMounted(async () => {
+  const user = firebaseAuth.currentUser;
+  
+  if (user) {
+    const userDocRef = doc(db, 'users', user.uid);
+    
+    const unsubscribe = onSnapshot(userDocRef, (doc) => {
+      if (doc.exists()) {
+        userData.value = doc.data();
+      }
+    });
+
+    onUnmounted(() => {
+      unsubscribe(); // Cleanup the listener
+    });
+  }
+});
+
 </script>

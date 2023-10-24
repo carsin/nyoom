@@ -4,6 +4,7 @@
       <ion-toolbar collapse="condense">
         <ion-title>Feed</ion-title>
         <ion-button class="back" slot="end" fill="outline" href="/create-post">Create Post</ion-button>
+
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">

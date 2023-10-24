@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>@myusername</ion-title>
-        <ion-button class="back" slot="end" fill="outline" href="/">Log Out</ion-button>
+        <ion-button @click="handleLogout" class="back" slot="end" fill="outline">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-menu side="end" content-id="main-content">
@@ -100,6 +100,8 @@
           caption="Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
           upvotes="9232" downvotes="822" image_src="../src/assets/carpic4.png" />
       </ion-list>
+      <ion-toast :is-open="isOpen" :message="toastMessage" :color="toastColor" :duration="3000" @didDismiss="setOpen(false)"></ion-toast> 
+
     </ion-content>
   </ion-page>
 </template>
@@ -126,4 +128,33 @@ import { IonText, IonMenu, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonI
 import { closeCircle, settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
+
+import { signOut } from 'firebase/auth';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { firebaseAuth } from '../firebase-service';
+const router = useRouter(); // Getting access to the router instance
+const isOpen = ref(false);
+const toastMessage = ref('');
+const toastColor = ref('');
+
+const setOpen = (state: boolean) => {
+  isOpen.value = state;
+};
+
+const handleLogout = async () => {
+  try {
+    await signOut(firebaseAuth);
+    toastColor.value = 'success';
+    toastMessage.value = 'Logged out successfully';
+    setOpen(true);
+    router.push('/onboard')
+  } catch (error: any) { // Handling error during the logout process
+    
+    toastColor.value = 'danger';
+    toastMessage.value = 'An error occurred during logout';
+    setOpen(true);
+    console.error(error.message);
+  }
+};
 </script>

@@ -3,7 +3,6 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Events</ion-title>
-        <ion-button class="back" slot="end" fill="outline" href="/">Log Out</ion-button>
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar show-clear-button="focus" placeholder="Search events"></ion-searchbar>

@@ -69,6 +69,12 @@
             show-clear-button="focus"
             placeholder="Search deals"
           ></ion-searchbar>
+          <ion-buttons slot="end">
+  <ion-button expand="block" @click="openModal">
+  <ion-icon :icon="funnel" />
+</ion-button>
+</ion-buttons>
+<p>{{ message }}</p>
         </ion-toolbar>
 
         <ion-grid>

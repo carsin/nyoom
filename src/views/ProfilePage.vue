@@ -1,5 +1,5 @@
 <template>
-  <ion-page>
+  <ion-page id="main-content">
     <ion-header>
       <ion-toolbar v-if="isLoading">
         <ion-progress-bar type="indeterminate"></ion-progress-bar>
@@ -9,41 +9,7 @@
         <ion-button v-if="isCurrentUser" @click="handleLogout" class="back" slot="end" fill="outline">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
-    <ion-menu side="end" content-id="main-content">
-      <ion-header>
-        <ion-toolbar>
-          <ion-grid>
-            <ion-row class="ion-align-items-center">
-              <ion-col size="9">
-                <ion-title>My Friends</ion-title>
-              </ion-col>
-              <ion-col size="3">
-                <ion-menu-toggle>
-                  <ion-button fill="clear">
-                    <ion-icon slot="icon-only" size="medium" :icon="closeCircle"></ion-icon>
-                  </ion-button>
-                </ion-menu-toggle>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-        <ion-list>
-          <FriendListItemComponent username="@friend1" avatar_src="/src/assets/avatar.svg" />
-          <FriendListItemComponent username="@friend2" avatar_src="/src/assets/avatar.svg" />
-          <FriendListItemComponent username="@friend3" avatar_src="/src/assets/avatar.svg" />
-          <FriendListItemComponent username="@friend4" avatar_src="/src/assets/avatar.svg" />
-          <FriendListItemComponent username="@friend5" avatar_src="/src/assets/avatar.svg" />
-          <FriendListItemComponent username="@friend6" avatar_src="/src/assets/avatar.svg" />
-          <FriendListItemComponent username="@friend7" avatar_src="/src/assets/avatar.svg" />
-          <FriendListItemComponent username="@friend8" avatar_src="/src/assets/avatar.svg" />
-          <FriendListItemComponent username="@friend9" avatar_src="/src/assets/avatar.svg" />
-          <FriendListItemComponent username="@friend10" avatar_src="/src/assets/avatar.svg" />
-        </ion-list>
-      </ion-content>
-    </ion-menu>
-    <ion-content id="main-content" :fullscreen="true">
+    <ion-content :fullscreen="true">
       <div v-if="!isLoading">
         <ion-toolbar>
           <ion-grid>
@@ -60,18 +26,19 @@
               <ion-col class="ion-text-center" size="10">
                 <ion-title class="ion-margin-bottom"> @{{ username }} </ion-title>
                 <img v-if="userData.avatarUrl" class="profile-avatar" :src="userData.avatarUrl" alt="Avatar image" />
-                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
+                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg"
+                  alt="Default avatar" />
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
                   <ion-list>
-                    <ion-item>
-                      <ion-menu-toggle>
-                        <ion-button>
-                          <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon>
-                        </ion-button>
-                      </ion-menu-toggle>
-                    </ion-item>
+                    <!-- <ion-item> -->
+                    <!--   <ion-menu-toggle> -->
+                    <!--     <ion-button> -->
+                    <!--       <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon> -->
+                    <!--     </ion-button> -->
+                    <!--   </ion-menu-toggle> -->
+                    <!-- </ion-item> -->
                     <ion-item>
                       <ion-button>
                         <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
@@ -83,15 +50,15 @@
             </ion-row>
             <ion-row class="ion-text-center">
               <ion-col>
-                <ion-chip color="primary">
-                  <ion-text> <b> {{ userData.followers.length - 1}} </b> Followers </ion-text>
-                </ion-chip>
-                <ion-chip color="primary">
-                  <ion-text> <b> {{ userData.following.length - 1}} </b> Following </ion-text>
-                </ion-chip>
-                <ion-button v-if="!isCurrentUser" id="add-friend" aria-label="Add Friend" @click="handleFollow" :fill="isFollowing ? 'outline' : 'solid'">
+                <ion-chip color="primary" @click="showUsers('Followers')"> <ion-text> <b> {{ userData.followers.length -
+                  1 }} </b> Followers </ion-text> </ion-chip>
+                <ion-chip color="primary" @click="showUsers('Following')"> <ion-text> <b> {{ userData.following.length -
+                  1 }} </b> Following </ion-text> </ion-chip>
+                <ion-button v-if="!isCurrentUser" id="add-friend" aria-label="Add Friend" @click="handleFollow"
+                  :fill="isFollowing ? 'outline' : 'solid'">
                   {{ isFollowing ? ' Unfollow' : ' Follow' }}
-                  <ion-icon slot="icon-only" size="medium" :icon="isFollowing ? personRemoveSharp : personAddSharp"></ion-icon>
+                  <ion-icon slot="icon-only" size="medium"
+                    :icon="isFollowing ? personRemoveSharp : personAddSharp"></ion-icon>
                 </ion-button>
               </ion-col>
             </ion-row>
@@ -104,10 +71,13 @@
         </ion-toolbar>
         <ion-list>
           <ion-list>
-            <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :timestamp="post.timestamp" />
+            <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption"
+              :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl"
+              :timestamp="post.timestamp" />
           </ion-list>
         </ion-list>
-        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000" @didDismiss="toast.isOpen = false"></ion-toast>
+        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
+          @didDismiss="toast.isOpen = false"></ion-toast>
       </div>
     </ion-content>
   </ion-page>
@@ -139,6 +109,37 @@ const username = ref(route.params.username);
 const userData = ref({}); // Reactive variable to store user data
 const posts = ref([]); // Variable to hold the user's posts
 const toast = ref({ isOpen: false, message: '', color: '' });
+const menuTitle = ref(''); // To dynamically set the menu title
+const userList = ref([]); // To store the list of users to display in the menu
+
+const showUsers = async (type: string) => {
+  try {
+    menuTitle.value = type; // Setting the menu title to either 'Followers' or 'Following'
+    const uids = type === 'Followers' ? userData.value.followers : userData.value.following;
+    userList.value = await getUserDetails(uids); // Fetching user details
+    console.log(userList.value);
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: 'Error while fetching user details: ' + error.message, color: 'danger' };
+  }
+};
+
+// Function to get user details based on uids
+const getUserDetails = async (uids: []) => {
+  const users = [];
+  for (const uid of uids) {
+    try {
+      if (uid) { // Check if uid is not null or undefined
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (userDoc.exists()) {
+          users.push({ uid, ...userDoc.data() });
+        }
+      }
+    } catch (error: any) {
+      toast.value = { isOpen: true, message: 'Error while fetching user: ' + error.message, color: 'danger' };
+    }
+  }
+  return users;
+};
 
 onMounted(async () => {
   // Fetch data for the user whose profile is being visited
@@ -152,7 +153,7 @@ onMounted(async () => {
 
   // Set user data for the profile being viewed
   userData.value = { uid: userSnapshot.docs[0].id, ...userSnapshot.docs[0].data() };
-  
+
   // Check if the viewed profile belongs to the currently authenticated user
   const currentUser = firebaseAuth.currentUser;
   if (currentUser) {

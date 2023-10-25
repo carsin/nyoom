@@ -30,6 +30,7 @@
         </ion-col>
       </ion-row>
     </ion-grid>
+    <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="2000" :color="toast.color" @didDismiss="toast.isOpen = false"></ion-toast>
   </ion-card>
 </template>
 
@@ -41,12 +42,14 @@
 
 <script setup lang="ts">
 import { defineProps, computed, ref } from 'vue';
-import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol } from '@ionic/vue';
+import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol, IonToast } from '@ionic/vue';
 import { arrowUpCircle, arrowDownCircle } from 'ionicons/icons';
 import { getDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
 
-// html props
+const toast = ref({ isOpen: false, message: '', color: '' });
+
+// vue props
 const props = defineProps({
   imageId: String,
   username: String,
@@ -61,54 +64,65 @@ const handleVote = async (postId: string, isUpvote: boolean) => {
   const postRef = doc(db, 'posts', postId);
   const user = firebaseAuth.currentUser;
 
-  if (user) {
-    const userId = user.uid;
-    const postDoc = await getDoc(postRef);
+  try {
+    if (user) {
+      const userId = user.uid;
+      const postDoc = await getDoc(postRef);
 
-    if (postDoc.exists()) {
-      const postData = postDoc.data();
-      const upvoters = postData.upvoters || [];
-      const downvoters = postData.downvoters || [];
-      let updates: any = {};
+      if (postDoc.exists()) {
+        const postData = postDoc.data();
+        const upvoters = postData.upvoters || [];
+        const downvoters = postData.downvoters || [];
+        let updates: any = {};
 
-      if (isUpvote) {
-        // Removing userId from downvoters list and decrement downvoteCount if user had previously downvoted
-        if (downvoters.includes(userId)) {
-          updates.downvoters = arrayRemove(userId);
-          updates.downvoteCount = postData.downvoteCount - 1;
-        }
+        if (isUpvote) {
+          // Removing userId from downvoters list and decrement downvoteCount if user had previously downvoted
+          if (downvoters.includes(userId)) {
+            updates.downvoters = arrayRemove(userId);
+            updates.downvoteCount = postData.downvoteCount - 1;
+          }
 
-        // If user had previously upvoted, remove the upvote; otherwise, add the upvote
-        if (upvoters.includes(userId)) {
-          updates.upvoters = arrayRemove(userId);
-          updates.upvoteCount = postData.upvoteCount - 1;
+          // If user had previously upvoted, remove the upvote; otherwise, add the upvote
+          if (upvoters.includes(userId)) {
+            updates.upvoters = arrayRemove(userId);
+            updates.upvoteCount = postData.upvoteCount - 1;
+          } else {
+            updates.upvoters = arrayUnion(userId);
+            updates.upvoteCount = postData.upvoteCount + 1;
+          }
         } else {
-          updates.upvoters = arrayUnion(userId);
-          updates.upvoteCount = postData.upvoteCount + 1;
-        }
-      } else {
-        // Removing userId from upvoters list and decrement upvoteCount if user had previously upvoted
-        if (upvoters.includes(userId)) {
-          updates.upvoters = arrayRemove(userId);
-          updates.upvoteCount = postData.upvoteCount - 1;
+          // Removing userId from upvoters list and decrement upvoteCount if user had previously upvoted
+          if (upvoters.includes(userId)) {
+            updates.upvoters = arrayRemove(userId);
+            updates.upvoteCount = postData.upvoteCount - 1;
+          }
+
+          // If user had previously downvoted, remove the downvote; otherwise, add the downvote
+          if (downvoters.includes(userId)) {
+            updates.downvoters = arrayRemove(userId);
+            updates.downvoteCount = postData.downvoteCount - 1;
+          } else {
+            updates.downvoters = arrayUnion(userId);
+            updates.downvoteCount = postData.downvoteCount + 1;
+          }
         }
 
-        // If user had previously downvoted, remove the downvote; otherwise, add the downvote
-        if (downvoters.includes(userId)) {
-          updates.downvoters = arrayRemove(userId);
-          updates.downvoteCount = postData.downvoteCount - 1;
-        } else {
-          updates.downvoters = arrayUnion(userId);
-          updates.downvoteCount = postData.downvoteCount + 1;
-        }
+        // Apply the accumulated updates to the post document
+        await updateDoc(postRef, updates);
+        toast.value = {
+          isOpen: true, color: 'success',
+          message: isUpvote ? 'Upvoted successfully!' : 'Downvoted successfully!',
+        };
       }
-
-      // Apply the accumulated updates to the post document
-      await updateDoc(postRef, updates);
+    } else {
+      // Handle the case where the user is not logged in
+      console.error("User not logged in.");
     }
-  } else {
-    // Handle the case where the user is not logged in
-    console.error("User not logged in.");
+  } catch (error: any) {
+    toast.value = {
+      isOpen: true, color: 'danger',
+      message: "Error while voting: " + error.message,
+    };
   }
 };
 

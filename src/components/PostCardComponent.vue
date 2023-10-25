@@ -19,13 +19,13 @@
           <ion-card-content> {{ caption }} </ion-card-content>
         </ion-col>
         <ion-col class="ion-text-end ion-align-self-top" size="4">
-          <ion-chip color="success" @click="handleUpvote(imageId)">
+          <ion-chip color="success" @click="handleVote(imageId, true)">
             <ion-icon aria-hidden="true" :icon="arrowUpCircle" />
-            <ion-label> {{ upvotes }}</ion-label>
+            <ion-label> {{ upvotes?.toString() }}</ion-label>
           </ion-chip>
-          <ion-chip color="danger">
+          <ion-chip color="danger" @click="handleVote(imageId, false)">
             <ion-icon aria-hidden="true" :icon="arrowDownCircle" />
-            <ion-label> {{ downvotes }}</ion-label>
+            <ion-label> {{ downvotes?.toString() }}</ion-label>
           </ion-chip>
         </ion-col>
       </ion-row>
@@ -40,7 +40,7 @@
 </style>
 
 <script setup lang="ts">
-import { defineProps, computed } from 'vue';
+import { defineProps, computed, ref } from 'vue';
 import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol } from '@ionic/vue';
 import { arrowUpCircle, arrowDownCircle } from 'ionicons/icons';
 import { getDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
@@ -51,79 +51,66 @@ const props = defineProps({
   imageId: String,
   username: String,
   caption: String,
-  upvotes: String,
-  downvotes: String,
+  upvotes: Number,
+  downvotes: Number,
   image_src: String,
   timestamp: Object,
 });
 
-const handleUpvote = async (postId: string) => {
+const handleVote = async (postId: string, isUpvote: boolean) => {
   const postRef = doc(db, 'posts', postId);
   const user = firebaseAuth.currentUser;
 
   if (user) {
     const userId = user.uid;
-
-    // Get the post document to check if the user has already upvoted
     const postDoc = await getDoc(postRef);
 
     if (postDoc.exists()) {
       const postData = postDoc.data();
-      const upvotes = postData.upvotes || [];
-
-      if (upvotes.includes(userId)) {
-        // User has already upvoted, so remove the upvote
-        await updateDoc(postRef, {
-          upvoters: arrayRemove(userId),
-          upvoteCount: postData.upvoteCount - 1
-        });
-      } else {
-        // User has not upvoted, so add the upvote
-        await updateDoc(postRef, {
-          upvoters: arrayUnion(userId),
-          upvoteCount: postData.upvoteCount + 1
-        });
-      }
-    }
-  } else {
-    // Handle the case where the user is not logged in
-    console.error("User not logged in.");
-  }
-}
-  
-const handleDownvote = async (postId: string) => {
-  const postRef = doc(db, 'posts', postId);
-  const user = firebaseAuth.currentUser;
-
-  if (user) {
-    const userId = user.uid;
-
-    // Get the post document to check if the user has already upvoted
-    const postDoc = await getDoc(postRef);
-
-    if (postDoc.exists()) {
-      const postData = postDoc.data();
+      const upvoters = postData.upvoters || [];
       const downvoters = postData.downvoters || [];
+      let updates: any = {};
 
-      if (downvoters.includes(userId)) {
-        // User has already downvoted, so remove the downvote
-        await updateDoc(postRef, {
-          downvoters: arrayRemove(userId),
-          downvoteCount: postData.downvoteCount - 1
-        });
+      if (isUpvote) {
+        // Removing userId from downvoters list and decrement downvoteCount if user had previously downvoted
+        if (downvoters.includes(userId)) {
+          updates.downvoters = arrayRemove(userId);
+          updates.downvoteCount = postData.downvoteCount - 1;
+        }
+
+        // If user had previously upvoted, remove the upvote; otherwise, add the upvote
+        if (upvoters.includes(userId)) {
+          updates.upvoters = arrayRemove(userId);
+          updates.upvoteCount = postData.upvoteCount - 1;
+        } else {
+          updates.upvoters = arrayUnion(userId);
+          updates.upvoteCount = postData.upvoteCount + 1;
+        }
       } else {
-        // User has not downvoted, so add the downvote
-        await updateDoc(postRef, {
-          downvoters: arrayUnion(userId),
-          downvoteCount: postData.downvoteCount + 1
-        });
+        // Removing userId from upvoters list and decrement upvoteCount if user had previously upvoted
+        if (upvoters.includes(userId)) {
+          updates.upvoters = arrayRemove(userId);
+          updates.upvoteCount = postData.upvoteCount - 1;
+        }
+
+        // If user had previously downvoted, remove the downvote; otherwise, add the downvote
+        if (downvoters.includes(userId)) {
+          updates.downvoters = arrayRemove(userId);
+          updates.downvoteCount = postData.downvoteCount - 1;
+        } else {
+          updates.downvoters = arrayUnion(userId);
+          updates.downvoteCount = postData.downvoteCount + 1;
+        }
       }
+
+      // Apply the accumulated updates to the post document
+      await updateDoc(postRef, updates);
     }
   } else {
     // Handle the case where the user is not logged in
     console.error("User not logged in.");
   }
-}
+};
 
 const formattedTimestamp = computed(() => {
   if (props.timestamp) {

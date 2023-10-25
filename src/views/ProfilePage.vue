@@ -60,8 +60,7 @@
               <ion-col class="ion-text-center" size="10">
                 <ion-title class="ion-margin-bottom"> @{{ username }} </ion-title>
                 <img v-if="userData.avatarUrl" class="profile-avatar" :src="userData.avatarUrl" alt="Avatar image" />
-                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg"
-                  alt="Default avatar" />
+                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">

@@ -6,10 +6,10 @@
           <img alt="Nyoom logo" id="logo" src="/src/assets/Group1.png"/>
         </ion-row>
         <ion-row class="ion-justify-content-center">
-          <ion-button class="button-adjust" fill="outline" href="/login">Login</ion-button>
+          <ion-button class="button-adjust" fill="outline" href="/login" size="large">Login</ion-button>
         </ion-row>
         <ion-row class="ion-justify-content-center">
-          <ion-button class="button-adjust" fill="outline" href="/register">Register</ion-button>
+          <ion-button class="button-adjust" fill="outline" href="/register" size="large">Register</ion-button>
         </ion-row>
       </ion-grid>
     </ion-content>

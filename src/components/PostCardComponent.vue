@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, defineProps, computed, ref } from 'vue';
-import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol, IonToast } from '@ionic/vue';
+import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol, IonToast, IonAvatar } from '@ionic/vue';
 import { arrowUpCircle, arrowDownCircle } from 'ionicons/icons';
 import { getDoc, getDocs, collection, query, where, doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";

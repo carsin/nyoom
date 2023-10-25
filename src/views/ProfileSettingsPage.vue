@@ -14,17 +14,17 @@
       <!-- TODO: Make this look good -->
       <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100"></ion-progress-bar>
       <ion-item>
-        <img class="profile-avatar" :src="avatarUrl">
+        <img v-if="avatarUrl" class="profile-avatar" :src="avatarUrl" alt="Avatar image"/>
+        <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
       </ion-item>
       <ion-item>
-        <ion-label position="stacked">Change Avatar:</ion-label>
-        <input type="file" @change="updateAvatar" />
+        <ion-label position="stacked" id="avatar" aria-label="Change Avatar">Change Avatar:</ion-label>
+        <input  aria-labelledby="avatarImgUp" type="file" @change="updateAvatar"/>
       </ion-item>
       <ion-item>
-        <ion-label position="stacked">Edit Bio ({{ remainingChars }}/{{ MAX_BIO_LENGTH }}):</ion-label>
+        <ion-label position="stacked" >Edit Bio ({{ remainingChars }}/{{ MAX_BIO_LENGTH }}):</ion-label>
         <div class="bio-container">
-          <ion-textarea placeholder="Enter biography here" v-model="newBiography" :maxlength="MAX_BIO_LENGTH"
-            class="bio-textarea"></ion-textarea>
+          <ion-textarea placeholder="Enter biography here" v-model="newBiography" :maxlength="MAX_BIO_LENGTH" aria-label="Edit Bio" class="bio-textarea"></ion-textarea>
           <ion-button :disabled="remainingChars < 0" @click="updateBiography" fill="outline" size="default"
             class="bio-button">Update</ion-button>
         </div>
@@ -88,7 +88,7 @@ const newBiography = ref(''); // Reactive variable to store the new biography in
 const remainingChars = computed(() => MAX_BIO_LENGTH - newBiography.value.length);
 const userProfileHref = ref('/feed');
 
-// get users profile picture on load
+// get users data and update profile picture on load
 onMounted(async () => {
   const user = firebaseAuth.currentUser;
   if (user) {
@@ -97,10 +97,7 @@ onMounted(async () => {
     if (docSnap.exists()) {
       avatarUrl.value = docSnap.data().avatarUrl;
       const username = docSnap.data().username;
-      userProfileHref.value = `/user/${username}`;
-      if (avatarUrl.value == "") {
-        avatarUrl.value = "https://ionicframework.com/docs/img/demos/avatar.svg";
-      }
+      userProfileHref.value = `/user/${username}`; // update back button url reference
     }
   }
 });

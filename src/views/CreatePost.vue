@@ -6,21 +6,21 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <ion-progress-bar v-if="isUploading" :value="uploadProgress"></ion-progress-bar>
+      <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100"></ion-progress-bar>
       <ion-grid>
         <ion-row>
           <ion-col size-md="6" offset-md="3">
             <ion-item>
-              <ion-input label="Caption: " v-model="caption" />
+              <ion-label position="stacked">Caption: </ion-label>
+              <!-- TODO: ensure caption is below length -->
+              <ion-input id="caption-input" v-model="caption" aria-label="Caption input"/>
             </ion-item>
             <ion-item v-if="imageUrl">
               <img :src="imageUrl" alt="Uploaded Image" />
             </ion-item>
-
             <ion-item>
               <input type="file" accept="image/*" @change="uploadImage" />
             </ion-item>
-
             <ion-button expand="block" @click="createPost">Create Post</ion-button>
           </ion-col>
         </ion-row>
@@ -33,8 +33,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonButton, IonToast } from '@ionic/vue';
-
-import { firebaseAuth, db, storage } from "../firebase-service"; 
+import { firebaseAuth, db, storage } from "../firebase-service";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
 import { useRouter } from 'vue-router';
 import { uploadImageToFirebase } from '@/util/uploadImage';
@@ -68,9 +67,9 @@ const createPost = async () => {
 
   if (!imageUrl) {
     toast.value = { isOpen: true, message: 'No image uploaded!', color: "danger" };
-    return; 
+    return;
   }
-  
+
   // get userdata for username and uid
   try {
     const postsCollection = collection(db, 'posts');
@@ -96,7 +95,7 @@ const createPost = async () => {
     }
   } catch (error: any){
     toast.value = { isOpen: true, message: 'Error while posting: ' + error.message, color: "danger" };
-    console.error(error.message); 
+    console.error(error.message);
   }
 };
 

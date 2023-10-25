@@ -50,15 +50,18 @@
             <ion-row>
               <ion-col size="1">
                 <ion-buttons v-if="isCurrentUser">
-                  <ion-button href="/settings">
-                    <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
-                  </ion-button>
+                  <router-link to="/settings">
+                    <ion-button>
+                      <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
+                    </ion-button>
+                  </router-link>
                 </ion-buttons>
               </ion-col>
               <ion-col class="ion-text-center" size="10">
                 <ion-title class="ion-margin-bottom"> @{{ username }} </ion-title>
                 <img v-if="userData.avatarUrl" class="profile-avatar" :src="userData.avatarUrl" alt="Avatar image" />
-                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
+                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg"
+                  alt="Default avatar" />
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
@@ -101,8 +104,7 @@
             <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :timestamp="post.timestamp" />
           </ion-list>
         </ion-list>
-        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
-            @didDismiss="toast.isOpen = false"></ion-toast>
+        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000" @didDismiss="toast.isOpen = false"></ion-toast>
       </div>
     </ion-content>
   </ion-page>
@@ -121,7 +123,7 @@ import PostCardComponent from '@/components/PostCardComponent.vue';
 import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
 import { ref, onMounted } from 'vue';
 import { doc, getDoc, getDocs, query, collection, where, orderBy } from "firebase/firestore";
-import { firebaseAuth, db } from "../firebase-service"; 
+import { firebaseAuth, db } from "../firebase-service";
 import { signOut } from 'firebase/auth';
 import { useRouter, useRoute } from 'vue-router';
 
@@ -139,7 +141,7 @@ onMounted(async () => {
   const userQuery = query(collection(db, 'users'), where('username', '==', username.value));
   const userSnapshot = await getDocs(userQuery);
   const currentUser = firebaseAuth.currentUser;
-  
+
   if (userSnapshot.empty) {
     router.push('/404'); // Redirect to 404 page if user doesn't exist
   } else { // user exists
@@ -152,14 +154,14 @@ onMounted(async () => {
       }
     }
     userData.value = userSnapshot.docs[0].data(); // get user data
-    
+
     // query all users posts
     const postsQuery = query(
       collection(db, 'posts'),
       where('username', '==', username.value),
       orderBy('timestamp', 'desc')
     );
-    
+
     const querySnapshot = await getDocs(postsQuery);
     posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     isLoading.value = false;
@@ -171,7 +173,7 @@ const handleLogout = async () => {
     await signOut(firebaseAuth);
     toast.value = { isOpen: true, message: 'Logout successful!', color: 'success' }
     router.push('/onboard')
-  } catch (error: any) { 
+  } catch (error: any) {
     toast.value = { isOpen: true, message: 'An error occurred during logout: ' + error.message, color: 'danger' }
     console.error(error.message);
   }

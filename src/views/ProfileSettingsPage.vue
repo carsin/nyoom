@@ -3,7 +3,11 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Profile Settings</ion-title>
-        <ion-button class="back" slot="end" fill="outline" href="/my-profile">Back</ion-button>
+        <ion-button class="back" slot="end" fill="outline">
+          <router-link style="text-decoration: none;" :to="userProfileHref">
+            Back to Profile
+          </router-link>
+        </ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -14,12 +18,16 @@
       </ion-item>
       <ion-item>
         <ion-label position="stacked">Change Avatar:</ion-label>
-        <input type="file" @change="updateAvatar"/>
+        <input type="file" @change="updateAvatar" />
       </ion-item>
       <ion-item>
-        <ion-label id="editBioLabel" position="stacked">Edit Bio ({{ remainingChars }}/{{ MAX_BIO_LENGTH }}):</ion-label>
-        <ion-input placeholder="New biography" v-model="newBiography" :maxlength="MAX_BIO_LENGTH" aria-labelledby="editBioLabel"></ion-input>
-        <ion-button :disabled="remainingChars < 0" @click="updateBiography" fill="outline" size="default">Update Biography</ion-button>
+        <ion-label position="stacked">Edit Bio ({{ remainingChars }}/{{ MAX_BIO_LENGTH }}):</ion-label>
+        <div class="bio-container">
+          <ion-textarea placeholder="Enter biography here" v-model="newBiography" :maxlength="MAX_BIO_LENGTH"
+            class="bio-textarea"></ion-textarea>
+          <ion-button :disabled="remainingChars < 0" @click="updateBiography" fill="outline" size="default"
+            class="bio-button">Update</ion-button>
+        </div>
       </ion-item>
       <!-- TODO: Implement this functionality -->
       <!-- <ion-item> -->
@@ -41,16 +49,33 @@
 </template>
 
 <style>
-.back{
+.back {
   padding-right: 15px;
 }
+
+.bio-container {
+  display: flex;
+  width: 100%;
+}
+
+.bio-textarea {
+  flex: 1;
+  /* Allows the textarea to grow and take available space */
+}
+
+.bio-button {
+  align-self: center;
+  /* Vertically centers the button */
+  margin-left: 10px;
+  /* Adds some space between the textarea and button */
+}
 </style>
-  
+
 <script setup lang="ts">
-import { IonPage, IonToast, IonHeader, IonInput, IonLabel, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonProgressBar } from '@ionic/vue';
+import { IonPage, IonToast, IonHeader, IonTextarea, IonLabel, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonProgressBar } from '@ionic/vue';
 import { ref, onMounted, computed } from 'vue';
 import { uploadImageToFirebase } from '../util/uploadImage';
-import { firebaseAuth, db } from "../firebase-service"; 
+import { firebaseAuth, db } from "../firebase-service";
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const MAX_BIO_LENGTH = 150; // You can adjust this value as needed
@@ -61,6 +86,7 @@ const avatarUrl = ref('');
 const newBiography = ref(''); // Reactive variable to store the new biography input
 // Computed property to calculate the remaining characters
 const remainingChars = computed(() => MAX_BIO_LENGTH - newBiography.value.length);
+const userProfileHref = ref('/feed');
 
 // get users profile picture on load
 onMounted(async () => {
@@ -70,6 +96,8 @@ onMounted(async () => {
     const docSnap = await getDoc(userDocRef);
     if (docSnap.exists()) {
       avatarUrl.value = docSnap.data().avatarUrl;
+      const username = docSnap.data().username;
+      userProfileHref.value = `/user/${username}`;
       if (avatarUrl.value == "") {
         avatarUrl.value = "https://ionicframework.com/docs/img/demos/avatar.svg";
       }
@@ -86,7 +114,7 @@ const updateBiography = async () => {
       await updateDoc(userDocRef, {
         biography: newBiography.value.trim()
       });
-      
+
       toast.value = { isOpen: true, message: "Biography updated successfully!", color: "success" };
     } catch (error: any) {
       toast.value = { isOpen: true, message: "An error occurred: " + error.message, color: "danger" };
@@ -112,15 +140,14 @@ const updateAvatar = async (event: any) => {
         avatarUrl: newAvatarUrl
       });
       // update UI
-      avatarUrl.value = newAvatarUrl; 
+      avatarUrl.value = newAvatarUrl;
       isUploading.value = false;
       toast.value = { isOpen: true, message: "Successfully uploaded avatar!", color: "success" };
     }
-    
+
   } catch (error: any) {
     toast.value = { isOpen: true, message: "An error occurred: " + error.message, color: "danger" };
     isUploading.value = false;
   }
 };
 </script>
-  

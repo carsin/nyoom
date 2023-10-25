@@ -111,67 +111,58 @@ const handleRealtimeUpdates = () => {
 // Calling the function to handle real-time updates
 handleRealtimeUpdates();
 
+const toggleVote = (userId, voters, otherVoters, countKey, otherCountKey, updates) => {
+  if (voters.includes(userId)) {
+    voters.splice(voters.indexOf(userId), 1);
+    updates[countKey]--;
+  } else {
+    voters.push(userId);
+    updates[countKey]++;
+    if (otherVoters.includes(userId)) {
+      otherVoters.splice(otherVoters.indexOf(userId), 1);
+      updates[otherCountKey]--;
+    }
+  }
+};
+
 const handleVote = async (postId: string, isUpvote: boolean) => {
   const postRef = doc(db, 'posts', postId);
   const user = firebaseAuth.currentUser;
 
   try {
-    if (user) {
-      const userId = user.uid;
-      const postDoc = await getDoc(postRef);
-
-      if (postDoc.exists()) {
-        const postData = postDoc.data();
-        const upvoters = postData.upvoters || [];
-        const downvoters = postData.downvoters || [];
-        let updates: any = {};
-
-        if (isUpvote) {
-          // Removing userId from downvoters list and decrement downvoteCount if user had previously downvoted
-          if (downvoters.includes(userId)) {
-            updates.downvoters = arrayRemove(userId);
-            updates.downvoteCount = postData.downvoteCount - 1;
-          }
-
-          // If user had previously upvoted, remove the upvote; otherwise, add the upvote
-          if (upvoters.includes(userId)) {
-            updates.upvoters = arrayRemove(userId);
-            updates.upvoteCount = postData.upvoteCount - 1;
-          } else {
-            updates.upvoters = arrayUnion(userId);
-            updates.upvoteCount = postData.upvoteCount + 1;
-          }
-        } else {
-          // Removing userId from upvoters list and decrement upvoteCount if user had previously upvoted
-          if (upvoters.includes(userId)) {
-            updates.upvoters = arrayRemove(userId);
-            updates.upvoteCount = postData.upvoteCount - 1;
-          }
-
-          // If user had previously downvoted, remove the downvote; otherwise, add the downvote
-          if (downvoters.includes(userId)) {
-            updates.downvoters = arrayRemove(userId);
-            updates.downvoteCount = postData.downvoteCount - 1;
-          } else {
-            updates.downvoters = arrayUnion(userId);
-            updates.downvoteCount = postData.downvoteCount + 1;
-          }
-        }
-
-        // Apply the accumulated updates to the post document
-        await updateDoc(postRef, updates);
-        toast.value = { // send success toast
-          isOpen: true,
-          color: isUpvote ? 'success' : 'danger',
-          message: isUpvote ? 'Changed upvote successfully!' : 'Changed downvote successfully!',
-        };
-      }
-    } else { // Handle the case where the user is not logged in
+    if (!user) {
+      // Handle the case where the user is not logged in
       toast.value = {
         isOpen: true, color: 'danger',
         message: "You are not logged in. Please create an account before voting.",
       };
-      console.error("User not logged in.");
+      return;
+    }
+
+    const userId = user.uid;
+    const postDoc = await getDoc(postRef);
+
+    if (postDoc.exists()) {
+      const postData = postDoc.data();
+      const updates = {
+        upvoters: postData.upvoters || [],
+        downvoters: postData.downvoters || [],
+        upvoteCount: postData.upvoteCount || 0,
+        downvoteCount: postData.downvoteCount || 0,
+      };
+
+      if (isUpvote) {
+        toggleVote(userId, updates.upvoters, updates.downvoters, 'upvoteCount', 'downvoteCount', updates);
+      } else {
+        toggleVote(userId, updates.downvoters, updates.upvoters, 'downvoteCount', 'upvoteCount', updates);
+      }
+
+      await updateDoc(postRef, updates);
+      toast.value = {
+        isOpen: true,
+        color: isUpvote ? 'success' : 'danger',
+        message: isUpvote ? 'Changed upvote successfully!' : 'Changed downvote successfully!',
+      };
     }
   } catch (error: any) {
     toast.value = {

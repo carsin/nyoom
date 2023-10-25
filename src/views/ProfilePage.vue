@@ -89,6 +89,9 @@
                 <ion-chip color="primary">
                   <ion-text> <b> {{ userData.following }} </b> Following </ion-text>
                 </ion-chip>
+                <ion-button v-if="!isCurrentUser" id="add-friend" fill="clear" aria-label="Add Friend">
+                  <ion-icon slot="icon-only" size="medium" :icon="personAddSharp"></ion-icon>
+                </ion-button>
               </ion-col>
             </ion-row>
             <ion-row class="ion-text-center">
@@ -117,7 +120,7 @@
 
 <script setup lang="ts">
 import { IonText, IonMenu, IonToast, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
-import { closeCircle, settingsSharp, peopleSharp, carSportSharp } from 'ionicons/icons';
+import { closeCircle, settingsSharp, peopleSharp, carSportSharp, personAddSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
 import { ref, onMounted } from 'vue';

@@ -13,8 +13,13 @@
         <img class="profile-avatar" :src="avatarUrl">
       </ion-item>
       <ion-item>
-        <ion-label>Change Avatar:</ion-label>
-        <ion-input type="file" @change="uploadAvatar"></ion-input>
+        <ion-label position="stacked">Change Avatar:</ion-label>
+        <input type="file" @change="updateAvatar"/>
+      </ion-item>
+      <ion-item>
+        <ion-label id="editBioLabel" position="stacked">Edit Bio ({{ remainingChars }}/{{ MAX_BIO_LENGTH }}):</ion-label>
+        <ion-input placeholder="New biography" v-model="newBiography" :maxlength="MAX_BIO_LENGTH" aria-labelledby="editBioLabel"></ion-input>
+        <ion-button :disabled="remainingChars < 0" @click="updateBiography" fill="outline" size="default">Update Biography</ion-button>
       </ion-item>
       <!-- TODO: Implement this functionality -->
       <!-- <ion-item> -->
@@ -42,17 +47,20 @@
 </style>
   
 <script setup lang="ts">
-import { IonPage, IonToast, IonHeader, IonToolbar, IonTitle, IonContent, IonButton } from '@ionic/vue';
-
-import { ref, onMounted } from 'vue';
+import { IonPage, IonToast, IonHeader, IonInput, IonLabel, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonProgressBar } from '@ionic/vue';
+import { ref, onMounted, computed } from 'vue';
 import { uploadImageToFirebase } from '../util/uploadImage';
 import { firebaseAuth, db } from "../firebase-service"; 
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
+const MAX_BIO_LENGTH = 150; // You can adjust this value as needed
 const uploadProgress = ref(0);
 const isUploading = ref(false);
 const toast = ref({ isOpen: false, message: '', color: '' });
 const avatarUrl = ref('');
+const newBiography = ref(''); // Reactive variable to store the new biography input
+// Computed property to calculate the remaining characters
+const remainingChars = computed(() => MAX_BIO_LENGTH - newBiography.value.length);
 
 // get users profile picture on load
 onMounted(async () => {
@@ -69,7 +77,26 @@ onMounted(async () => {
   }
 });
 
-const uploadAvatar = async (event: any) => {
+const updateBiography = async () => {
+  const user = firebaseAuth.currentUser;
+  if (user && newBiography.value.trim() !== '' && remainingChars.value >= 0) {
+    try {
+      // Update the biography in the Firestore database
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        biography: newBiography.value.trim()
+      });
+      
+      toast.value = { isOpen: true, message: "Biography updated successfully!", color: "success" };
+    } catch (error: any) {
+      toast.value = { isOpen: true, message: "An error occurred: " + error.message, color: "danger" };
+    }
+  } else {
+    toast.value = { isOpen: true, message: "Biography is invalid. Ensure it is not empty and within the character limit.", color: "danger" };
+  }
+};
+
+const updateAvatar = async (event: any) => {
   const user = firebaseAuth.currentUser;
   const file = event.target.files[0];
   isUploading.value = true;

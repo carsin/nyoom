@@ -23,12 +23,7 @@
           <ion-label>Market</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button v-if="isOwnProfile" tab="tab5" :href="userProfileTabHref" class="active-tab">
-          <ion-icon aria-hidden="true" :icon="person" />
-          <ion-label>My Profile</ion-label>
-        </ion-tab-button>
-
-        <ion-tab-button v-else tab="tab5" :href="userProfileTabHref" class="inactive-tab">
+        <ion-tab-button tab="tab5" :href="userProfileTabHref" :class="isOwnProfile ? 'active-profile-tab' : 'inactive-profile-tab'">
           <ion-icon aria-hidden="true" :icon="person" />
           <ion-label>My Profile</ion-label>
         </ion-tab-button>
@@ -38,12 +33,12 @@
 </template>
 
 <style scoped>
-.inactive-tab {
+.inactive-profile-tab {
   --color-selected: var(--ion-color-medium);
   color: var(--ion-color-medium);
 }
 
-.active-tab {
+.active-profile-tab {
   color: var(--ion-color-primary);
   --color-selected: var(--ion-color-primary);
 }

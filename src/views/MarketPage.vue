@@ -6,10 +6,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <ion-segment v-model="selectedTab">
-        <ion-segment-button @click="selectTab('parts')" value="Parts" checked>
-          <ion-label>Parts</ion-label>
-        </ion-segment-button>
+      <ion-segment v-model="selectedTab"> <ion-segment-button @click="selectTab('parts')" value="Parts" checked> <ion-label>Parts</ion-label> </ion-segment-button>
         <ion-segment-button @click="selectTab('auto-shop')" value="Autoshop Offers">
           <ion-label>Autoshop Offers</ion-label>
         </ion-segment-button>
@@ -118,6 +115,7 @@ import { useStore } from "vuex";
 import { computed } from "vue";
 import { IonHeader, modalController, IonSegment, IonCardTitle, IonCard, IonSegmentButton, IonGrid, IonRow, IonCol, IonCardSubtitle, IonPage,
   IonToolbar, IonTitle, IonContent, IonCardHeader, IonSearchbar, IonButton,
+  IonButtons, IonLabel, IonIcon, 
 } from "@ionic/vue";
 import { funnel } from "ionicons/icons";
 

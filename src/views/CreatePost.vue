@@ -11,7 +11,7 @@
         <ion-row>
           <ion-col size-md="6" offset-md="3">
             <ion-item>
-              <ion-label position="floating">Caption</ion-label>
+              <ion-label position="floating">Caption: </ion-label>
               <ion-input v-model="caption" />
             </ion-item>
             <ion-item v-if="imageURL">
@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonButton, IonToast } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonButton, IonToast } from '@ionic/vue';
 
 import { firebaseAuth, db, storage } from "../firebase-service"; 
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";

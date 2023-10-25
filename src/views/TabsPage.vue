@@ -5,7 +5,7 @@
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="tab1" href="/feed">
           <ion-icon aria-hidden="true" :icon="home" />
-          <ion-label>Feed</ion-label>
+            <ion-label> Feed </ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="tab2" href="/search">

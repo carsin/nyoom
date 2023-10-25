@@ -57,7 +57,7 @@
               </ion-col>
               <ion-col class="ion-text-center" size="10">
                 <ion-title class="ion-margin-bottom"> @{{ username }} </ion-title>
-                <img id="profile-avatar" src="/src/assets/carpic3.png" alt="Avatar image" />
+                <img id="profile-avatar" src="/src/assets/avatar.svg" alt="Avatar image" />
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
@@ -152,6 +152,7 @@ onMounted(async () => {
   if (userSnapshot.empty) {
     router.push('/404'); // Redirect to 404 page if user doesn't exist
   } else { // user exists
+    isLoading.value = false;
     userData.value = userSnapshot.docs[0].data(); // get user data
     // query all users posts
     const postsQuery = query(
@@ -162,7 +163,6 @@ onMounted(async () => {
     
     const querySnapshot = await getDocs(postsQuery);
     posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    isLoading.value = false;
   }
 });
 

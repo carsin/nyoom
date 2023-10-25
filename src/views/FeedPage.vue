@@ -3,7 +3,9 @@
     <ion-header>
       <ion-toolbar collapse="condense">
         <ion-title>Feed</ion-title>
-        <ion-button class="back" slot="end" fill="outline" href="/create-post">Create Post</ion-button>
+          <ion-button class="back" slot="end" fill="outline">
+            <router-link style="text-decoration: none;" to="/create-post"> Create Post </router-link>
+          </ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">

@@ -5,7 +5,7 @@
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="tab1" href="/feed">
           <ion-icon aria-hidden="true" :icon="home" />
-            <ion-label> Feed </ion-label>
+          <ion-label> Feed </ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="tab2" href="/search">
@@ -17,13 +17,18 @@
           <ion-icon aria-hidden="true" :icon="balloon" />
           <ion-label>Events</ion-label>
         </ion-tab-button>
-                
+
         <ion-tab-button tab="tab4" href="/market">
           <ion-icon aria-hidden="true" :icon="cart" />
           <ion-label>Market</ion-label>
         </ion-tab-button>
-                
-        <ion-tab-button tab="tab5" :href="userProfileHref">
+
+        <ion-tab-button v-if="isOwnProfile" tab="tab5" :href="userProfileTabHref" class="active-tab">
+          <ion-icon aria-hidden="true" :icon="person" />
+          <ion-label>My Profile</ion-label>
+        </ion-tab-button>
+
+        <ion-tab-button v-else tab="tab5" :href="userProfileTabHref" class="inactive-tab">
           <ion-icon aria-hidden="true" :icon="person" />
           <ion-label>My Profile</ion-label>
         </ion-tab-button>
@@ -32,14 +37,29 @@
   </ion-page>
 </template>
 
+<style scoped>
+.inactive-tab {
+  --color-selected: var(--ion-color-medium);
+  color: var(--ion-color-medium);
+}
+
+.active-tab {
+  color: var(--ion-color-primary);
+  --color-selected: var(--ion-color-primary);
+}
+</style>
+
 <script setup lang="ts">
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 import { home, search, balloon, cart, person } from 'ionicons/icons';
-import { onMounted, ref } from 'vue';
-import { firebaseAuth, db } from "../firebase-service"; 
+import { onMounted, ref, watch } from 'vue';
+import { firebaseAuth, db } from "../firebase-service";
 import { doc, getDoc } from "firebase/firestore";
+import { useRoute } from 'vue-router';
 
-const userProfileHref = ref('/login'); // Default to login
+const userProfileTabHref = ref('/login'); // Default to login
+const isOwnProfile = ref(false); // Variable to determine whether it's the user’s own profile
+const route = useRoute();
 
 const updateUserProfileHref = async () => {
   const user = firebaseAuth.currentUser;
@@ -47,11 +67,16 @@ const updateUserProfileHref = async () => {
     const userDocRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userDocRef);
     if (userDoc.exists()) {
-      const username = userDoc.data().username;
-      userProfileHref.value = `/user/${username}`;
+      const authenticatedUsername = userDoc.data().username;
+      userProfileTabHref.value = `/user/${authenticatedUsername}`;
     }
   }
 };
+// Check if the current route matches the authenticated user's profile and update isOwnProfile accordingly
+watch(route, () => {
+  isOwnProfile.value = (route.path == userProfileTabHref.value);
+  // console.log(route.path + ", " + userProfileTabHref.value + ", " + isOwnProfile.value);
+}, { immediate: true });
 
 onMounted(() => {
   updateUserProfileHref();

@@ -72,8 +72,8 @@ const register = async () => {
           avatarURL: "",
           email: email.value,
           biography: "",
-          followers: 0,
-          following: 0,
+          followers: [],
+          following: [],
           // add other fields as needed
         });
 

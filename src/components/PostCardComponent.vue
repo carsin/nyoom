@@ -87,6 +87,9 @@ onMounted(async () => {
     const userData = querySnapshot.docs[0].data();
     avatarUrl.value = userData.avatarUrl || ''; // Set avatar URL
   }
+  
+  // Calling the function to handle real-time updates
+  handleRealtimeUpdates();
 });
 
 // Function to handle the real-time updates
@@ -108,8 +111,6 @@ const handleRealtimeUpdates = () => {
   });
 };
 
-// Calling the function to handle real-time updates
-handleRealtimeUpdates();
 
 const toggleVote = (userId, voters, otherVoters, countKey, otherCountKey, updates) => {
   if (voters.includes(userId)) {

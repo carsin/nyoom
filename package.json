@@ -13,8 +13,9 @@
     "ionic:serve": "vite dev --host"
   },
   "dependencies": {
+    "@capacitor/android": "^5.5.0",
     "@capacitor/app": "5.0.6",
-    "@capacitor/core": "5.4.2",
+    "@capacitor/core": "^5.4.2",
     "@capacitor/haptics": "5.0.6",
     "@capacitor/ios": "5.4.2",
     "@capacitor/keyboard": "5.0.6",
@@ -22,6 +23,7 @@
     "@ionic/pwa-elements": "^3.2.2",
     "@ionic/vue": "^7.0.0",
     "@ionic/vue-router": "^7.0.0",
+    "capacitor": "^0.5.6",
     "firebase": "^10.5.0",
     "gulp": "^4.0.2",
     "ionicons": "^7.0.0",

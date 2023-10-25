@@ -4,7 +4,18 @@
       <ion-row class="ion-align-self-end ion-justify-content-center">
         <ion-button fill="clear">
           <router-link :to="{ path: `/user/${username}` }">
-            <ion-card-title color="primary"> {{ username }} </ion-card-title>
+            <!-- TODO: make these side by side -->
+            <ion-col v-if="showAvatar">
+              <ion-avatar v-if="avatarUrl">
+                <img :src="avatarUrl" alt="User avatar" />
+              </ion-avatar>
+              <ion-avatar v-else>
+                <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
+              </ion-avatar>
+            </ion-col>
+            <ion-col>
+              <ion-card-title color="primary"> {{ username }} </ion-card-title>
+            </ion-col>
           </router-link>
         </ion-button>
       </ion-row>
@@ -42,10 +53,10 @@
 </style>
 
 <script setup lang="ts">
-import { onUnmounted, defineProps, computed, ref } from 'vue';
+import { onMounted, onUnmounted, defineProps, computed, ref } from 'vue';
 import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol, IonToast } from '@ionic/vue';
 import { arrowUpCircle, arrowDownCircle } from 'ionicons/icons';
-import { getDoc, doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { getDoc, getDocs, collection, query, where, doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
 
 const toast = ref({ isOpen: false, message: '', color: '' });
@@ -59,11 +70,24 @@ const props = defineProps({
   downvotes: Number,
   image_src: String,
   timestamp: Object,
+  showAvatar: Boolean,
 });
 
 // vue refs for upvotes and downvotes
 const upvoteCount = ref(props.upvotes);
 const downvoteCount = ref(props.downvotes);
+const avatarUrl = ref(''); // Reactive variable to store the avatar URL
+
+onMounted(async () => {
+  // Query Firestore based on the username to get avatar URL
+  const userQuery = query(collection(db, 'users'), where('username', '==', props.username));
+  const querySnapshot = await getDocs(userQuery);
+
+  if (!querySnapshot.empty) {
+    const userData = querySnapshot.docs[0].data();
+    avatarUrl.value = userData.avatarUrl || ''; // Set avatar URL
+  }
+});
 
 // Function to handle the real-time updates
 const handleRealtimeUpdates = () => {

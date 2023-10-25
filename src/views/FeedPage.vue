@@ -9,7 +9,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageURL" :timestamp="post.timestamp" />
+      <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :timestamp="post.timestamp" showAvatar/>
       <ion-fab>
         <ion-fab-button slot="fixed" vertical="bottom" horizontal="end">
           <ion-icon :icon="add"></ion-icon>

@@ -5,7 +5,7 @@
         <ion-progress-bar type="indeterminate"></ion-progress-bar>
       </ion-toolbar>
       <ion-toolbar v-else>
-        <ion-title> @{{ username }} </ion-title>
+        <ion-title> @{{ username }}'s Profile </ion-title>
         <ion-button @click="handleLogout" class="back" slot="end" fill="outline">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
@@ -49,15 +49,18 @@
           <ion-grid>
             <ion-row>
               <ion-col size="1">
-                <ion-buttons>
-                  <ion-button href="/settings">
-                    <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
-                  </ion-button>
+                <ion-buttons v-if="isCurrentUser">
+                  <router-link to="/settings">
+                    <ion-button>
+                      <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
+                    </ion-button>
+                  </router-link>
                 </ion-buttons>
               </ion-col>
               <ion-col class="ion-text-center" size="10">
                 <ion-title class="ion-margin-bottom"> @{{ username }} </ion-title>
-                <img id="profile-avatar" src="/src/assets/avatar.svg" alt="Avatar image" />
+                <img v-if="userData.avatarUrl" class="profile-avatar" :src="userData.avatarUrl" alt="Avatar image" />
+                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
@@ -97,28 +100,16 @@
         </ion-toolbar>
         <ion-list>
           <ion-list>
-            <PostCardComponent v-for="post in posts" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount.toString()" :downvotes="post.downvoteCount.toString()" :image_src="post.imageURL" :timestamp="post.timestamp" />
+            <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :timestamp="post.timestamp" />
           </ion-list>
         </ion-list>
-        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
-            @didDismiss="toast.isOpen = false"></ion-toast>
+        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000" @didDismiss="toast.isOpen = false"></ion-toast>
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <style>
-#profile-avatar {
-  border-radius: 50%;
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-}
-
-#friends-title {
-  display: inline-block;
-}
-
 .back {
   padding-right: 15px;
 }
@@ -131,37 +122,48 @@ import PostCardComponent from '@/components/PostCardComponent.vue';
 import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
 import { ref, onMounted } from 'vue';
 import { doc, getDoc, getDocs, query, collection, where, orderBy } from "firebase/firestore";
-import { firebaseAuth, db } from "../firebase-service"; 
+import { firebaseAuth, db } from "../firebase-service";
 import { signOut } from 'firebase/auth';
 import { useRouter, useRoute } from 'vue-router';
 
-const isLoading = ref(true); // Variable to manage loading state
 const route = useRoute();
 const router = useRouter();
+const isCurrentUser = ref(false); // store whether the profile belongs to the authenticated user
+const isLoading = ref(true); // Variable to manage loading state
 const username = ref(route.params.username);
 const userData = ref({}); // Reactive variable to store user data
-const toast = ref({ isOpen: false, message: '', color: '' });
 const posts = ref([]); // Variable to hold the user's posts
+const toast = ref({ isOpen: false, message: '', color: '' });
 
 onMounted(async () => {
   // Check if the user exists in the 'users' collection
   const userQuery = query(collection(db, 'users'), where('username', '==', username.value));
   const userSnapshot = await getDocs(userQuery);
+  const currentUser = firebaseAuth.currentUser;
 
   if (userSnapshot.empty) {
     router.push('/404'); // Redirect to 404 page if user doesn't exist
   } else { // user exists
-    isLoading.value = false;
+    // Check if the viewed profile belongs to the currently authenticated user
+    if (currentUser) {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists() && docSnap.data().username === username.value) {
+        isCurrentUser.value = true;
+      }
+    }
     userData.value = userSnapshot.docs[0].data(); // get user data
+
     // query all users posts
     const postsQuery = query(
       collection(db, 'posts'),
       where('username', '==', username.value),
       orderBy('timestamp', 'desc')
     );
-    
+
     const querySnapshot = await getDocs(postsQuery);
     posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    isLoading.value = false;
   }
 });
 
@@ -170,7 +172,7 @@ const handleLogout = async () => {
     await signOut(firebaseAuth);
     toast.value = { isOpen: true, message: 'Logout successful!', color: 'success' }
     router.push('/onboard')
-  } catch (error: any) { 
+  } catch (error: any) {
     toast.value = { isOpen: true, message: 'An error occurred during logout: ' + error.message, color: 'danger' }
     console.error(error.message);
   }

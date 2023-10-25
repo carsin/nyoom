@@ -57,7 +57,8 @@
               </ion-col>
               <ion-col class="ion-text-center" size="10">
                 <ion-title class="ion-margin-bottom"> @{{ username }} </ion-title>
-                <img id="profile-avatar" src="/src/assets/avatar.svg" alt="Avatar image" />
+                <img v-if="userData.avatarUrl" class="profile-avatar" :src="userData.avatarUrl" alt="Avatar image" />
+                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
@@ -108,17 +109,6 @@
 </template>
 
 <style>
-#profile-avatar {
-  border-radius: 50%;
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-}
-
-#friends-title {
-  display: inline-block;
-}
-
 .back {
   padding-right: 15px;
 }
@@ -140,8 +130,8 @@ const route = useRoute();
 const router = useRouter();
 const username = ref(route.params.username);
 const userData = ref({}); // Reactive variable to store user data
-const toast = ref({ isOpen: false, message: '', color: '' });
 const posts = ref([]); // Variable to hold the user's posts
+const toast = ref({ isOpen: false, message: '', color: '' });
 
 onMounted(async () => {
   // Check if the user exists in the 'users' collection
@@ -152,6 +142,7 @@ onMounted(async () => {
     router.push('/404'); // Redirect to 404 page if user doesn't exist
   } else { // user exists
     userData.value = userSnapshot.docs[0].data(); // get user data
+    
     // query all users posts
     const postsQuery = query(
       collection(db, 'posts'),

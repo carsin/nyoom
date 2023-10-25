@@ -49,7 +49,7 @@
           <ion-grid>
             <ion-row>
               <ion-col size="1">
-                <ion-buttons>
+                <ion-buttons v-if="isCurrentUser">
                   <ion-button href="/settings">
                     <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
                   </ion-button>
@@ -125,9 +125,10 @@ import { firebaseAuth, db } from "../firebase-service";
 import { signOut } from 'firebase/auth';
 import { useRouter, useRoute } from 'vue-router';
 
-const isLoading = ref(true); // Variable to manage loading state
 const route = useRoute();
 const router = useRouter();
+const isCurrentUser = ref(false); // store whether the profile belongs to the authenticated user
+const isLoading = ref(true); // Variable to manage loading state
 const username = ref(route.params.username);
 const userData = ref({}); // Reactive variable to store user data
 const posts = ref([]); // Variable to hold the user's posts
@@ -137,10 +138,19 @@ onMounted(async () => {
   // Check if the user exists in the 'users' collection
   const userQuery = query(collection(db, 'users'), where('username', '==', username.value));
   const userSnapshot = await getDocs(userQuery);
-
+  const currentUser = firebaseAuth.currentUser;
+  
   if (userSnapshot.empty) {
     router.push('/404'); // Redirect to 404 page if user doesn't exist
   } else { // user exists
+    // Check if the viewed profile belongs to the currently authenticated user
+    if (currentUser) {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists() && docSnap.data().username === username.value) {
+        isCurrentUser.value = true;
+      }
+    }
     userData.value = userSnapshot.docs[0].data(); // get user data
     
     // query all users posts

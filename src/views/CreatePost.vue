@@ -13,8 +13,8 @@
             <ion-item>
               <ion-input label="Caption: " v-model="caption" />
             </ion-item>
-            <ion-item v-if="imageURL">
-              <img :src="imageURL" alt="Uploaded Image" />
+            <ion-item v-if="imageUrl">
+              <img :src="imageUrl" alt="Uploaded Image" />
             </ion-item>
 
             <ion-item>
@@ -36,54 +36,44 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, I
 
 import { firebaseAuth, db, storage } from "../firebase-service"; 
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
-import { uploadBytesResumable, getDownloadURL, ref as storageRef } from "firebase/storage";
 import { useRouter } from 'vue-router';
+import { uploadImageToFirebase } from '@/util/uploadImage';
 
 const isUploading = ref(false);
 const uploadProgress = ref(0);
 const toast = ref({ isOpen: false, message: '', color: '' });
 const caption = ref('');
 const router = useRouter();
-let imageURL = '';
+let imageUrl = '';
 
-// upload image to firebase storage and return URL before creating post
 const uploadImage = async (event: any) => {
   isUploading.value = true;
   const file = event.target.files[0];
-  const storageReference = storageRef(storage, 'posts/' + file.name);
-  const uploadTask = uploadBytesResumable(storageReference, file);
 
-  uploadTask.on('state_changed', 
-    (snapshot) => {
-      const progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+  try {
+    imageUrl = await uploadImageToFirebase(file, 'posts', (progress: number) => {
       uploadProgress.value = progress;
-    }, 
-    (error) => {
-      toast.value = { isOpen: true, message: 'Upload failed: ' + error.message, color: "danger" };
-      isUploading.value = false;
-    }, 
-    () => {
-      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-        imageURL = downloadURL;
-        isUploading.value = false;
-        toast.value = { isOpen: true, message: 'Image uploaded successfully!', color: "success"};
-      });
-    }
-  );
+    });
+    toast.value = { isOpen: true, message: "Successfully uploaded image!", color: "success" };
+    isUploading.value = false;
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error while uploading image: " + error.message, color: "danger" };
+    isUploading.value = false;
+  }
 };
 
 // sending post to posts firestore collection
 const createPost = async () => {
-  const postsCollection = collection(db, 'posts');
   const user = firebaseAuth.currentUser;
 
-  if (!imageURL) {
+  if (!imageUrl) {
     toast.value = { isOpen: true, message: 'No image uploaded!', color: "danger" };
     return; 
   }
   
   // get userdata for username and uid
   try {
+    const postsCollection = collection(db, 'posts');
     if (user) {
       // get user data
       const userDocRef = doc(db, 'users', user.uid);
@@ -92,7 +82,7 @@ const createPost = async () => {
         await addDoc(postsCollection, {
           userId: user.uid,
           username: docSnap.data().username,
-          imageURL,
+          imageUrl,
           caption: caption.value,
           upvoteCount: 0,
           downvoteCount: 0,

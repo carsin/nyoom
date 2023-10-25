@@ -139,7 +139,7 @@ const handleVote = async (postId: string, isUpvote: boolean) => {
         toast.value = { // send success toast
           isOpen: true,
           color: isUpvote ? 'success' : 'danger',
-          message: isUpvote ? 'Upvoted successfully!' : 'Downvoted successfully!',
+          message: isUpvote ? 'Changed upvote successfully!' : 'Changed downvote successfully!',
         };
       }
     } else { // Handle the case where the user is not logged in

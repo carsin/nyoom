@@ -5,7 +5,7 @@
         <ion-progress-bar type="indeterminate"></ion-progress-bar>
       </ion-toolbar>
       <ion-toolbar v-else>
-        <ion-title> @{{ username }} </ion-title>
+        <ion-title> @{{ username }}'s Profile </ion-title>
         <ion-button @click="handleLogout" class="back" slot="end" fill="outline">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
@@ -97,7 +97,7 @@
         </ion-toolbar>
         <ion-list>
           <ion-list>
-            <PostCardComponent v-for="post in posts" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount.toString()" :downvotes="post.downvoteCount.toString()" :image_src="post.imageURL" :timestamp="post.timestamp" />
+            <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :timestamp="post.timestamp" />
           </ion-list>
         </ion-list>
         <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
@@ -151,7 +151,6 @@ onMounted(async () => {
   if (userSnapshot.empty) {
     router.push('/404'); // Redirect to 404 page if user doesn't exist
   } else { // user exists
-    isLoading.value = false;
     userData.value = userSnapshot.docs[0].data(); // get user data
     // query all users posts
     const postsQuery = query(
@@ -162,6 +161,7 @@ onMounted(async () => {
     
     const querySnapshot = await getDocs(postsQuery);
     posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    isLoading.value = false;
   }
 });
 

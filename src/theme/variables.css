@@ -261,3 +261,7 @@ a.router-link-active, a.router-link-exact-active, router-link {
   display: inline-block;
 }
 
+.avatar-header-link {
+    display: flex;
+    align-items: center;
+}

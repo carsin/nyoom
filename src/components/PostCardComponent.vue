@@ -2,10 +2,10 @@
   <ion-card>
     <ion-grid>
       <ion-row>
-        <ion-button fill="clear">
+        <ion-col size="10" class="ion-float-left">
+            <ion-button fill="clear">
           <!-- TODO: Fix layout -->
-          <ion-col size="10" class="ion-float-left">
-            <router-link v-if="showAvatar" :to="{ path: `/user/${username}` }">
+            <router-link class="avatar-header-link" v-if="showAvatar" :to="{ path: `/user/${username}` }">
               <ion-col>
                 <ion-avatar v-if="avatarUrl">
                   <img :src="avatarUrl" alt="User avatar" />
@@ -14,28 +14,21 @@
                   <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
                 </ion-avatar>
               </ion-col>
-              <ion-col>
+              <ion-col class="ion-align-self-bottom">
                 <ion-card-title color="primary"> @{{ username }} </ion-card-title>
               </ion-col>
             </router-link>
-          </ion-col>
-        </ion-button>
-        <ion-col size="2" v-if="isOwner" class="ion-float-right">
+          </ion-button>
+        </ion-col>
+        <ion-col size="2" v-if="isOwner" class="ion-text-right">
           <ion-button fill="clear" @click="confirmDeleteNotification">
             <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
           </ion-button>
-          <ion-button fill="clear" v-if="!editing" @click="startEditing">
-            <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
-          </ion-button>
-        </ion-col>
-        <ion-col v-if="editing">
-          <ion-label position="floating" color="primary">Enter new caption: </ion-label>
-          <ion-input v-model="newCaption" placeholder="Exude genius here" aria-label="Edit caption input"></ion-input>
-          <ion-button fill="clear" v-if="editing" color="success" @click="saveCaption">
-            <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
-          </ion-button>
-          <ion-button fill="clear" v-if="editing" color="danger" @click="cancelEditing">
+          <ion-button fill="clear" v-if="editingCaption" color="danger" @click="cancelEditing">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
+          </ion-button>
+          <ion-button fill="clear" v-if="!editingCaption" @click="startEditing">
+            <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
           </ion-button>
         </ion-col>
       </ion-row>
@@ -45,9 +38,20 @@
       <ion-row class="ion-align-self-end ion-justify-content-center">
         <ion-card-subtitle> {{ formattedTimestamp }} </ion-card-subtitle>
       </ion-row>
+      <ion-row class="ion-align-items-top" v-if="editingCaption">
+        <ion-col class="ion-text-left"  size="11">
+          <ion-label position="floating" color="primary">Enter new caption: </ion-label>
+          <ion-input v-model="newCaption" placeholder="Exude genius here" aria-label="Edit caption input"></ion-input>
+        </ion-col>
+        <ion-col size="1" class="ion-text-right">
+          <ion-button fill="clear" v-if="editingCaption" color="success" @click="saveCaption">
+            <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
+          </ion-button>
+        </ion-col>
+      </ion-row>
       <ion-row>
         <ion-col class="ion-text-left ion-align-self-top" size="8">
-          <ion-card-content> {{ postCaption }} </ion-card-content>
+          <ion-card-content v-if="!editingCaption"> {{ postCaption }} </ion-card-content>
         </ion-col>
         <ion-col class="ion-text-end ion-align-self-top" size="4">
           <ion-chip color="success" @click="handleVote(imageId, true)">
@@ -100,7 +104,7 @@ const upvoteCount = ref(props.upvotes);
 const downvoteCount = ref(props.downvotes);
 const avatarUrl = ref(''); // Reactive variable to store the avatar URL
 const isOwner = ref(false);
-const editing = ref(false); // State to manage the editing mode
+const editingCaption = ref(false); // State to manage the editing mode
 const newCaption = ref(''); // Reactive variable to store the new caption
 const toast = ref({ isOpen: false, message: '', color: '' });
 
@@ -249,13 +253,13 @@ const handleDelete = async () => {
 // start editing the caption
 const startEditing = () => {
   newCaption.value = props.caption; // Set the initial value of the new caption
-  editing.value = true;
+  editingCaption.value = true;
 };
 
 // cancel editing and discard changes
 const cancelEditing = () => {
   newCaption.value = ''; 
-  editing.value = false; 
+  editingCaption.value = false; 
 };
 
 
@@ -264,7 +268,7 @@ const saveCaption = async () => {
   try {
     const postRef = doc(db, 'posts', props.imageId);
     await updateDoc(postRef, { caption: newCaption.value });
-    editing.value = false; // Exit editing mode
+    editingCaption.value = false; // Exit editing mode
     toast.value = {
       isOpen: true, color: 'success',
       message: "Caption edit confirmed!",

@@ -23,7 +23,7 @@
           <ion-label>Market</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="tab5" :href="userProfileTabHref" :class="isOwnProfile ? 'active-profile-tab' : 'inactive-profile-tab'">
+        <ion-tab-button tab="tab5" :href="userProfileTabHref">
           <ion-icon aria-hidden="true" :icon="person" />
           <ion-label>My Profile</ion-label>
         </ion-tab-button>
@@ -67,11 +67,13 @@ const updateUserProfileHref = async () => {
     }
   }
 };
+
+// FIX: this breaks the my profile button sometimes, taking the L for now
 // Check if the current route matches the authenticated user's profile and update isOwnProfile accordingly
-watch(route, () => {
-  isOwnProfile.value = (route.path == userProfileTabHref.value);
-  // console.log(route.path + ", " + userProfileTabHref.value + ", " + isOwnProfile.value);
-}, { immediate: true });
+// watch(route, () => {
+//   isOwnProfile.value = (route.path == userProfileTabHref.value);
+//   // console.log(route.path + ", " + userProfileTabHref.value + ", " + isOwnProfile.value);
+// }, { immediate: true });
 
 onMounted(() => {
   updateUserProfileHref();

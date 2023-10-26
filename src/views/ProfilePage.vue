@@ -6,12 +6,12 @@
       </ion-toolbar>
       <ion-toolbar v-else>
         <ion-title> @{{ username }}'s Profile </ion-title>
-        <ion-button v-if="isCurrentUser" @click="handleLogout" class="back" slot="end" fill="outline">Log Out</ion-button>
+        <ion-button v-if="isCurrentUser" @click="handleLogout" class="ion-padding-end" slot="end" fill="outline">Log Out</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
       <div v-if="!isLoading">
-        <ion-toolbar>
+        <ion-toolbar class="ion-margin-bottom">
           <ion-grid>
             <ion-row>
               <ion-col size="1">
@@ -25,7 +25,9 @@
                 </ion-buttons>
               </ion-col>
               <ion-col class="ion-text-center" size="10">
-                <ion-title class="ion-margin-bottom"> @{{ username }} </ion-title>
+                <ion-text color="primary">
+                  <h1 class="ion-margin-vertical"> @{{ username }} </h1>
+                </ion-text>
                 <img v-if="userData.avatarUrl" class="profile-avatar" :src="userData.avatarUrl" alt="Avatar image" />
                 <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg"
                   alt="Default avatar" />
@@ -33,13 +35,6 @@
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
                   <ion-list>
-                    <!-- <ion-item> -->
-                    <!--   <ion-menu-toggle> -->
-                    <!--     <ion-button> -->
-                    <!--       <ion-icon slot="icon-only" :icon="peopleSharp"></ion-icon> -->
-                    <!--     </ion-button> -->
-                    <!--   </ion-menu-toggle> -->
-                    <!-- </ion-item> -->
                     <ion-item>
                       <ion-button>
                         <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
@@ -49,18 +44,18 @@
                 </ion-buttons>
               </ion-col>
             </ion-row>
-            <ion-row class="ion-text-center">
-              <ion-col>
-                <ion-chip color="primary" @click="showUsers('Followers')"> <ion-text> <b> {{ userData.followers.length -
-                  1 }} </b> Followers </ion-text> </ion-chip>
-                <ion-chip color="primary" @click="showUsers('Following')"> <ion-text> <b> {{ userData.following.length -
-                  1 }} </b> Following </ion-text> </ion-chip>
-                <ion-button v-if="!isCurrentUser" id="add-friend" aria-label="Add Friend" @click="handleFollow"
+            <ion-row class="ion-justify-content-center ion-text-center">
+                <ion-button v-if="!isCurrentUser" id="add-friend" aria-label="Add Friend" @click="handleFollow" size="default"
                   :fill="isFollowing ? 'outline' : 'solid'">
                   {{ isFollowing ? ' Unfollow' : ' Follow' }}
-                  <ion-icon slot="icon-only" size="medium"
+                  <ion-icon slot="end" size="medium"
                     :icon="isFollowing ? personRemoveSharp : personAddSharp"></ion-icon>
                 </ion-button>
+            </ion-row>
+            <ion-row class="ion-text-center">
+              <ion-col>
+                <ion-chip color="primary" @click="showUsers('Followers')"> <ion-text> <b> {{ userData.followers.length - 1 }} </b> Followers </ion-text> </ion-chip>
+                <ion-chip color="primary" @click="showUsers('Following')"> <ion-text> <b> {{ userData.following.length - 1 }} </b> Following </ion-text> </ion-chip>
               </ion-col>
             </ion-row>
             <ion-row class="ion-text-center">
@@ -70,11 +65,12 @@
             </ion-row>
           </ion-grid>
         </ion-toolbar>
-        <ion-list>
-          <ion-list>
-            <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :userId="post.userId" :timestamp="post.timestamp" />
-          </ion-list>
-        </ion-list>
+        <div v-if="posts.length > 0">
+          <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :userId="post.userId" :timestamp="post.timestamp"/>
+        </div>
+        <ion-text v-else class="ion-text-center">
+          <h3> <i> @{{ username }} has no posts :( </i></h3>
+        </ion-text>
         <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
           @didDismiss="toast.isOpen = false"></ion-toast>
       </div>
@@ -82,17 +78,10 @@
   </ion-page>
 </template>
 
-<style>
-.back {
-  padding-right: 15px;
-}
-</style>
-
 <script setup lang="ts">
-import { IonText, IonMenu, IonToast, IonMenuToggle, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
-import { closeCircle, settingsSharp, peopleSharp, carSportSharp, personAddSharp, personRemoveSharp } from 'ionicons/icons';
+import { IonText, IonToast, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
+import { settingsSharp, carSportSharp, personAddSharp, personRemoveSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
-import FriendListItemComponent from '@/components/FriendListItemComponent.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { doc, getDoc, getDocs, query, collection, where, onSnapshot, orderBy, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";

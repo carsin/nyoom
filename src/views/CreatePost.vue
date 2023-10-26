@@ -10,33 +10,38 @@
       <ion-grid>
         <ion-row>
           <ion-col size-md="6" offset-md="3">
-            <ion-item>
-              <ion-label position="stacked">Caption: </ion-label>
-              <!-- TODO: ensure caption is below length -->
-              <ion-input id="caption-input" v-model="caption" placeholder="Say something witty :p" aria-label="Caption input"/>
-            </ion-item>
-            <ion-item v-if="imageUrl">
-              <img :src="imageUrl" alt="Uploaded Image" />
-            </ion-item>
-            <ion-item>
-              <input type="file" accept="image/*" @change="uploadImage" />
-            </ion-item>
-            <ion-button expand="block" @click="createPost">Create Post</ion-button>
+            <ion-list>
+              <ion-item v-if="imageUrl">
+                <img :src="imageUrl" alt="Uploaded Image" />
+              </ion-item>
+              <ion-item>
+                <ion-label color="primary" position="stacked">Upload a photo: </ion-label>
+                <!-- TODO: ensure user can't spam database with photos -->
+                <input type="file" accept="image/*" @change="uploadImage" class="ion-margin-top"/>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Caption</b> ({{ caption.length }}/{{ MAX_CAPTION_LENGTH }}):
+                </ion-label>
+                <ion-textarea :maxlength="MAX_CAPTION_LENGTH" id="caption-input" v-model="caption" placeholder="Say something witty :p" aria-label="Caption input" :autoGrow="true" :counter="true"></ion-textarea>
+              </ion-item>
+            </ion-list>
+            <ion-button :disabled="caption.length > MAX_CAPTION_LENGTH" expand="block" @click="createPost">Create Post</ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>
-      <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000" @didDismiss="toast.isOpen = false"></ion-toast>
+      <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000"
+        @didDismiss="toast.isOpen = false"></ion-toast>
     </ion-content>
-  </ion-page>
-</template>
+</ion-page></template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonButton, IonToast } from '@ionic/vue';
-import { firebaseAuth, db, storage } from "../firebase-service";
+import { IonPage, IonList, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonTextarea, IonButton, IonToast } from '@ionic/vue';
+import { firebaseAuth, db } from "../firebase-service";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
 import { useRouter } from 'vue-router';
 import { uploadImageToFirebase } from '@/util/uploadImage';
+import { MAX_CAPTION_LENGTH } from "../util/constants"
 
 const isUploading = ref(false);
 const uploadProgress = ref(0);
@@ -70,6 +75,9 @@ const createPost = async () => {
 
   if (!imageUrl || !imagePath) {
     toast.value = { isOpen: true, message: 'No image uploaded!', color: "danger" };
+    return;
+  } else if (caption.value.length > MAX_CAPTION_LENGTH) {
+    toast.value = { isOpen: true, message: 'Caption too long!', color: "danger" };
     return;
   }
 

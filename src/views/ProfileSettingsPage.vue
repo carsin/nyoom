@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Profile Settings</ion-title>
-        <ion-button class="back" slot="end" fill="outline" :href="userProfileHref">
+        <ion-button class="ion-padding-end" slot="end" fill="outline" :href="userProfileHref">
           Back to Profile
           <!-- TODO: Figure out why router links sometimes don't work -->
           <!-- <router-link style="text-decoration: none;" :to="userProfileHref"> -->
@@ -13,24 +13,31 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <!-- TODO: Make this look good -->
+      <!-- TODO: Make this look good (center) -->
       <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100"></ion-progress-bar>
-      <ion-item>
-        <img v-if="avatarUrl" class="profile-avatar" :src="avatarUrl" alt="Avatar image"/>
-        <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
-      </ion-item>
-      <ion-item>
-        <ion-label position="stacked" id="avatar" aria-label="Change Avatar">Change Avatar:</ion-label>
-        <input  aria-labelledby="avatarImgUp" type="file" @change="updateAvatar"/>
-      </ion-item>
-      <ion-item>
-        <ion-label position="stacked" >Edit Bio ({{ remainingChars }}/{{ MAX_BIO_LENGTH }}):</ion-label>
-        <div class="bio-container">
-          <ion-textarea placeholder="Enter biography here" v-model="newBiography" :maxlength="MAX_BIO_LENGTH" aria-label="Edit Bio" class="bio-textarea"></ion-textarea>
-          <ion-button :disabled="remainingChars < 0" @click="updateBiography" fill="outline" size="default"
-            class="bio-button">Update</ion-button>
-        </div>
-      </ion-item>
+      <ion-grid>
+        <ion-row class="ion-justify-content-center">
+          <ion-col>
+            <ion-list>
+              <ion-item>
+                <img v-if="avatarUrl" class="profile-avatar" :src="avatarUrl" alt="Avatar image"/>
+                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked" id="avatar" color="primary" aria-label="Change Avatar">Change Avatar:</ion-label>
+                <input aria-labelledby="avatarImgUp" type="file" @change="updateAvatar"/>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked" color="primary"> <b>Edit Bio</b> </ion-label>
+                <div class="bio-container ion-align-items-center">
+                  <ion-textarea placeholder="Enter new biography" v-model="newBiography" :maxlength="MAX_BIO_LENGTH" aria-label="Edit Bio" class="bio-textarea" :autoGrow="true" :counter="true"></ion-textarea>
+                  <ion-button :disabled="remainingBioChars < 0" @click="updateBiography" fill="outline" size="default" class="bio-button">Update</ion-button>
+                </div>
+              </ion-item>
+            </ion-list>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
       <!-- TODO: Implement this functionality -->
       <!-- <ion-item> -->
       <!--   <ion-input label="Change Username:" placeholder="Enter new username"></ion-input> -->
@@ -51,48 +58,43 @@
 </template>
 
 <style>
-.back {
-  padding-right: 15px;
-}
-
 .bio-container {
   display: flex;
   width: 100%;
 }
 
 .bio-textarea {
-  flex: 1;
   /* Allows the textarea to grow and take available space */
+  flex: 1;
 }
 
 .bio-button {
-  align-self: center;
-  /* Vertically centers the button */
-  margin-left: 10px;
   /* Adds some space between the textarea and button */
+  margin-left: 10px;
+  
 }
 </style>
 
 <script setup lang="ts">
-import { IonPage, IonToast, IonHeader, IonTextarea, IonLabel, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonProgressBar } from '@ionic/vue';
+import { IonGrid, IonRow, IonCol, IonPage, IonToast, IonHeader, IonTextarea, IonList, IonLabel, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonProgressBar } from '@ionic/vue';
 import { ref, onMounted, computed } from 'vue';
 import { uploadImageToFirebase } from '../util/uploadImage';
 import { firebaseAuth, db } from "../firebase-service";
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { MAX_BIO_LENGTH } from "../util/constants"
 
-const MAX_BIO_LENGTH = 150; // You can adjust this value as needed
 const uploadProgress = ref(0);
 const isUploading = ref(false);
 const toast = ref({ isOpen: false, message: '', color: '' });
 const avatarUrl = ref('');
 const newBiography = ref(''); // Reactive variable to store the new biography input
 // Computed property to calculate the remaining characters
-const remainingChars = computed(() => MAX_BIO_LENGTH - newBiography.value.length);
+const remainingBioChars = computed(() => MAX_BIO_LENGTH - newBiography.value.length);
 const userProfileHref = ref('/feed');
+const user = firebaseAuth.currentUser;
 
 // get users data and update profile picture on load
 onMounted(async () => {
-  const user = firebaseAuth.currentUser;
   if (user) {
     const userDocRef = doc(db, 'users', user.uid);
     const docSnap = await getDoc(userDocRef);
@@ -105,26 +107,25 @@ onMounted(async () => {
 });
 
 const updateBiography = async () => {
-  const user = firebaseAuth.currentUser;
-  if (user && newBiography.value.trim() !== '' && remainingChars.value >= 0) {
-    try {
-      // Update the biography in the Firestore database
-      const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, {
-        biography: newBiography.value.trim()
-      });
+  if (!user || newBiography.value.length < MAX_BIO_LENGTH) {
+    toast.value = { isOpen: true, message: "Error: Biography too long, or you are not signed in!", color: "danger" };
+    return;
+  }
 
-      toast.value = { isOpen: true, message: "Biography updated successfully!", color: "success" };
-    } catch (error: any) {
-      toast.value = { isOpen: true, message: "An error occurred: " + error.message, color: "danger" };
-    }
-  } else {
-    toast.value = { isOpen: true, message: "Biography is invalid. Ensure it is not empty and within the character limit.", color: "danger" };
+  try {
+    // Update the biography in the Firestore database
+    const userDocRef = doc(db, 'users', user.uid);
+    await updateDoc(userDocRef, {
+      biography: newBiography.value.trim()
+    });
+
+    toast.value = { isOpen: true, message: "Biography updated successfully!", color: "success" };
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "An error occurred: " + error.message, color: "danger" };
   }
 };
 
 const updateAvatar = async (event: any) => {
-  const user = firebaseAuth.currentUser;
   const file = event.target.files[0];
   isUploading.value = true;
 

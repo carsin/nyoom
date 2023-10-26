@@ -7,10 +7,10 @@ export const uploadImageToFirebase = async (
   directory: string,
   onProgress: (progress: number) => void
 ) => {
-  const storageReference = storageRef(storage, directory + '/' + file.name);
+  const storageReference = storageRef(storage, `${directory}/${file.name}`);
   const uploadTask = uploadBytesResumable(storageReference, file);
 
-  return new Promise<string>((resolve, reject) => {
+  return new Promise<{ downloadURL: string, imagePath: string }>((resolve, reject) => {
     uploadTask.on('state_changed', 
       (snapshot) => {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -21,7 +21,10 @@ export const uploadImageToFirebase = async (
       }, 
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          resolve(downloadURL);
+          resolve({
+            downloadURL,
+            imagePath: `${directory}/${file.name}` // Include the directory and file name as the imagePath
+          });
         });
       }
     );

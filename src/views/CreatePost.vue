@@ -13,7 +13,7 @@
             <ion-item>
               <ion-label position="stacked">Caption: </ion-label>
               <!-- TODO: ensure caption is below length -->
-              <ion-input id="caption-input" v-model="caption" aria-label="Caption input"/>
+              <ion-input id="caption-input" v-model="caption" placeholder="Say something witty :p" aria-label="Caption input"/>
             </ion-item>
             <ion-item v-if="imageUrl">
               <img :src="imageUrl" alt="Uploaded Image" />
@@ -44,15 +44,18 @@ const toast = ref({ isOpen: false, message: '', color: '' });
 const caption = ref('');
 const router = useRouter();
 let imageUrl = '';
+let imagePath = '';
 
 const uploadImage = async (event: any) => {
   isUploading.value = true;
   const file = event.target.files[0];
 
   try {
-    imageUrl = await uploadImageToFirebase(file, 'posts', (progress: number) => {
+    const imageData = await uploadImageToFirebase(file, 'posts', (progress: number) => {
       uploadProgress.value = progress;
     });
+    imageUrl = imageData.downloadURL;
+    imagePath = imageData.imagePath; 
     toast.value = { isOpen: true, message: "Successfully uploaded image!", color: "success" };
     isUploading.value = false;
   } catch (error: any) {
@@ -65,7 +68,7 @@ const uploadImage = async (event: any) => {
 const createPost = async () => {
   const user = firebaseAuth.currentUser;
 
-  if (!imageUrl) {
+  if (!imageUrl || !imagePath) {
     toast.value = { isOpen: true, message: 'No image uploaded!', color: "danger" };
     return;
   }
@@ -81,7 +84,8 @@ const createPost = async () => {
         await addDoc(postsCollection, {
           userId: user.uid,
           username: docSnap.data().username,
-          imageUrl,
+          imageUrl: imageUrl,
+          imagePath: imagePath,
           caption: caption.value,
           upvoteCount: 0,
           downvoteCount: 0,

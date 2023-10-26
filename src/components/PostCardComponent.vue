@@ -1,23 +1,43 @@
 <template>
   <ion-card>
     <ion-grid>
-      <ion-row class="ion-align-self-end ion-justify-content-center">
+      <ion-row>
         <ion-button fill="clear">
-          <router-link :to="{ path: `/user/${username}` }">
-            <!-- TODO: make these side by side -->
-            <ion-col v-if="showAvatar">
-              <ion-avatar v-if="avatarUrl">
-                <img :src="avatarUrl" alt="User avatar" />
-              </ion-avatar>
-              <ion-avatar v-else>
-                <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
-              </ion-avatar>
-            </ion-col>
-            <ion-col>
-              <ion-card-title color="primary"> {{ username }} </ion-card-title>
-            </ion-col>
-          </router-link>
+          <!-- TODO: Fix layout -->
+          <ion-col size="10" class="ion-float-left">
+            <router-link v-if="showAvatar" :to="{ path: `/user/${username}` }">
+              <ion-col>
+                <ion-avatar v-if="avatarUrl">
+                  <img :src="avatarUrl" alt="User avatar" />
+                </ion-avatar>
+                <ion-avatar v-else>
+                  <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
+                </ion-avatar>
+              </ion-col>
+              <ion-col>
+                <ion-card-title color="primary"> @{{ username }} </ion-card-title>
+              </ion-col>
+            </router-link>
+          </ion-col>
         </ion-button>
+        <ion-col size="2" v-if="isOwner" class="ion-float-right">
+          <ion-button fill="clear" @click="confirmDeleteNotification">
+            <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
+          </ion-button>
+          <ion-button fill="clear" v-if="!editing" @click="startEditing">
+            <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
+          </ion-button>
+        </ion-col>
+        <ion-col v-if="editing">
+          <ion-label position="floating" color="primary">Enter new caption: </ion-label>
+          <ion-input v-model="newCaption" placeholder="Exude genius here" aria-label="Edit caption input"></ion-input>
+          <ion-button fill="clear" v-if="editing" color="success" @click="saveCaption">
+            <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
+          </ion-button>
+          <ion-button fill="clear" v-if="editing" color="danger" @click="cancelEditing">
+            <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
+          </ion-button>
+        </ion-col>
       </ion-row>
       <ion-row class="ion-justify-content-center">
         <img id="post-image" v-bind:src="image_src" alt="Post image content" /> <!-- v-bind: use prop in attribute -->
@@ -27,7 +47,7 @@
       </ion-row>
       <ion-row>
         <ion-col class="ion-text-left ion-align-self-top" size="8">
-          <ion-card-content> {{ caption }} </ion-card-content>
+          <ion-card-content> {{ postCaption }} </ion-card-content>
         </ion-col>
         <ion-col class="ion-text-end ion-align-self-top" size="4">
           <ion-chip color="success" @click="handleVote(imageId, true)">
@@ -41,8 +61,7 @@
         </ion-col>
       </ion-row>
     </ion-grid>
-    <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="2000" :color="toast.color"
-      @didDismiss="toast.isOpen = false"></ion-toast>
+    <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="2000" :color="toast.color" @didDismiss="toast.isOpen = false"></ion-toast>
   </ion-card>
 </template>
 
@@ -54,40 +73,55 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, ref } from 'vue';
-import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol, IonToast, IonAvatar } from '@ionic/vue';
-import { arrowUpCircle, arrowDownCircle } from 'ionicons/icons';
-import { getDoc, getDocs, collection, query, where, doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import { firebaseAuth, db } from "../firebase-service";
-
-const toast = ref({ isOpen: false, message: '', color: '' });
+import { alertController, IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonInput, IonRow, IonCol, IonToast, IonAvatar } from '@ionic/vue';
+import { arrowUpCircle, arrowDownCircle, trash, pencil, checkmark, close } from 'ionicons/icons';
+import { deleteDoc, getDoc, getDocs, collection, query, where, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { firebaseAuth, db, storage } from "../firebase-service";
+import { useRouter } from 'vue-router';
 
 // vue props
 const props = defineProps({
+  userId: String,
   imageId: String,
   username: String,
   caption: String,
   upvotes: Number,
   downvotes: Number,
   image_src: String,
+  imagePath: String,
   timestamp: Object,
   showAvatar: Boolean,
 });
 
 // vue refs for upvotes and downvotes
+const router = useRouter();
+const postCaption = ref(props.caption);
 const upvoteCount = ref(props.upvotes);
 const downvoteCount = ref(props.downvotes);
 const avatarUrl = ref(''); // Reactive variable to store the avatar URL
+const isOwner = ref(false);
+const editing = ref(false); // State to manage the editing mode
+const newCaption = ref(''); // Reactive variable to store the new caption
+const toast = ref({ isOpen: false, message: '', color: '' });
 
 onMounted(async () => {
   // Query Firestore based on the username to get avatar URL
+  const user = firebaseAuth.currentUser;
   const userQuery = query(collection(db, 'users'), where('username', '==', props.username));
   const querySnapshot = await getDocs(userQuery);
 
+  // check if post belongs to currently authenticated user
+  if (user && user.uid === props.userId) {
+    console.log(isOwner);
+    isOwner.value = true;
+  }
+
+  // get avatar belonging to post creator
   if (!querySnapshot.empty) {
     const userData = querySnapshot.docs[0].data();
     avatarUrl.value = userData.avatarUrl || ''; // Set avatar URL
   }
-  
+
   // Calling the function to handle real-time updates
   handleRealtimeUpdates();
 });
@@ -102,6 +136,7 @@ const handleRealtimeUpdates = () => {
       const data = doc.data();
       upvoteCount.value = data.upvoteCount; // Updating upvotes
       downvoteCount.value = data.downvoteCount; // Updating downvotes
+      postCaption.value = data.caption; // Updating caption
     }
   });
 
@@ -111,7 +146,7 @@ const handleRealtimeUpdates = () => {
   });
 };
 
-
+// helper function for handleVote to ensure up/downvote exclusivity & singularity
 const toggleVote = (userId, voters, otherVoters, countKey, otherCountKey, updates) => {
   if (voters.includes(userId)) {
     voters.splice(voters.indexOf(userId), 1);
@@ -126,6 +161,7 @@ const toggleVote = (userId, voters, otherVoters, countKey, otherCountKey, update
   }
 };
 
+// sending of upvote and downvotes
 const handleVote = async (postId: string, isUpvote: boolean) => {
   const postRef = doc(db, 'posts', postId);
   const user = firebaseAuth.currentUser;
@@ -173,6 +209,73 @@ const handleVote = async (postId: string, isUpvote: boolean) => {
   }
 };
 
+// show a confirmation dialog before deletion of post
+const confirmDeleteNotification = async () => {
+  const alert = await alertController.create({
+    header: 'Confirm Delete',
+    message: 'Are you sure you want to delete this post?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      },
+      {
+        text: 'Delete',
+        handler: handleDelete
+      }
+    ]
+  });
+  await alert.present();
+};
+
+// handle the deletion of the post
+const handleDelete = async () => {
+  try {
+    const postRef = doc(db, 'posts', props.imageId);
+    await deleteDoc(postRef);
+    toast.value = {
+      isOpen: true, color: 'success',
+      message: "Successfully deleted the post. Good riddance!",
+    };
+    router.go(0)
+  } catch (error: any) {
+    toast.value = {
+      isOpen: true, color: 'danger',
+      message: "Error while deleting post: " + error.message,
+    };
+  }
+};
+
+// start editing the caption
+const startEditing = () => {
+  newCaption.value = props.caption; // Set the initial value of the new caption
+  editing.value = true;
+};
+
+// cancel editing and discard changes
+const cancelEditing = () => {
+  newCaption.value = ''; 
+  editing.value = false; 
+};
+
+
+// save the updated caption
+const saveCaption = async () => {
+  try {
+    const postRef = doc(db, 'posts', props.imageId);
+    await updateDoc(postRef, { caption: newCaption.value });
+    editing.value = false; // Exit editing mode
+    toast.value = {
+      isOpen: true, color: 'success',
+      message: "Caption edit confirmed!",
+    };
+  } catch (error: any) {
+    toast.value = {
+      isOpen: true, color: 'danger',
+      message: "Error while saving new caption: " + error.message,
+    };
+  }
+};
 const formattedTimestamp = computed(() => {
   if (props.timestamp) {
     const date = props.timestamp.toDate(); // Convert Firestore timestamp to JavaScript Date

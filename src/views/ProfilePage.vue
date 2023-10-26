@@ -16,11 +16,12 @@
             <ion-row>
               <ion-col size="1">
                 <ion-buttons v-if="isCurrentUser">
-                  <router-link to="/settings">
-                    <ion-button>
+                  <!-- TODO: Figure out why router links sometimes don't work -->
+                  <!-- <router-link to="/settings"> -->
+                    <ion-button href="/settings">
                       <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
                     </ion-button>
-                  </router-link>
+                  <!-- </router-link> -->
                 </ion-buttons>
               </ion-col>
               <ion-col class="ion-text-center" size="10">
@@ -71,9 +72,7 @@
         </ion-toolbar>
         <ion-list>
           <ion-list>
-            <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption"
-              :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl"
-              :timestamp="post.timestamp" />
+            <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :userId="post.userId" :timestamp="post.timestamp" />
           </ion-list>
         </ion-list>
         <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"

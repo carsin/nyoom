@@ -9,6 +9,7 @@
         </ion-toolbar>
         <ion-toolbar>
           <ion-title size="large">Select Model</ion-title>
+          <ion-button class="back" slot="end" fill="outline" href="/search">Back</ion-button>
         </ion-toolbar>
   
       </ion-header>
@@ -30,5 +31,5 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton } from '@ionic/vue';
 </script>

@@ -236,10 +236,28 @@ http://ionicframework.com/docs/theming/ */
 }
 
   /*
-   * Nyoom Changes to Ionic Components
+   * Nyoom Changes 
    * -------------------------------------------
    */
 
+/* don't make button text capitalize */
 ion-button {
  text-transform: none;
 }
+
+/* remove underline from router-links */
+a.router-link-active, a.router-link-exact-active, router-link {
+  text-decoration: none;
+}
+
+.profile-avatar {
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+#friends-title {
+  display: inline-block;
+}
+

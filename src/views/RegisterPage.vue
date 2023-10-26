@@ -69,10 +69,11 @@ const register = async () => {
         const userDocRef = doc(db, 'users', user.uid);
         await setDoc(userDocRef, {
           username: username.value,
+          avatarURL: "",
           email: email.value,
           biography: "",
-          followers: 0,
-          following: 0,
+          followers: [],
+          following: [],
           // add other fields as needed
         });
 

@@ -1,23 +1,30 @@
 <template>
   <ion-card>
     <ion-grid>
-      <ion-row class="ion-align-self-end ion-justify-content-center">
+      <ion-row>
         <ion-button fill="clear">
-          <router-link :to="{ path: `/user/${username}` }">
-            <!-- TODO: make these side by side -->
-            <ion-col v-if="showAvatar">
-              <ion-avatar v-if="avatarUrl">
-                <img :src="avatarUrl" alt="User avatar" />
-              </ion-avatar>
-              <ion-avatar v-else>
-                <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
-              </ion-avatar>
-            </ion-col>
-            <ion-col>
-              <ion-card-title color="primary"> {{ username }} </ion-card-title>
-            </ion-col>
-          </router-link>
+          <!-- TODO: Fix layout -->
+          <ion-col size="10" class="ion-float-left">
+            <router-link v-if="showAvatar" :to="{ path: `/user/${username}` }">
+              <ion-col>
+                <ion-avatar v-if="avatarUrl">
+                  <img :src="avatarUrl" alt="User avatar" />
+                </ion-avatar>
+                <ion-avatar v-else>
+                  <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
+                </ion-avatar>
+              </ion-col>
+              <ion-col>
+                <ion-card-title color="primary"> @{{ username }} </ion-card-title>
+              </ion-col>
+            </router-link>
+          </ion-col>
         </ion-button>
+        <ion-col size="2" v-if="isOwner" class="ion-float-right">
+          <ion-button fill="clear" @click="confirmDelete">
+            <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
+          </ion-button>
+        </ion-col>
       </ion-row>
       <ion-row class="ion-justify-content-center">
         <img id="post-image" v-bind:src="image_src" alt="Post image content" /> <!-- v-bind: use prop in attribute -->
@@ -41,8 +48,7 @@
         </ion-col>
       </ion-row>
     </ion-grid>
-    <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="2000" :color="toast.color"
-      @didDismiss="toast.isOpen = false"></ion-toast>
+    <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="2000" :color="toast.color" @didDismiss="toast.isOpen = false"></ion-toast>
   </ion-card>
 </template>
 
@@ -54,40 +60,53 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, ref } from 'vue';
-import { IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol, IonToast, IonAvatar } from '@ionic/vue';
-import { arrowUpCircle, arrowDownCircle } from 'ionicons/icons';
-import { getDoc, getDocs, collection, query, where, doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import { firebaseAuth, db } from "../firebase-service";
+import { alertController, IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonRow, IonCol, IonToast, IonAvatar } from '@ionic/vue';
+import { arrowUpCircle, arrowDownCircle, trash } from 'ionicons/icons';
+import { deleteDoc, getDoc, getDocs, collection, query, where, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { firebaseAuth, db, storage } from "../firebase-service";
+import { useRouter } from 'vue-router';
 
 const toast = ref({ isOpen: false, message: '', color: '' });
 
 // vue props
 const props = defineProps({
+  userId: String,
   imageId: String,
   username: String,
   caption: String,
   upvotes: Number,
   downvotes: Number,
   image_src: String,
+  imagePath: String,
   timestamp: Object,
   showAvatar: Boolean,
 });
 
 // vue refs for upvotes and downvotes
+const router = useRouter();
 const upvoteCount = ref(props.upvotes);
 const downvoteCount = ref(props.downvotes);
 const avatarUrl = ref(''); // Reactive variable to store the avatar URL
+const isOwner = ref(false);
 
 onMounted(async () => {
   // Query Firestore based on the username to get avatar URL
+  const user = firebaseAuth.currentUser;
   const userQuery = query(collection(db, 'users'), where('username', '==', props.username));
   const querySnapshot = await getDocs(userQuery);
 
+  // check if post belongs to currently authenticated user
+  if (user && user.uid === props.userId) {
+    console.log(isOwner);
+    isOwner.value = true;
+  }
+
+  // get avatar belonging to post creator
   if (!querySnapshot.empty) {
     const userData = querySnapshot.docs[0].data();
     avatarUrl.value = userData.avatarUrl || ''; // Set avatar URL
   }
-  
+
   // Calling the function to handle real-time updates
   handleRealtimeUpdates();
 });
@@ -110,7 +129,6 @@ const handleRealtimeUpdates = () => {
     unsubscribe();
   });
 };
-
 
 const toggleVote = (userId, voters, otherVoters, countKey, otherCountKey, updates) => {
   if (voters.includes(userId)) {
@@ -169,6 +187,43 @@ const handleVote = async (postId: string, isUpvote: boolean) => {
     toast.value = {
       isOpen: true, color: 'danger',
       message: "Error while voting: " + error.message,
+    };
+  }
+};
+
+// Function to show a confirmation dialog before deletion
+const confirmDelete = async () => {
+  const alert = await alertController.create({
+    header: 'Confirm Delete',
+    message: 'Are you sure you want to delete this post?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      },
+      {
+        text: 'Delete',
+        handler: handleDelete
+      }
+    ]
+  });
+  await alert.present();
+};
+
+// Function to handle the deletion of the post
+const handleDelete = async () => {
+  try {
+    const postRef = doc(db, 'posts', props.imageId);
+    await deleteDoc(postRef);
+    toast.value = {
+      isOpen: true, color: 'danger',
+      message: "Successfully deleted the post. Good riddance!",
+    };
+    router.go(0)
+  } catch (error: any) {
+    toast.value = {
+      isOpen: true, color: 'danger',
+      message: "Error while deleting post: " + error.message,
     };
   }
 };

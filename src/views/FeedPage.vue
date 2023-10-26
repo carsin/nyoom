@@ -3,13 +3,15 @@
     <ion-header>
       <ion-toolbar collapse="condense">
         <ion-title>Feed</ion-title>
-          <ion-button class="back" slot="end" fill="outline">
-            <router-link style="text-decoration: none;" to="/create-post"> Create Post </router-link>
+          <ion-button class="back" slot="end" fill="outline" href="/create-post">
+            <!-- TODO: Figure out why router links sometimes don't work -->
+            <!-- <router-link style="text-decoration: none;" to="/create-post"> Create Post </router-link> -->
+          Create Post
           </ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :timestamp="post.timestamp" showAvatar/>
+      <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :imagePath="post.imagePath" :userId="post.userId" :timestamp="post.timestamp" showAvatar/>
       <ion-fab>
         <ion-fab-button slot="fixed" vertical="bottom" horizontal="end">
           <ion-icon :icon="add"></ion-icon>

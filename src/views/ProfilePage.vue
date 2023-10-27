@@ -100,34 +100,6 @@ const toast = ref({ isOpen: false, message: '', color: '' });
 const menuTitle = ref(''); // To dynamically set the menu title
 const userList = ref([]); // To store the list of users to display in the menu
 
-const showUsers = async (type: string) => {
-  try {
-    menuTitle.value = type; // Setting the menu title to either 'Followers' or 'Following'
-    const uids = type === 'Followers' ? userData.value.followers : userData.value.following;
-    userList.value = await getUserDetails(uids); // Fetching user details
-    console.log(userList.value);
-  } catch (error: any) {
-    toast.value = { isOpen: true, message: 'Error while fetching user details: ' + error.message, color: 'danger' };
-  }
-};
-
-// Function to get user details based on uids
-const getUserDetails = async (uids: []) => {
-  const users = [];
-  for (const uid of uids) {
-    try {
-      if (uid) { // Check if uid is not null or undefined
-        const userDoc = await getDoc(doc(db, 'users', uid));
-        if (userDoc.exists()) {
-          users.push({ uid, ...userDoc.data() });
-        }
-      }
-    } catch (error: any) {
-      toast.value = { isOpen: true, message: 'Error while fetching user: ' + error.message, color: 'danger' };
-    }
-  }
-  return users;
-};
 
 onMounted(async () => {
   // Fetch data for the user whose profile is being visited
@@ -171,6 +143,7 @@ onMounted(async () => {
   isLoading.value = false;
 });
 
+
 // Function to handle the real-time updates
 const handleRealtimeUpdates = (userDocId) => {
   const userRef = doc(db, 'users', userDocId);
@@ -186,6 +159,35 @@ const handleRealtimeUpdates = (userDocId) => {
   onUnmounted(() => {
     unsubscribe();
   });
+};
+
+const showUsers = async (type: string) => {
+  try {
+    menuTitle.value = type; // Setting the menu title to either 'Followers' or 'Following'
+    const uids = type === 'Followers' ? userData.value.followers : userData.value.following;
+    userList.value = await getUserDetails(uids); // Fetching user details
+    console.log(userList.value);
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: 'Error while fetching user details: ' + error.message, color: 'danger' };
+  }
+};
+
+// Function to get user details based on uids
+const getUserDetails = async (uids: []) => {
+  const users = [];
+  for (const uid of uids) {
+    try {
+      if (uid) { // Check if uid is not null or undefined
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (userDoc.exists()) {
+          users.push({ uid, ...userDoc.data() });
+        }
+      }
+    } catch (error: any) {
+      toast.value = { isOpen: true, message: 'Error while fetching user: ' + error.message, color: 'danger' };
+    }
+  }
+  return users;
 };
 
 // Function to handle follow/unfollow

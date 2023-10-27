@@ -20,8 +20,7 @@
                 <input type="file" accept="image/*" @change="uploadImage" class="ion-margin-top"/>
               </ion-item>
               <ion-item>
-                <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Caption</b> ({{ caption.length }}/{{ MAX_CAPTION_LENGTH }}):
-                </ion-label>
+                <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Caption</b>: </ion-label>
                 <ion-textarea :maxlength="MAX_CAPTION_LENGTH" id="caption-input" v-model="caption" placeholder="Say something witty :p" aria-label="Caption input" :autoGrow="true" :counter="true"></ion-textarea>
               </ion-item>
             </ion-list>

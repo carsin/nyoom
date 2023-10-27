@@ -6,28 +6,28 @@
     <ion-grid v-else>
       <!-- Post header -->
       <ion-row>
+        <!-- Avatar username and timestamp component -->
         <ion-col class="ion-justify-content-center ion-text-left ion-align-items-bottom">
-            <ion-button fill="clear">
-            <router-link class="avatar-header-link" v-if="showAvatar" style="text-decoration: none;" :to="{ path: `/user/${username}` }">
-              <ion-col>
+          <ion-button v-if="showAvatar" fill="clear">
+            <router-link class="avatar-header-link" style="text-decoration: none;" :to="{ path: `/user/${username}` }">
                 <ion-avatar v-if="avatarUrl">
                   <img :src="avatarUrl" alt="User avatar" />
                 </ion-avatar>
                 <ion-avatar v-else>
                   <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
                 </ion-avatar>
-              </ion-col>
-              <ion-col class="ion-align-items-bottom ion-no-margin ion-margin-start">
+              <div class="ion-align-items-bottom ion-no-margin ion-margin-start">
                 <ion-card-title color="primary"> @{{ username }} </ion-card-title>
                 <ion-card-subtitle> {{ formattedTimestamp }} </ion-card-subtitle>
-              </ion-col>
+              </div>
             </router-link>
           </ion-button>
         </ion-col>
+        <!-- show timestamp if no avatar component -->
         <ion-col v-if="!showAvatar" class="ion-text-center ion-align-self-center ion-justify-content-center">
           <ion-card-subtitle> {{ formattedTimestamp }} </ion-card-subtitle>
         </ion-col>
-        <ion-col v-if="isOwner" class="ion-justify-content-center ion-align-items-bottom ion-text-end">
+        <ion-col v-if="isPostOwner" class="ion-justify-content-center ion-align-items-bottom ion-text-end">
           <ion-button fill="clear" v-if="!editingCaption" @click="editingCaption = true">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
           </ion-button>
@@ -39,7 +39,6 @@
           </ion-button>
         </ion-col>
       </ion-row>
-      <!-- show timestamp if no avatar component -->
       <!-- Post image -->
       <ion-row class="ion-justify-content-center">
         <img id="post-image" :src="image_src" alt="Post image content" />
@@ -48,10 +47,10 @@
       <ion-row v-if="editingCaption" class="ion-align-items-center">
         <ion-col class="ion-text-left"  size="11">
           <ion-label position="stacked" color="primary"><b>Edit Caption</b> </ion-label>
-          <ion-textarea v-model="newCaption" :maxlength="MAX_CAPTION_LENGTH" placeholder="Exude genius here" aria-label="Edit caption input" :counter="true" :autoGrow="true"></ion-textarea>
+          <ion-textarea v-model="newCaption" :maxlength="MAX_CAPTION_LENGTH" placeholder="Exude genius here" aria-label="Edit caption input" :counter="true" :autoGrow="true"/>
         </ion-col>
         <ion-col size="1" class="ion-text-right">
-          <ion-button :disabled="newCaption.length > MAX_CAPTION_LENGTH" v-if="editingCaption" color="success" @click="saveCaption">
+          <ion-button :disabled="newCaption.length > MAX_CAPTION_LENGTH" v-if="editingCaption" color="success" @click="updateCaption">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
           </ion-button>
         </ion-col>
@@ -92,6 +91,7 @@ import { deleteDoc, getDoc, getDocs, collection, query, where, doc, onSnapshot, 
 import { firebaseAuth, db } from "../firebase-service";
 import { useRouter } from 'vue-router';
 import { MAX_CAPTION_LENGTH } from "../util/constants"
+import { postManager } from '../services/ManagePostService';
 
 // vue props
 const props = defineProps({
@@ -114,7 +114,7 @@ const postCaption = ref(props.caption);
 const upvoteCount = ref(props.upvotes);
 const downvoteCount = ref(props.downvotes);
 const avatarUrl = ref(''); // Reactive variable to store the avatar URL
-const isOwner = ref(false);
+const isPostOwner = ref(false);
 const editingCaption = ref(false); // State to manage the editing mode
 const newCaption = ref(props.caption || ""); // Reactive variable to store the new caption
 const toast = ref({ isOpen: false, message: '', color: '' });
@@ -127,8 +127,7 @@ onMounted(async () => {
 
   // check if post belongs to currently authenticated user
   if (user && user.uid === props.userId) {
-    console.log(isOwner);
-    isOwner.value = true;
+    isPostOwner.value = true;
   }
 
   // get avatar belonging to post creator
@@ -145,7 +144,7 @@ onMounted(async () => {
 // Function to handle the real-time updates
 const handleRealtimeUpdates = () => {
   const postRef = doc(db, 'posts', props.imageId);
-  
+
   // Listening for real-time updates
   const unsubscribe = onSnapshot(postRef, (doc) => {
     if (doc.exists()) {
@@ -160,7 +159,6 @@ const handleRealtimeUpdates = () => {
   onUnmounted(() => {
     unsubscribe();
   });
-
 };
 
 // helper function for handleVote to ensure up/downvote exclusivity & singularity
@@ -263,30 +261,10 @@ const handleDelete = async () => {
 };
 
 // save the updated caption
-const saveCaption = async () => {
-  if (newCaption.value == props.caption) {
-    toast.value = { isOpen: true, message: "You have entered the same caption!", color: "danger" };
-    return;
-  } else if (newCaption.value.length < MAX_CAPTION_LENGTH) {
-    toast.value = { isOpen: true, message: "Caption too long!", color: "danger" };
-    return;
-  }
-
-  try {
-    const postRef = doc(db, 'posts', props.imageId);
-    await updateDoc(postRef, { caption: newCaption.value });
-    editingCaption.value = false; // Exit editing mode
-    toast.value = {
-      isOpen: true, color: 'success',
-      message: "Caption edit confirmed!",
-    };
-  } catch (error: any) {
-    toast.value = {
-      isOpen: true, color: 'danger',
-      message: "Error while saving new caption: " + error.message,
-    };
-  }
+const updateCaption = async () => {
+  const result = await postManager.updateCaption(props.imageId, newCaption.value, props.caption);
 };
+
 const formattedTimestamp = computed(() => {
   if (props.timestamp) {
     const date = props.timestamp.toDate(); // Convert Firestore timestamp to JavaScript Date

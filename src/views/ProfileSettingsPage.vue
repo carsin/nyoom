@@ -30,7 +30,7 @@
               <ion-item>
                 <ion-label position="stacked" color="primary"> <b>Edit Bio</b> </ion-label>
                 <div class="bio-container ion-align-items-center">
-                  <ion-textarea placeholder="Enter new biography" v-model="newBiography" :maxlength="MAX_BIO_LENGTH" aria-label="Edit Bio" class="bio-textarea" :autoGrow="true" :counter="true"></ion-textarea>
+                  <ion-textarea placeholder="Enter new biography" v-model="newBiography" :maxlength="MAX_BIO_LENGTH" aria-label="Edit Bio" class="bio-textarea" :autoGrow="true" :counter="true"/>
                   <ion-button :disabled="remainingBioChars < 0" @click="updateBiography" fill="outline" size="default" class="bio-button">Update</ion-button>
                 </div>
               </ion-item>
@@ -101,13 +101,14 @@ onMounted(async () => {
     if (docSnap.exists()) {
       avatarUrl.value = docSnap.data().avatarUrl;
       const username = docSnap.data().username;
+      newBiography.value = docSnap.data().biography;
       userProfileHref.value = `/user/${username}`; // update back button url reference
     }
   }
 });
 
 const updateBiography = async () => {
-  if (!user || newBiography.value.length < MAX_BIO_LENGTH) {
+  if (!user || newBiography.value.length > MAX_BIO_LENGTH) {
     toast.value = { isOpen: true, message: "Error: Biography too long, or you are not signed in!", color: "danger" };
     return;
   }

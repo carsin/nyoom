@@ -32,7 +32,7 @@
   padding-right: 15px;
 }
 </style>
-
+ 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonInput, IonButton, IonToast } from '@ionic/vue';

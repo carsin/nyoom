@@ -1,7 +1,6 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-card-title>{{ parts2 }}</ion-card-title>
       <ion-toolbar collapse="condense">
         <ion-title>Market</ion-title>
       </ion-toolbar>
@@ -55,7 +54,7 @@
                     part.price
                   }}</ion-card-subtitle>
                   <ion-card-subtitle class="card-title">{{
-                    part.title
+                    part.itemName
                   }}</ion-card-subtitle>
                 </ion-card-header>
               </ion-card>
@@ -179,30 +178,33 @@ import { useRouter, useRoute } from "vue-router";
 const isLoading = ref(true); // Variable to manage loading state
 const route = useRoute();
 const router = useRouter();
-const partData = ref({}); // Reactive variable to store user data
+const partData = ref([{}]); // Reactive variable to store user data
 const toast = ref({ isOpen: false, message: "", color: "" });
 const posts = ref([]); // Variable to hold the user's posts
 var noResults = false;
 
 onMounted(async () => {
-  // Check if the user exists in the 'users' collection
   const partsQuery = query(collection(db, "parts"));
   const partSnapshot = await getDocs(partsQuery);
 
   if (partSnapshot.empty) {
+    //later implement an empty
     noResults = true;
   } else {
     // parts exists
     isLoading.value = false;
-    partData.value = partSnapshot.docs[0].data(); // get part data
+    //partData.value = partSnapshot.docs[0].data(); // get part data
 
-    //parts.value = partSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    partData.value = partSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
   }
 });
 
 const store = useStore();
-const parts2 = partData;
-const parts = computed(() => store.getters.parts);
+const parts = partData;
+//const parts = computed(() => store.getters.parts);
 const offers = computed(() => store.getters.offers);
 const selectedTab = computed(() => store.state.tabs.selectedTab);
 

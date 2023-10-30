@@ -66,7 +66,7 @@
           </ion-grid>
         </ion-toolbar>
         <div v-if="posts.length > 0">
-          <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :userId="post.userId" :timestamp="post.timestamp"/>
+          <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted" :isDownvoted="post.isDownvoted"/>
         </div>
         <ion-text v-else class="ion-text-center">
           <h3> <i> @{{ username }} has no posts :( </i></h3>
@@ -99,7 +99,7 @@ const posts = ref([]); // Variable to hold the user's posts
 const toast = ref({ isOpen: false, message: '', color: '' });
 const menuTitle = ref(''); // To dynamically set the menu title
 const userList = ref([]); // To store the list of users to display in the menu
-
+const user = firebaseAuth.currentUser;
 
 onMounted(async () => {
   // Fetch data for the user whose profile is being visited
@@ -115,9 +115,8 @@ onMounted(async () => {
   userData.value = { uid: userSnapshot.docs[0].id, ...userSnapshot.docs[0].data() };
 
   // Check if the viewed profile belongs to the currently authenticated user
-  const currentUser = firebaseAuth.currentUser;
-  if (currentUser) {
-    const userDocRef = doc(db, 'users', currentUser.uid);
+  if (user) {
+    const userDocRef = doc(db, 'users', user.uid);
     const docSnap = await getDoc(userDocRef);
 
     if (docSnap.exists() && docSnap.data().username === username.value) {
@@ -127,7 +126,7 @@ onMounted(async () => {
     // Check if the current user is following the profile user
     const userDocId = userSnapshot.docs[0].id; // Getting the uid from the document ID
     handleRealtimeUpdates(userDocId);
-    isFollowing.value = userData.value.followers.includes(currentUser.uid);
+    isFollowing.value = userData.value.followers.includes(user.uid);
   }
 
   // Query all posts for the profile being viewed
@@ -138,8 +137,15 @@ onMounted(async () => {
   );
 
   const querySnapshot = await getDocs(postsQuery);
-  posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+  posts.value = querySnapshot.docs.map(doc => {
+    const postData = doc.data();
+    return {
+      id: doc.id,
+      isUpvoted: postData.upvoters.includes(user.uid),
+      isDownvoted: postData.downvoters.includes(user.uid),
+      ...postData
+    };
+  });
   isLoading.value = false;
 });
 

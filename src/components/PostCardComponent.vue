@@ -34,7 +34,7 @@
           <ion-button v-if="editingCaption" color="danger" fill="clear" @click="editingCaption = false">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
           </ion-button>
-          <ion-button fill="clear" @click="confirmDeleteNotification">
+          <ion-button fill="clear" @click="deletePostDialog">
             <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
           </ion-button>
         </ion-col>
@@ -62,11 +62,11 @@
         </ion-col>
         <ion-col class="ion-text-end ion-align-self-top" size="2">
           <ion-chip color="success" @click="handleVote(imageId, true)">
-            <ion-label> {{ upvoteCount?.toString() }}</ion-label>
+            <ion-label :class="{ voted: isUpvoted }"> {{ upvoteCount?.toString() }}</ion-label>
             <ion-icon aria-hidden="true" :icon="arrowUpCircle" />
           </ion-chip>
           <ion-chip color="danger" @click="handleVote(imageId, false)">
-            <ion-label> {{ downvoteCount?.toString() }}</ion-label>
+            <ion-label :class="{ voted: isDownvoted }"> {{ downvoteCount?.toString() }}</ion-label>
             <ion-icon aria-hidden="true" :icon="arrowDownCircle" />
           </ion-chip>
         </ion-col>
@@ -80,6 +80,11 @@
 #post-image {
   max-height: 50rem;
   border-radius: 0.5rem;
+}
+
+.voted {
+  font-weight: bold;
+  text-decoration: underline;
 }
 </style>
 
@@ -102,6 +107,8 @@ const props = defineProps({
   upvotes: Number,
   downvotes: Number,
   image_src: String,
+  isUpvoted: Boolean,
+  isDownvoted: Boolean,
   imagePath: String,
   timestamp: Object,
   showAvatar: Boolean,
@@ -113,6 +120,8 @@ const isLoading = ref(true); // Variable to manage loading state
 const postCaption = ref(props.caption);
 const upvoteCount = ref(props.upvotes);
 const downvoteCount = ref(props.downvotes);
+const isUpvoted = ref(props.isUpvoted);
+const isDownvoted = ref(props.isDownvoted);
 const avatarUrl = ref(''); // Reactive variable to store the avatar URL
 const isPostOwner = ref(false);
 const editingCaption = ref(false); // State to manage the editing mode
@@ -161,70 +170,27 @@ const handleRealtimeUpdates = () => {
   });
 };
 
-// helper function for handleVote to ensure up/downvote exclusivity & singularity
-const toggleVote = (userId, voters, otherVoters, countKey, otherCountKey, updates) => {
-  if (voters.includes(userId)) {
-    voters.splice(voters.indexOf(userId), 1);
-    updates[countKey]--;
-  } else {
-    voters.push(userId);
-    updates[countKey]++;
-    if (otherVoters.includes(userId)) {
-      otherVoters.splice(otherVoters.indexOf(userId), 1);
-      updates[otherCountKey]--;
-    }
-  }
-};
 
 // sending of upvote and downvotes
 const handleVote = async (postId: string, isUpvote: boolean) => {
-  const postRef = doc(db, 'posts', postId);
-
-  if (!user) {
-    // Handle the case where the user is not logged in
-    toast.value = {
-      isOpen: true, color: 'danger',
-      message: "You are not logged in. Please create an account before voting.",
-    };
-    return;
-  }
-
-  try {
-    const userId = user.uid;
-    const postDoc = await getDoc(postRef);
-
-    if (postDoc.exists()) {
-      const postData = postDoc.data();
-      const updates = {
-        upvoters: postData.upvoters || [],
-        downvoters: postData.downvoters || [],
-        upvoteCount: postData.upvoteCount || 0,
-        downvoteCount: postData.downvoteCount || 0,
-      };
-
-      if (isUpvote) {
-        toggleVote(userId, updates.upvoters, updates.downvoters, 'upvoteCount', 'downvoteCount', updates);
-      } else {
-        toggleVote(userId, updates.downvoters, updates.upvoters, 'downvoteCount', 'upvoteCount', updates);
-      }
-
-      await updateDoc(postRef, updates);
-      toast.value = {
-        isOpen: true,
-        color: isUpvote ? 'success' : 'danger',
-        message: isUpvote ? 'Changed upvote on ' + props.username + "'s post" : 'Changed downvote on ' + props.username + "'s post"
-      };
+  const result = await postManager.sendVote(props.imageId, isUpvote);
+  if (result.success) {
+    toast.value = { isOpen: true, color: 'success', message: result.message };
+    // reset the vote status
+    isUpvoted.value = false;
+    isDownvoted.value = false;
+    // set the new vote status
+    if (result.isNewVote) {
+      isUpvoted.value = isUpvote;
+      isDownvoted.value = !isUpvote;
     }
-  } catch (error: any) {
-    toast.value = {
-      isOpen: true, color: 'danger',
-      message: "Error while voting: " + error.message,
-    };
+  } else {
+    toast.value = { isOpen: true, color: 'danger', message: result.message };
   }
 };
 
 // show a confirmation dialog before deletion of post
-const confirmDeleteNotification = async () => {
+const deletePostDialog = async () => {
   const alert = await alertController.create({
     header: 'Confirm Delete',
     message: 'Are you sure you want to delete this post?',
@@ -235,34 +201,30 @@ const confirmDeleteNotification = async () => {
       },
       {
         text: 'Delete',
-        handler: handleDelete
+        handler: async () => { // handle the deletion of the post
+          const result = await postManager.deletePost(props.imageId);
+          if (result.success) {
+            toast.value = { isOpen: true, color: 'success', message: result.message };
+            router.go(0);
+          } else {
+            toast.value = { isOpen: true, color: 'danger', message: result.message };
+          }
+        }
       }
     ]
   });
   await alert.present();
 };
 
-// handle the deletion of the post
-const handleDelete = async () => {
-  try {
-    const postRef = doc(db, 'posts', props.imageId);
-    await deleteDoc(postRef);
-    toast.value = {
-      isOpen: true, color: 'success',
-      message: "Successfully deleted the post. Good riddance!",
-    };
-    router.go(0)
-  } catch (error: any) {
-    toast.value = {
-      isOpen: true, color: 'danger',
-      message: "Error while deleting post: " + error.message,
-    };
-  }
-};
-
 // save the updated caption
 const updateCaption = async () => {
   const result = await postManager.updateCaption(props.imageId, newCaption.value, props.caption);
+  if (result.success) {
+    toast.value = { isOpen: true, color: 'success', message: result.message };
+    editingCaption.value = false;
+  } else {
+    toast.value = { isOpen: true, color: 'danger', message: result.message };
+  }
 };
 
 const formattedTimestamp = computed(() => {

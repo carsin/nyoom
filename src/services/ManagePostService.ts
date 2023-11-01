@@ -9,7 +9,10 @@ import { MAX_CAPTION_LENGTH } from "../util/constants"
 
 // helper function for handleVote to ensure up/downvote exclusivity & singularity
 // returns true if vote was added and false if vote was removed
-const toggleVote = (gId, voters, otherVoters, countKey, otherCountKey, updates) => {
+type UpdatesType = {
+  [key: string]: number;
+};
+const toggleVote = ( gId: string, voters: string[], otherVoters: string[], countKey: string, otherCountKey: string, updates: UpdatesType): boolean => {
   if (voters.includes(gId)) {
     voters.splice(voters.indexOf(gId), 1);
     updates[countKey]--;
@@ -26,6 +29,12 @@ const toggleVote = (gId, voters, otherVoters, countKey, otherCountKey, updates) 
 };
 
 class ManagePostService {
+  user: any;
+  
+  constructor(user: any) {
+    this.user = user;
+  }
+  
   async updateCaption(postId: string, newCaption: string, oldCaption: string) {
     if (newCaption === oldCaption) {
       return { success: false, message: "You have entered the same caption!" };
@@ -39,9 +48,8 @@ class ManagePostService {
 
       if (postDoc.exists()) {
         const postData = postDoc.data();
-        const currentUser = firebaseAuth.currentUser;
 
-        if (currentUser && postData.userId === currentUser.uid) {
+        if (this.user && postData.userId === this.user.uid) {
           await updateDoc(postRef, { caption: newCaption });
           return { success: true, message: "Caption edit confirmed!" };
         } else {
@@ -57,15 +65,14 @@ class ManagePostService {
 
   async sendVote(postId: string, isUpvote: boolean) {
     const postRef = doc(db, 'posts', postId);
-    const user = firebaseAuth.currentUser;
     let isNewVote = false;
 
-    if (!user) { // handle case where the user is not logged in
+    if (!this.user) { // handle case where the user is not logged in
       return { success: false, message: "Error: You are not logged !" };
     }
 
     try {
-      const userId = user.uid;
+      const userId = this.user.uid;
       const postDoc = await getDoc(postRef);
 
       if (postDoc.exists()) {
@@ -90,15 +97,22 @@ class ManagePostService {
     } catch (error: any) {
       return { success: false, message: "Error voting on post: " + error.message, isNewVote };
     }
+    return { success: false, message: "An unknown error occurred while voting."};
   }
 
   async deletePost(postId: string) {
-    const postRef = doc(db, 'posts', postId);
-    await deleteDoc(postRef);
-    return { success: true, message: "Successfully deleted the post. Good riddance!" };
-  } catch(error: any) {
-    return { success: false, message: "Error deleting post: " + error.message };
+    if (!this.user) {
+      return { success: false, message: "Error: You are not signed in!" };
+    }
+    
+    try {
+      const postRef = doc(db, 'posts', postId);
+      await deleteDoc(postRef);
+      return { success: true, message: "Successfully deleted the post. Good riddance!" };
+    } catch (error: any) {
+      return { success: false, message: "Error deleting post: " + error.message };
+    }
   }
 }
 
-export const postManager = new ManagePostService();
+export const postManager = new ManagePostService(firebaseAuth.currentUser);

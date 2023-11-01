@@ -34,7 +34,7 @@
           <ion-button v-if="editingCaption" color="danger" fill="clear" @click="editingCaption = false">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
           </ion-button>
-          <ion-button fill="clear" @click="deletePostDialog">
+          <ion-button fill="clear" @click="handlePostDelete">
             <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
           </ion-button>
         </ion-col>
@@ -50,7 +50,7 @@
           <ion-textarea v-model="newCaption" :maxlength="MAX_CAPTION_LENGTH" placeholder="Exude genius here" aria-label="Edit caption input" :counter="true" :autoGrow="true"/>
         </ion-col>
         <ion-col size="1" class="ion-text-right">
-          <ion-button :disabled="newCaption.length > MAX_CAPTION_LENGTH" v-if="editingCaption" color="success" @click="updateCaption">
+          <ion-button :disabled="newCaption.length > MAX_CAPTION_LENGTH" v-if="editingCaption" color="success" @click="handleCaptionUpdate">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
           </ion-button>
         </ion-col>
@@ -61,11 +61,11 @@
           <ion-card-content> {{ postCaption }} </ion-card-content>
         </ion-col>
         <ion-col class="ion-text-end ion-align-self-top" size="2">
-          <ion-chip color="success" @click="handleVote(imageId, true)">
+          <ion-chip :outline="isUpvoted ? false : true" color="success" @click="handleVote(true)">
             <ion-label :class="{ voted: isUpvoted }"> {{ upvoteCount?.toString() }}</ion-label>
             <ion-icon aria-hidden="true" :icon="arrowUpCircle" />
           </ion-chip>
-          <ion-chip color="danger" @click="handleVote(imageId, false)">
+          <ion-chip :outline="isDownvoted ? false : true" color="danger" @click="handleVote(false)">
             <ion-label :class="{ voted: isDownvoted }"> {{ downvoteCount?.toString() }}</ion-label>
             <ion-icon aria-hidden="true" :icon="arrowDownCircle" />
           </ion-chip>
@@ -84,15 +84,14 @@
 
 .voted {
   font-weight: bold;
-  text-decoration: underline;
 }
 </style>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed, ref } from 'vue';
+import { onMounted, onUnmounted, computed, ref, defineProps } from 'vue';
 import { alertController, IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonAvatar } from '@ionic/vue';
 import { arrowUpCircle, arrowDownCircle, trash, pencil, checkmark, close } from 'ionicons/icons';
-import { deleteDoc, getDoc, getDocs, collection, query, where, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { getDocs, collection, query, where, doc, onSnapshot } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
 import { useRouter } from 'vue-router';
 import { MAX_CAPTION_LENGTH } from "../util/constants"
@@ -172,10 +171,9 @@ const handleRealtimeUpdates = () => {
 
 
 // sending of upvote and downvotes
-const handleVote = async (postId: string, isUpvote: boolean) => {
+const handleVote = async (isUpvote: boolean) => {
   const result = await postManager.sendVote(props.imageId, isUpvote);
   if (result.success) {
-    toast.value = { isOpen: true, color: 'success', message: result.message };
     // reset the vote status
     isUpvoted.value = false;
     isDownvoted.value = false;
@@ -184,13 +182,14 @@ const handleVote = async (postId: string, isUpvote: boolean) => {
       isUpvoted.value = isUpvote;
       isDownvoted.value = !isUpvote;
     }
+    toast.value = { isOpen: true, color: 'success', message: result.message };
   } else {
     toast.value = { isOpen: true, color: 'danger', message: result.message };
   }
 };
 
 // show a confirmation dialog before deletion of post
-const deletePostDialog = async () => {
+const handlePostDelete = async () => {
   const alert = await alertController.create({
     header: 'Confirm Delete',
     message: 'Are you sure you want to delete this post?',
@@ -217,7 +216,7 @@ const deletePostDialog = async () => {
 };
 
 // save the updated caption
-const updateCaption = async () => {
+const handleCaptionUpdate = async () => {
   const result = await postManager.updateCaption(props.imageId, newCaption.value, props.caption);
   if (result.success) {
     toast.value = { isOpen: true, color: 'success', message: result.message };

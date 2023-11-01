@@ -16,7 +16,7 @@
         <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :imagePath="post.imagePath" :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted" :isDownvoted="post.isDownvoted" showAvatar/>
       </div>
       <ion-text v-else class="ion-text-center">
-        <h3> <i> No one has posted anything :( )</i></h3>
+        <h3> <i> No one has posted anything :( </i></h3>
       </ion-text>
     </ion-content>
   </ion-page>

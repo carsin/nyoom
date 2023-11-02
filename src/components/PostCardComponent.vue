@@ -41,7 +41,9 @@
       </ion-row>
       <!-- Post image -->
       <ion-row class="ion-justify-content-center">
-        <img id="post-image" :src="image_src" alt="Post image content" />
+        <div class="post-image-container">
+          <img class="post-image" :src="image_src" alt="Post image content" />
+        </div>
       </ion-row>
       <!-- Condtional caption editing menu -->
       <ion-row v-if="editingCaption" class="ion-align-items-center">
@@ -57,10 +59,10 @@
       </ion-row>
       <!-- Caption and vote buttons -->
       <ion-row v-else>
-        <ion-col class="ion-text-left ion-align-self-top" size="10">
+        <ion-col class="ion-text-left ion-align-self-top" size="8">
           <ion-card-content> {{ postCaption }} </ion-card-content>
         </ion-col>
-        <ion-col class="ion-text-end ion-align-self-top" size="2">
+        <ion-col class="ion-text-end ion-align-self-top" size="4">
           <ion-chip :outline="isUpvoted ? false : true" color="success" @click="handleVote(true)">
             <ion-label :class="{ voted: isUpvoted }"> {{ upvoteCount?.toString() }}</ion-label>
             <ion-icon aria-hidden="true" :icon="arrowUpCircle" />
@@ -76,10 +78,22 @@
   </ion-card>
 </template>
 
-<style>
-#post-image {
-  max-height: 50rem;
+<style scoped>
+
+.post-image-container {
+  padding: 0px 16px 0px; /* horizontal padding only */
+  border-radius: 8px; 
+  overflow: hidden; /* ensure that the border-radius is applied to the image inside */
+  line-height: 0; /* removes any extra space below the image */
+}
+
+.post-image {
   border-radius: 0.5rem;
+  display: block;
+  width: auto; /* maintain the aspect ratio */
+  height: auto; /* maintain the aspect ratio */
+  display: block; /* remove bottom space */
+  max-width: 100%; /* ensure the image does not overflow the padding */
 }
 
 .voted {

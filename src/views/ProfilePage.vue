@@ -65,7 +65,13 @@
           </ion-grid>
         </ion-toolbar>
         <div v-if="posts.length > 0">
-          <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted" :isDownvoted="post.isDownvoted"/>
+          <ion-grid>
+            <ion-row>
+              <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="post in posts" :key="post.id">
+                <PostCardComponent :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted" :isDownvoted="post.isDownvoted"/>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </div>
         <ion-text v-else class="ion-text-center">
           <h3> <i> @{{ username }} has no posts :( </i></h3>

@@ -8,7 +8,10 @@ export const uploadImageToFirebase = async (
   onProgress: (progress: number) => void
 ) => {
   const storageReference = storageRef(storage, `${directory}/${file.name}`);
-  const uploadTask = uploadBytesResumable(storageReference, file);
+  const metadata = {
+    cacheControl: 'public,max-age=86400', // cache for 1 day
+  };
+  const uploadTask = uploadBytesResumable(storageReference, file, metadata);
 
   return new Promise<{ downloadURL: string, imagePath: string }>((resolve, reject) => {
     uploadTask.on('state_changed', 
@@ -23,7 +26,7 @@ export const uploadImageToFirebase = async (
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           resolve({
             downloadURL,
-            imagePath: `${directory}/${file.name}` // Include the directory and file name as the imagePath
+            imagePath: `${directory}/${file.name}` // include the directory and file name as the imagePath
           });
         });
       }

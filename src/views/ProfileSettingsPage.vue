@@ -69,6 +69,7 @@
 
 .bio-button {
   margin-left: 10px; /* Adds some space between the textarea and button */
+  justify-self: end;
   
 }
 </style>

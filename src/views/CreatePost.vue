@@ -11,27 +11,29 @@
         <ion-row>
           <ion-col size-md="6" offset-md="3">
             <ion-list>
-              <ion-item v-if="imageUrl">
-                <img :src="imageUrl" alt="Uploaded Image" />
+              <ion-item v-if="imageFile">
+                <img :src="imagePreviewUrl" id="imagePreview" alt="Uploaded Image" />
               </ion-item>
               <ion-item>
                 <ion-label color="primary" position="stacked">Upload a photo: </ion-label>
-                <!-- TODO: ensure user can't spam database with photos -->
-                <input type="file" accept="image/*" @change="uploadImage" class="ion-margin-top"/>
+                <input type="file" accept="image/*" @change="handleImagePreview" class="ion-margin-top" />
+                <ion-button @click="handleImageUpload" size="default">Upload Image</ion-button>
               </ion-item>
               <ion-item>
                 <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Caption</b>: </ion-label>
-                <ion-textarea :maxlength="MAX_CAPTION_LENGTH" id="caption-input" v-model="caption" placeholder="Say something witty :p" aria-label="Caption input" :autoGrow="true" :counter="true"></ion-textarea>
+                <ion-textarea :maxlength="MAX_CAPTION_LENGTH" id="caption-input" v-model="caption"
+                  placeholder="Say something witty :p" aria-label="Caption input" :autoGrow="true"
+                  :counter="true"></ion-textarea>
               </ion-item>
             </ion-list>
-            <ion-button :disabled="caption.length > MAX_CAPTION_LENGTH" expand="block" @click="createPost">Create Post</ion-button>
+            <ion-button :disabled="caption.length > MAX_CAPTION_LENGTH || !imageUrl" expand="block" @click="handleCreatePost">Create Post</ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>
-      <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000"
-        @didDismiss="toast.isOpen = false"></ion-toast>
+      <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000" @didDismiss="toast.isOpen = false"></ion-toast>
     </ion-content>
-</ion-page></template>
+  </ion-page>
+</template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
@@ -50,16 +52,30 @@ const router = useRouter();
 let imageUrl = '';
 let imagePath = '';
 
-const uploadImage = async (event: any) => {
+const imageFile = ref<File | null>(null);
+const imagePreviewUrl = ref<string | undefined>(undefined);
+
+const handleImagePreview = (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (file) {
+    imageFile.value = file;
+    imagePreviewUrl.value = URL.createObjectURL(file);
+  }
+};
+
+const handleImageUpload = async () => {
   isUploading.value = true;
-  const file = event.target.files[0];
+  if (!imageFile.value) { // no image uploaded
+    toast.value = { isOpen: true, message: "You haven't uploaded an image!", color: "danger" };
+    return;
+  }
 
   try {
-    const imageData = await uploadImageToFirebase(file, 'posts', (progress: number) => {
+    const imageData = await uploadImageToFirebase(imageFile.value, 'posts', (progress: number) => {
       uploadProgress.value = progress;
     });
     imageUrl = imageData.downloadURL;
-    imagePath = imageData.imagePath; 
+    imagePath = imageData.imagePath;
     toast.value = { isOpen: true, message: "Successfully uploaded image!", color: "success" };
     isUploading.value = false;
   } catch (error: any) {
@@ -69,7 +85,7 @@ const uploadImage = async (event: any) => {
 };
 
 // sending post to posts firestore collection
-const createPost = async () => {
+const handleCreatePost = async () => {
   const user = firebaseAuth.currentUser;
 
   if (!imageUrl || !imagePath) {
@@ -98,13 +114,13 @@ const createPost = async () => {
           downvoteCount: 0,
           upvoters: [],
           downvoters: [],
-          timestamp: new Date() // Or use Firebase server timestamp
+          timestamp: new Date()
         });
       }
-      toast.value = { isOpen: true, message: 'Post created successfully!', color: "success"};
+      toast.value = { isOpen: true, message: 'Post created successfully!', color: "success" };
       router.push("/feed");
     }
-  } catch (error: any){
+  } catch (error: any) {
     toast.value = { isOpen: true, message: 'Error while posting: ' + error.message, color: "danger" };
     console.error(error.message);
   }

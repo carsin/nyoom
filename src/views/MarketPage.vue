@@ -162,17 +162,8 @@ import {
   IonIcon,
 } from "@ionic/vue";
 import { funnel } from "ionicons/icons";
-import {
-  doc,
-  setDoc,
-  addDoc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
-import { firebaseAuth, db } from "../firebase-service";
+import { collection, query, getDocs, } from "firebase/firestore";
+import { db } from "../firebase-service";
 import { useRouter, useRoute } from "vue-router";
 
 const isLoading = ref(true); // Variable to manage loading state
@@ -181,7 +172,7 @@ const router = useRouter();
 const partData = ref([{}]); // Reactive variable to store user data
 const toast = ref({ isOpen: false, message: "", color: "" });
 const posts = ref([]); // Variable to hold the user's posts
-var noResults = false;
+let noResults = false;
 
 onMounted(async () => {
   const partsQuery = query(collection(db, "parts"));
@@ -193,7 +184,6 @@ onMounted(async () => {
   } else {
     // parts exists
     isLoading.value = false;
-    //partData.value = partSnapshot.docs[0].data(); // get part data
 
     partData.value = partSnapshot.docs.map((doc) => ({
       id: doc.id,
@@ -204,11 +194,10 @@ onMounted(async () => {
 
 const store = useStore();
 const parts = partData;
-//const parts = computed(() => store.getters.parts);
 const offers = computed(() => store.getters.offers);
 const selectedTab = computed(() => store.state.tabs.selectedTab);
 
-const selectTab = (tab: String) => {
+const selectTab = (tab: string) => {
   store.commit("tabs/setSelectedTab", tab);
 };
 

@@ -47,7 +47,7 @@
 
   <script lang="ts">
   import { defineComponent } from 'vue';
-  import { IonButton, IonBackButton, IonIcon } from '@ionic/vue';
+  import { IonPage, IonTitle, IonHeader, IonCardSubtitle, IonContent, IonToolbar, IonButtons, IonButton, IonBackButton } from '@ionic/vue';
   export default defineComponent({
   data() {
     return {

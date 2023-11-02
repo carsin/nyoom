@@ -18,14 +18,13 @@
 
 <style>
 #logo {
-width: 800px;
-padding-top: 100px;
-padding-bottom: 25px;
-/* height: 100px; */
+  width: 800px;
+  padding-top: 100px;
+  padding-bottom: 25px;
 }
 
-.button-adjust{
-    width: 200px;
+.button-adjust {
+  width: 200px;
 }
 </style>
 

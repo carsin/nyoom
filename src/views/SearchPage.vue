@@ -140,7 +140,6 @@
               </ion-col>
               <ion-col size="6">
                 <ion-card>
-                  <!-- <ion-title align="center" class="wide"> -->
                   <img class="center-align" alt="Fiat logo" src="../assets/logos/fiat.png" height='100' max-width='425'/>
                   <ion-card-header>
                     <ion-card-subtitle>Fiat</ion-card-subtitle>

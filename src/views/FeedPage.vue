@@ -4,7 +4,9 @@
       <ion-toolbar collapse="condense">
         <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
         <ion-title>Feed</ion-title>
-        <ion-button slot="end" fill="outline" class="ion-padding-end" href="/create-post"> Create Post </ion-button>
+        <router-link slot="end" to="/create-post">
+          <ion-button fill="outline" class="ion-padding-end"> Create Post </ion-button>
+        </router-link>
       </ion-toolbar>
     </ion-header>
     <ion-content v-if="!isLoading" :fullscreen="true">

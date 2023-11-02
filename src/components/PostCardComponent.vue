@@ -92,6 +92,7 @@
   display: block;
   width: auto; /* maintain the aspect ratio */
   height: auto; /* maintain the aspect ratio */
+  max-height: 35rem;
   display: block; /* remove bottom space */
   max-width: 100%; /* ensure the image does not overflow the padding */
 }
@@ -113,18 +114,18 @@ import { postManager } from '../services/ManagePostService';
 
 // vue props
 const props = defineProps({
-  userId: String,
-  imageId: String,
-  username: String,
-  caption: String,
-  upvotes: Number,
-  downvotes: Number,
-  image_src: String,
-  isUpvoted: Boolean,
-  isDownvoted: Boolean,
-  imagePath: String,
+  userId: { type: String, default: ''},
+  imageId: { type: String, default: '' },
+  username: { type: String, default: '' },
+  caption: { type: String, default: '' },
+  upvotes: { type: Number, default: -1 },
+  downvotes: { type: Number, default: -1 },
+  image_src: { type: String, default: '' },
+  isUpvoted: { type: Boolean, default: false },
+  isDownvoted: { type: Boolean, default: false },
+  imagePath: { type: String, default: '' },
+  showAvatar: { type: Boolean, default: false },
   timestamp: Object,
-  showAvatar: Boolean,
 });
 
 // vue refs for upvotes and downvotes

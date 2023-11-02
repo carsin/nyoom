@@ -4,11 +4,7 @@
       <ion-toolbar collapse="condense">
         <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
         <ion-title>Feed</ion-title>
-        <ion-button slot="end" fill="outline" class="ion-padding-end" href="/create-post">
-          <!-- TODO: Figure out why router links sometimes don't work -->
-          <!-- <router-link style="text-decoration: none;" to="/create-post"> Create Post </router-link> -->
-        Create Post
-        </ion-button>
+        <ion-button slot="end" fill="outline" class="ion-padding-end" href="/create-post"> Create Post </ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content v-if="!isLoading" :fullscreen="true">
@@ -25,10 +21,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "../firebase-service"; // Adjust the import based on your file structure
 import { IonPage, IonText, IonProgressBar, IonHeader, IonButton, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import PostCardComponent from '@/components/PostCardComponent.vue';
-import { firebaseAuth } from "../firebase-service";
+import { db, firebaseAuth } from "../firebase-service";
 
 const posts = ref([]); // Variable to hold the posts
 const isLoading = ref(true); // Variable to manage loading state

@@ -5,10 +5,6 @@
         <ion-title>Profile Settings</ion-title>
         <ion-button class="ion-padding-end" slot="end" fill="outline" :href="userProfileHref">
           Back to Profile
-          <!-- TODO: Figure out why router links sometimes don't work -->
-          <!-- <router-link style="text-decoration: none;" :to="userProfileHref"> -->
-            <!-- Back to Profile -->
-          <!-- </router-link> -->
         </ion-button>
       </ion-toolbar>
     </ion-header>

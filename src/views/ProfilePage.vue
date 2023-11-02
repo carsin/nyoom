@@ -16,12 +16,11 @@
             <ion-row>
               <ion-col size="1">
                 <ion-buttons v-if="isCurrentUser">
-                  <!-- TODO: Figure out why router links sometimes don't work -->
-                  <!-- <router-link to="/settings"> -->
-                    <ion-button href="/settings">
+                  <router-link to="/settings">
+                    <ion-button>
                       <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
                     </ion-button>
-                  <!-- </router-link> -->
+                  </router-link>
                 </ion-buttons>
               </ion-col>
               <ion-col class="ion-text-center" size="10">

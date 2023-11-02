@@ -48,7 +48,7 @@ const password = ref('');
 const confirmPassword = ref('');
 const toast = ref({ isOpen: false, message: '', color: '' });
 
-const checkUsernameTaken = async (username: String) => {
+const checkUsernameTaken = async (username: string) => {
   const usersRef = collection(db, 'users');
   const q = query(usersRef, where('username', '==', username));
   const querySnapshot = await getDocs(q);

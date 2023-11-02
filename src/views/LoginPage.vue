@@ -47,8 +47,7 @@ const handleLogin = async () => {
     }
   } catch (error: any) {
     toast.value = { isOpen: true, message: "Error while logging in: " + error.message, color: 'danger'}
-    console.error(error.message);
-  } finally {
-  }
+    console.error("Error while logging in: " + error.message);
+  } 
 };
 </script>

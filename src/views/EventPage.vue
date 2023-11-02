@@ -37,6 +37,5 @@
 </style>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSearchbar, IonButton } from '@ionic/vue';
-import ExploreContainer from '@/components/ExampleExploreComponent.vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSearchbar } from '@ionic/vue';
 </script>

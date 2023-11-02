@@ -88,7 +88,7 @@
 </style>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed, ref, defineProps } from 'vue';
+import { onMounted, onUnmounted, computed, ref } from 'vue';
 import { alertController, IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonAvatar } from '@ionic/vue';
 import { arrowUpCircle, arrowDownCircle, trash, pencil, checkmark, close } from 'ionicons/icons';
 import { getDocs, collection, query, where, doc, onSnapshot } from "firebase/firestore";

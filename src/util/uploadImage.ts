@@ -17,7 +17,7 @@ export const uploadImageToFirebase = async (
         onProgress(progress);
       }, 
       (error) => {
-        reject('Upload failed: ' + error.message);
+        reject(new Error('Upload failed: ' + error.message));
       }, 
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {

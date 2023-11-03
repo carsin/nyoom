@@ -89,7 +89,6 @@
 
 .post-image {
   border-radius: 0.5rem;
-  display: block;
   width: auto; /* maintain the aspect ratio */
   height: auto; /* maintain the aspect ratio */
   max-height: 35rem;

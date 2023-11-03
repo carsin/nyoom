@@ -10,8 +10,9 @@
       <p>This page will redirect once you have verified your email. If it
         doesn't, please ensure you are verified and <a href="login">login here.</a></p>
       <ion-button :disabled="isButtonDisabled" @click="sendVerificationEmail">Send Another Email</ion-button>
+      <ion-button @click="handleLogout" class="ion-padding-end"> Log Out</ion-button>
       <p v-if="timer > 0">You can resend the email in {{ timer }} seconds.</p>
-      <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="2000" @didDismiss="toast.isOpen = false">
+      <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="2000" @didDismiss="toast.isOpen = false" :color="toast.color">
       </ion-toast>
     </ion-content>
   </ion-page>
@@ -21,13 +22,13 @@
 import { IonPage, IonHeader, IonContent, IonButton, IonToast, IonTitle, IonToolbar } from '@ionic/vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { onAuthStateChanged, User, sendEmailVerification } from "firebase/auth";
+import { signOut, onAuthStateChanged, User, sendEmailVerification } from "firebase/auth";
 import { firebaseAuth } from '../firebase-service';
 
 const router = useRouter();
 const isButtonDisabled = ref(true);
 const timer = ref(60);
-const toast = ref({ isOpen: false, message: '' });
+const toast = ref({ isOpen: false, message: '', color: '' });
 
 let refreshIntervalId: number | null = null; // store the refresh interval ID
 
@@ -37,7 +38,7 @@ const sendVerificationEmail = async () => {
   if (user) {
     await sendEmailVerification(user);
     startVerifyCooldown(60); // Starting a 60 seconds cooldown after email is sent
-    toast.value = { isOpen: true, message: 'Verification email sent!' };
+    toast.value = { isOpen: true, message: 'Verification email sent!', color: 'success' };
   }
 };
 
@@ -67,6 +68,17 @@ const refreshUser = async (user: User | null, currentPath: string) => {
       clearInterval(refreshIntervalId); // Clear the interval when redirecting
       router.push('/feed');
     }
+  }
+};
+
+const handleLogout = async () => {
+  try {
+    await signOut(firebaseAuth);
+    toast.value = { isOpen: true, message: 'Logout successful!', color: 'success' }
+    router.push('/onboard')
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: 'An error occurred during logout: ' + error.message, color: 'danger' }
+    console.error(error.message);
   }
 };
 

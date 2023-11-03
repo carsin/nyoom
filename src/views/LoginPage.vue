@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Login</ion-title>
-        <ion-button class="back" slot="end" fill="outline" href="/">Back</ion-button>
+        <ion-button class="ion-margin-end" slot="end" fill="outline" href="/">Back</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -30,7 +30,7 @@
   </ion-page>
 </template>
 
-<style>
+<style scoped>
 .form-error-note { /* make error messages not the same size as other items */
   --padding-start: 16px;
   --padding-end: 0;
@@ -100,7 +100,7 @@ const handleLogin = async () => {
       showErrors.value = false;
       router.push("/feed");
     } else {
-      toast.value = { isOpen: true, message: 'Please verify your email before logging in with the link sent to ' + email.value, color: 'danger'}
+      toast.value = { isOpen: true, message: 'Please verify your email before logging in with the link sent to ' + formData.value.email, color: 'danger'}
     }
   } catch (error: any) {
     toast.value = { isOpen: true, message: "Error while logging in: " + error.message, color: 'danger'}

@@ -1,9 +1,4 @@
-import {
-  deleteDoc,
-  doc,
-  updateDoc,
-  getDoc,
-} from "firebase/firestore";
+import { collection, query, orderBy, getDocs, getDoc, addDoc, where, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { ref as storageRef, deleteObject } from "firebase/storage"
 import { firebaseAuth, db, storage } from "../firebase-service";
 import { MAX_CAPTION_LENGTH } from "../util/constants"
@@ -31,11 +26,74 @@ const toggleVote = ( gId: string, voters: string[], otherVoters: string[], count
 
 class ManagePostService {
   user: any;
-  
+
   constructor(user: any) {
     this.user = user;
   }
-  
+
+  // Method to fetch comments for a specific post
+  async fetchComments(postId: string) {
+    try {
+      const commentsCollection = collection(db, 'posts', postId, 'comments');
+      const commentsQuery = query(commentsCollection, orderBy('timestamp', 'desc'));
+      const querySnapshot = await getDocs(commentsQuery);
+
+      const comments = await Promise.all(querySnapshot.docs.map(async (doc) => {
+        const commentData = doc.data();
+        const userQuery = query(collection(db, 'users'), where('username', '==', commentData.username));
+        const userQuerySnapshot = await getDocs(userQuery);
+
+        let avatarUrl = '';
+        if (!userQuerySnapshot.empty) {
+          const userData = userQuerySnapshot.docs[0].data();
+          avatarUrl = userData.avatarUrl;
+        }
+
+        const commentTimestamp = commentData.timestamp ? commentData.timestamp.toDate().toLocaleString() : new Date();
+
+        return {
+          id: doc.id,
+          text: commentData.text,
+          username: commentData.username,
+          avatarUrl: avatarUrl,
+          canDelete: this.user?.uid === commentData.userId,
+          timestamp: commentTimestamp, // You might want to format this
+        };
+      }));
+
+      return { success: true, message: 'Success fetching comments!', comments: comments };
+    } catch (error: any) {
+      console.error('Error fetching comments:', error);
+      return { success: false, message: 'Error fetching comments: ' + error.message };
+    }
+  }
+
+  // add new comment to list
+  async submitComment(postId: string, text: string, username: string) {
+    try {
+      const commentsCollection = collection(db, 'posts', postId, 'comments');
+      const payload = {
+        text: text,
+        username: username,
+        userId: this.user.uid,
+        timestamp: new Date(),
+      };
+      await addDoc(commentsCollection, payload);
+      return { success: true, message: 'Comment added!' };
+    } catch (error: any) {
+      return { success: false, message: 'Error adding comment: ' + error.message };
+    }
+  }
+
+  async deleteComment(postId: string, commentId: string) {
+    try {
+      await deleteDoc(doc(db, 'posts', postId, 'comments', commentId));
+      return { success: true, message: 'Comment deleted successfully' };
+    } catch (error: any) {
+      return { success: false, message: 'Error deleting comment: ' + error.message };
+    }
+  }
+
   async updateCaption(postId: string, newCaption: string, oldCaption: string) {
     if (newCaption === oldCaption) {
       return { success: false, message: "You have entered the same caption!" };
@@ -98,25 +156,25 @@ class ManagePostService {
     } catch (error: any) {
       return { success: false, message: "Error voting on post: " + error.message, isNewVote };
     }
-    return { success: false, message: "An unknown error occurred while voting."};
+    return { success: false, message: "An unknown error occurred while voting." };
   }
 
   async deletePost(postId: string) {
     if (!this.user) {
       return { success: false, message: "Error: You are not signed in!" };
     }
-    
+
     try {
       const postRef = doc(db, 'posts', postId);
       const postSnap = await getDoc(postRef);
-      
+
       if (!postSnap.exists()) {
         return { success: false, message: "No such post found!" };
       }
 
       const postData = postSnap.data();
       const imageUrl = postData.imageUrl;
-      
+
       // Delete the post document
       await deleteDoc(postRef);
 

@@ -76,12 +76,12 @@
       </ion-row>
       <!-- Comments section -->
       <ion-row>
-        <ion-col size="12">
+        <ion-col>
           <ion-list>
             <ion-item v-for="comment in comments" :key="comment.id" lines="none">
               <router-link style="text-decoration: none;" :to="{ path: `/user/${comment.username}` }">
                 <ion-avatar class="comment-avatar" slot="start">
-                  <img :src="comment.avatarUrl || 'default-avatar-url.png'" />
+                  <img :src="comment.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="Comment avatar image"/>
                 </ion-avatar>
               </router-link>
               <ion-label>
@@ -90,7 +90,7 @@
                 </router-link>
                 <p>{{ comment.text }}</p>
               </ion-label>
-              <ion-button v-if="comment.canDelete" fill="clear" slot="end" @click="deleteComment(comment.id)">
+              <ion-button v-if="comment.canDelete" fill="clear" slot="end" @click="handleCommentDelete(comment.id)">
                 <ion-icon slot="icon-only" color="danger" :icon="trash" />
               </ion-button>
               <ion-note slot="end">{{ comment.timestamp }}</ion-note>
@@ -107,7 +107,7 @@
           </ion-item>
         </ion-col>
         <ion-col class="ion-text-right" size="3">
-          <ion-button v-if="newCommentText.length > 0" @click="submitComment">Comment</ion-button>
+          <ion-button v-if="newCommentText.length > 0" @click="handleCommentSubmit">Comment</ion-button>
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -185,21 +185,13 @@ const newCaption = ref(props.caption || ""); // Reactive variable to store the n
 const toast = ref({ isOpen: false, message: '', color: '' });
 const user = firebaseAuth.currentUser;
 const newCommentText = ref('');
-interface Comment {
-  id: string;
-  text: string;
-  username: string;
-  avatarUrl: string;
-  canDelete: boolean,
-  timestamp: String,
-}
-const comments = ref<Comment[]>([]);
+const comments = ref([]);
 
 onMounted(async () => {
   // Query Firestore based on the username to get avatar URL
   const userQuery = query(collection(db, 'users'), where('username', '==', props.username));
   const querySnapshot = await getDocs(userQuery);
-  await fetchComments();
+  await handleFetchComments();
 
   // check if post belongs to currently authenticated user
   if (user && user.uid === props.userId) {
@@ -238,79 +230,41 @@ const handleRealtimeUpdates = () => {
 };
 
 // Fetch comments for the post
-const fetchComments = async () => {
-  const commentsCollection = collection(db, 'posts', props.imageId, 'comments');
-  const commentsQuery = query(commentsCollection, orderBy('timestamp', 'desc'));
-  const querySnapshot = await getDocs(commentsQuery);
-
-  // map through each comment and fetch the user's avatar URL
-  const commentsList = await Promise.all(querySnapshot.docs.map(async (doc) => {
-    const commentData = doc.data();
-    const userQuery = query(collection(db, 'users'), where('username', '==', commentData.username));
-    const userQuerySnapshot = await getDocs(userQuery);
-    const canDelete = user?.uid === commentData.userId;
-
-    // get comment avatar
-    let avatarUrl = '';
-    if (!userQuerySnapshot.empty) {
-      const userData = userQuerySnapshot.docs[0].data();
-      avatarUrl = userData.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg';
-    }
-    // get comment timestamp
-    const commentTimestamp = commentData.timestamp ? commentData.timestamp.toDate().toLocaleString() : 'unknown time';
-
-    return {
-      id: doc.id,
-      text: commentData.text,
-      username: commentData.username,
-      avatarUrl: avatarUrl,
-      canDelete: canDelete,
-      timestamp: commentTimestamp,
-    };
-  }));
-
-  comments.value = commentsList;
+const handleFetchComments = async () => {
+  const result = await postManager.fetchComments(props.imageId);
+  if (result.success) {
+    comments.value = result.comments;
+  } else {
+    toast.value = { isOpen: true, message: result.message, color: 'danger' };
+  }
 };
 
 // Submit comment
-const submitComment = async () => {
+const handleCommentSubmit = async () => {
   if (newCommentText.value.trim() === '') {
     toast.value = { isOpen: true, message: 'Comment cannot be empty', color: 'danger' };
     return;
   }
-  
-  const currentUsername = await userInfoService.getCurrentUserUsername();
-  const commentsCollection = collection(db, 'posts', props.imageId, 'comments');
-  const payload = {
-    text: newCommentText.value,
-    username: currentUsername, 
-    userId: user?.uid,
-    timestamp: new Date(),
-  };
 
-  try {
-    await addDoc(commentsCollection, payload);
-    newCommentText.value = ''; // Clear the textarea
-    await fetchComments(); // Refresh comments
-    toast.value = { isOpen: true, message: 'Comment added!', color: 'success' };
-  } catch (error: any) {
-    console.error('Error adding comment: ', error);
-    toast.value = { isOpen: true, message: 'Error adding comment: ' + error.message, color: 'danger' };
+  const currentUsername = await userInfoService.getCurrentUserUsername();
+  const result = await postManager.submitComment(props.imageId, newCommentText.value, currentUsername);
+
+  if (result.success) {
+    newCommentText.value = ''; // clear the textarea
+    await handleFetchComments(); // refresh comments
+    toast.value = { isOpen: true, message: result.message, color: 'success' };
+  } else {
+    toast.value = { isOpen: true, message: result.message, color: 'danger' };
   }
 };
 
-const deleteComment = async (commentId: string) => {
-  try {
-    // Assuming you have a subcollection 'comments' under each 'post' document
-    await deleteDoc(doc(db, 'posts', props.imageId, 'comments', commentId));
-    // Show a success message
-    toast.value = { isOpen: true, message: 'Comment deleted successfully', color: 'success' };
-    // Refresh the comments list
-    await fetchComments();
-  } catch (error) {
-    // Handle errors, such as showing an error message
-    console.error('Error deleting comment: ', error);
-    toast.value = { isOpen: true, message: 'Error deleting comment', color: 'danger' };
+const handleCommentDelete = async (commentId: string) => {
+  const result = await postManager.deleteComment(props.imageId, commentId);
+  if (result.success) {
+    await handleFetchComments(); // Refresh the comments list
+    toast.value = { isOpen: true, message: result.message, color: 'success' };
+  } else {
+    toast.value = { isOpen: true, message: result.message, color: 'danger' };
   }
 };
 

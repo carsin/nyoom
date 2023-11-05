@@ -79,7 +79,6 @@
 </template>
 
 <style scoped>
-
 .post-image-container {
   padding: 0px 16px 0px; /* horizontal padding only */
   border-radius: 8px; 

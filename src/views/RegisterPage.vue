@@ -163,7 +163,7 @@ const handleRegister = async () => {
     const userDocRef = doc(db, 'users', user.uid);
     await setDoc(userDocRef, {
       username: formData.value.username,
-      avatarURL: "",
+      avatarUrl: "",
       email: formData.value.email,
       biography: "",
       followers: [],

@@ -21,19 +21,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { IonPage, IonText, IonProgressBar, IonHeader, IonButton, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import { db, firebaseAuth } from "../firebase-service";
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const posts = ref([]); // Variable to hold the posts
 const isLoading = ref(true); // Variable to manage loading state
 const user = firebaseAuth.currentUser;
 
 onMounted(async () => {
+  await fetchPosts();
+  isLoading.value = false;
+});
+
+const fetchPosts = async () => {
   // Query all posts and order by timestamp
-    const postsQuery = query(
+  const postsQuery = query(
     collection(db, 'posts'),
     orderBy('timestamp', 'desc') // Ordering by timestamp in descending order
   );
@@ -43,12 +50,18 @@ onMounted(async () => {
     const postData = doc.data();
     return {
       id: doc.id,
-      isUpvoted: postData.upvoters.includes(user.uid),
-      isDownvoted: postData.downvoters.includes(user.uid),
+      isUpvoted: postData.upvoters.includes(user?.uid),
+      isDownvoted: postData.downvoters.includes(user?.uid),
       ...postData
     };
   });
-  isLoading.value = false;
+}
+
+watch(() => route.path, async (newPath, oldPath) => {
+  if (oldPath === 'create-post' && newPath === '/feed') {
+    // Call your method to fetch posts here
+    await fetchPosts();
+  }
 });
 
 </script>

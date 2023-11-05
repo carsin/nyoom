@@ -4,7 +4,8 @@ import {
   updateDoc,
   getDoc,
 } from "firebase/firestore";
-import { firebaseAuth, db } from "../firebase-service";
+import { ref as storageRef, deleteObject } from "firebase/storage"
+import { firebaseAuth, db, storage } from "../firebase-service";
 import { MAX_CAPTION_LENGTH } from "../util/constants"
 
 // helper function for handleVote to ensure up/downvote exclusivity & singularity
@@ -107,7 +108,23 @@ class ManagePostService {
     
     try {
       const postRef = doc(db, 'posts', postId);
+      const postSnap = await getDoc(postRef);
+      
+      if (!postSnap.exists()) {
+        return { success: false, message: "No such post found!" };
+      }
+
+      const postData = postSnap.data();
+      const imageUrl = postData.imageUrl;
+      
+      // Delete the post document
       await deleteDoc(postRef);
+
+      // If there's an image URL, delete the file from storage
+      if (imageUrl) {
+        const imageRef = storageRef(storage, imageUrl); // Replace with the correct path if necessary
+        await deleteObject(imageRef);
+      }
       return { success: true, message: "Successfully deleted the post. Good riddance!" };
     } catch (error: any) {
       return { success: false, message: "Error deleting post: " + error.message };

@@ -1,7 +1,7 @@
 <template>
   <ion-card>
     <ion-card-header v-if="isLoading">
-        <ion-progress-bar type="indeterminate"></ion-progress-bar>
+      <ion-progress-bar type="indeterminate"></ion-progress-bar>
     </ion-card-header>
     <ion-grid v-else>
       <!-- Post header -->
@@ -10,12 +10,9 @@
         <ion-col class="ion-justify-content-center ion-text-left ion-align-items-bottom">
           <ion-button v-if="showAvatar" fill="clear">
             <router-link class="avatar-header-link" style="text-decoration: none;" :to="{ path: `/user/${username}` }">
-                <ion-avatar v-if="avatarUrl">
-                  <img :src="avatarUrl" alt="User avatar" />
-                </ion-avatar>
-                <ion-avatar v-else>
-                  <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
-                </ion-avatar>
+              <ion-avatar>
+                <img :src="avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="User avatar" />
+              </ion-avatar>
               <div class="ion-align-items-bottom ion-no-margin ion-margin-start">
                 <ion-card-title color="primary"> @{{ username }} </ion-card-title>
                 <ion-card-subtitle> {{ formattedTimestamp }} </ion-card-subtitle>
@@ -27,16 +24,18 @@
         <ion-col v-if="!showAvatar" class="ion-text-center ion-align-self-center ion-justify-content-center">
           <ion-card-subtitle> {{ formattedTimestamp }} </ion-card-subtitle>
         </ion-col>
-        <ion-col v-if="isPostOwner" class="ion-justify-content-center ion-align-items-bottom ion-text-end">
-          <ion-button fill="clear" v-if="!editingCaption" @click="editingCaption = true">
-            <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
-          </ion-button>
-          <ion-button v-if="editingCaption" color="danger" fill="clear" @click="editingCaption = false">
-            <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
-          </ion-button>
-          <ion-button fill="clear" @click="handlePostDelete">
-            <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
-          </ion-button>
+        <ion-col class="ion-justify-content-center ion-align-items-bottom ion-text-end">
+          <div v-if="isPostOwner">
+            <ion-button fill="clear" v-if="!editingCaption" @click="editingCaption = true">
+              <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
+            </ion-button>
+            <ion-button v-if="editingCaption" color="danger" fill="clear" @click="editingCaption = false">
+              <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
+            </ion-button>
+            <ion-button fill="clear" @click="handlePostDelete">
+              <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
+            </ion-button>
+          </div>
         </ion-col>
       </ion-row>
       <!-- Post image -->
@@ -47,12 +46,14 @@
       </ion-row>
       <!-- Condtional caption editing menu -->
       <ion-row v-if="editingCaption" class="ion-align-items-center">
-        <ion-col class="ion-text-left"  size="11">
+        <ion-col class="ion-text-left" size="11">
           <ion-label position="stacked" color="primary"><b>Edit Caption</b> </ion-label>
-          <ion-textarea v-model="newCaption" :maxlength="MAX_CAPTION_LENGTH" placeholder="Exude genius here" aria-label="Edit caption input" :counter="true" :autoGrow="true"/>
+          <ion-textarea v-model="newCaption" :maxlength="MAX_CAPTION_LENGTH" placeholder="Exude genius here"
+            aria-label="Edit caption input" :counter="true" :autoGrow="true" />
         </ion-col>
         <ion-col size="1" class="ion-text-right">
-          <ion-button :disabled="newCaption.length > MAX_CAPTION_LENGTH" v-if="editingCaption" color="success" @click="handleCaptionUpdate">
+          <ion-button :disabled="newCaption.length > MAX_CAPTION_LENGTH" v-if="editingCaption" color="success"
+            @click="handleCaptionUpdate">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
           </ion-button>
         </ion-col>
@@ -73,15 +74,52 @@
           </ion-chip>
         </ion-col>
       </ion-row>
+      <!-- Comments section -->
+      <ion-row>
+        <ion-col size="12">
+          <ion-list>
+            <ion-item v-for="comment in comments" :key="comment.id" lines="none">
+              <router-link style="text-decoration: none;" :to="{ path: `/user/${comment.username}` }">
+                <ion-avatar class="comment-avatar" slot="start">
+                  <img :src="comment.avatarUrl || 'default-avatar-url.png'" />
+                </ion-avatar>
+              </router-link>
+              <ion-label>
+                <router-link class="avatar-header-link" style="text-decoration: none;" :to="{ path: `/user/${comment.username}` }">
+                  <ion-card-subtitle color="primary">@{{ comment.username }}</ion-card-subtitle>
+                </router-link>
+                <p>{{ comment.text }}</p>
+              </ion-label>
+              <ion-button v-if="comment.canDelete" fill="clear" slot="end" @click="deleteComment(comment.id)">
+                <ion-icon slot="icon-only" color="danger" :icon="trash" />
+              </ion-button>
+              <ion-note slot="end">{{ comment.timestamp }}</ion-note>
+            </ion-item>
+          </ion-list>
+        </ion-col>
+      </ion-row>
+      <!-- Comment input -->
+      <ion-row class="ion-align-items-center">
+        <ion-col size="9">
+          <ion-item>
+            <ion-textarea v-model="newCommentText" placeholder="Add comment..."
+              :maxlength="MAX_COMMENT_LENGTH"></ion-textarea>
+          </ion-item>
+        </ion-col>
+        <ion-col class="ion-text-right" size="3">
+          <ion-button v-if="newCommentText.length > 0" @click="submitComment">Comment</ion-button>
+        </ion-col>
+      </ion-row>
     </ion-grid>
-    <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="1000" :color="toast.color" @didDismiss="toast.isOpen = false"></ion-toast>
+    <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="1000" :color="toast.color"
+      @didDismiss="toast.isOpen = false"></ion-toast>
   </ion-card>
 </template>
 
 <style scoped>
 .post-image-container {
   padding: 0px 16px 0px; /* horizontal padding only */
-  border-radius: 8px; 
+  border-radius: 8px;
   overflow: hidden; /* ensure that the border-radius is applied to the image inside */
   line-height: 0; /* removes any extra space below the image */
 }
@@ -98,17 +136,24 @@
 .voted {
   font-weight: bold;
 }
+
+.comment-avatar {
+  height: 3.2rem;
+  width: 3.2rem;
+  margin-right: 8px;
+}
 </style>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, ref } from 'vue';
-import { alertController, IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonAvatar } from '@ionic/vue';
+import { alertController, IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonList, IonItem, IonAvatar, IonNote } from '@ionic/vue';
 import { arrowUpCircle, arrowDownCircle, trash, pencil, checkmark, close } from 'ionicons/icons';
-import { getDocs, collection, query, where, doc, onSnapshot } from "firebase/firestore";
+import { getDocs, addDoc, deleteDoc, collection, query, orderBy, where, doc, onSnapshot } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
 import { useRouter } from 'vue-router';
-import { MAX_CAPTION_LENGTH } from "../util/constants"
+import { MAX_CAPTION_LENGTH, MAX_COMMENT_LENGTH } from "../util/constants"
 import { postManager } from '../services/ManagePostService';
+import { userInfoService } from "../services/UserInfoService";
 
 // vue props
 const props = defineProps({
@@ -126,25 +171,35 @@ const props = defineProps({
   timestamp: Object,
 });
 
-// vue refs for upvotes and downvotes
 const router = useRouter();
-const isLoading = ref(true); // Variable to manage loading state
+const isLoading = ref(true);
 const postCaption = ref(props.caption);
 const upvoteCount = ref(props.upvotes);
 const downvoteCount = ref(props.downvotes);
 const isUpvoted = ref(props.isUpvoted);
 const isDownvoted = ref(props.isDownvoted);
-const avatarUrl = ref(''); // Reactive variable to store the avatar URL
+const avatarUrl = ref('');
 const isPostOwner = ref(false);
-const editingCaption = ref(false); // State to manage the editing mode
+const editingCaption = ref(false); // State to manage the caption editing mode
 const newCaption = ref(props.caption || ""); // Reactive variable to store the new caption
 const toast = ref({ isOpen: false, message: '', color: '' });
 const user = firebaseAuth.currentUser;
+const newCommentText = ref('');
+interface Comment {
+  id: string;
+  text: string;
+  username: string;
+  avatarUrl: string;
+  canDelete: boolean,
+  timestamp: String,
+}
+const comments = ref<Comment[]>([]);
 
 onMounted(async () => {
   // Query Firestore based on the username to get avatar URL
   const userQuery = query(collection(db, 'users'), where('username', '==', props.username));
   const querySnapshot = await getDocs(userQuery);
+  await fetchComments();
 
   // check if post belongs to currently authenticated user
   if (user && user.uid === props.userId) {
@@ -182,6 +237,82 @@ const handleRealtimeUpdates = () => {
   });
 };
 
+// Fetch comments for the post
+const fetchComments = async () => {
+  const commentsCollection = collection(db, 'posts', props.imageId, 'comments');
+  const commentsQuery = query(commentsCollection, orderBy('timestamp', 'desc'));
+  const querySnapshot = await getDocs(commentsQuery);
+
+  // map through each comment and fetch the user's avatar URL
+  const commentsList = await Promise.all(querySnapshot.docs.map(async (doc) => {
+    const commentData = doc.data();
+    const userQuery = query(collection(db, 'users'), where('username', '==', commentData.username));
+    const userQuerySnapshot = await getDocs(userQuery);
+    const canDelete = user?.uid === commentData.userId;
+
+    // get comment avatar
+    let avatarUrl = '';
+    if (!userQuerySnapshot.empty) {
+      const userData = userQuerySnapshot.docs[0].data();
+      avatarUrl = userData.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg';
+    }
+    // get comment timestamp
+    const commentTimestamp = commentData.timestamp ? commentData.timestamp.toDate().toLocaleString() : 'unknown time';
+
+    return {
+      id: doc.id,
+      text: commentData.text,
+      username: commentData.username,
+      avatarUrl: avatarUrl,
+      canDelete: canDelete,
+      timestamp: commentTimestamp,
+    };
+  }));
+
+  comments.value = commentsList;
+};
+
+// Submit comment
+const submitComment = async () => {
+  if (newCommentText.value.trim() === '') {
+    toast.value = { isOpen: true, message: 'Comment cannot be empty', color: 'danger' };
+    return;
+  }
+  
+  const currentUsername = await userInfoService.getCurrentUserUsername();
+  const commentsCollection = collection(db, 'posts', props.imageId, 'comments');
+  const payload = {
+    text: newCommentText.value,
+    username: currentUsername, 
+    userId: user?.uid,
+    timestamp: new Date(),
+  };
+
+  try {
+    await addDoc(commentsCollection, payload);
+    newCommentText.value = ''; // Clear the textarea
+    await fetchComments(); // Refresh comments
+    toast.value = { isOpen: true, message: 'Comment added!', color: 'success' };
+  } catch (error: any) {
+    console.error('Error adding comment: ', error);
+    toast.value = { isOpen: true, message: 'Error adding comment: ' + error.message, color: 'danger' };
+  }
+};
+
+const deleteComment = async (commentId: string) => {
+  try {
+    // Assuming you have a subcollection 'comments' under each 'post' document
+    await deleteDoc(doc(db, 'posts', props.imageId, 'comments', commentId));
+    // Show a success message
+    toast.value = { isOpen: true, message: 'Comment deleted successfully', color: 'success' };
+    // Refresh the comments list
+    await fetchComments();
+  } catch (error) {
+    // Handle errors, such as showing an error message
+    console.error('Error deleting comment: ', error);
+    toast.value = { isOpen: true, message: 'Error deleting comment', color: 'danger' };
+  }
+};
 
 // sending of upvote and downvotes
 const handleVote = async (isUpvote: boolean) => {
@@ -246,4 +377,5 @@ const formattedTimestamp = computed(() => {
   }
   return '';
 });
+
 </script>

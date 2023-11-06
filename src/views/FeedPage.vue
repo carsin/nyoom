@@ -10,8 +10,16 @@
       </ion-toolbar>
     </ion-header>
     <ion-content v-if="!isLoading" :fullscreen="true">
+      <ion-refresher slot="fixed" @ionRefresh="refreshPosts($event)">
+        <ion-refresher-content pulling-text="Pull to fetch new posts" refreshing-spinner="circles"
+          refreshing-text="Fetching new posts...">
+        </ion-refresher-content>
+      </ion-refresher>
       <div v-if="posts.length > 0">
-        <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :imagePath="post.imagePath" :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted" :isDownvoted="post.isDownvoted" showAvatar/>
+        <PostCardComponent v-for="post in posts" :imageId="post.id" :username="post.username" :caption="post.caption"
+          :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl"
+          :imagePath="post.imagePath" :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted"
+          :isDownvoted="post.isDownvoted" showAvatar />
       </div>
       <ion-text v-else class="ion-text-center">
         <h3> <i> No one has posted anything :( </i></h3>
@@ -23,7 +31,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { IonPage, IonText, IonProgressBar, IonHeader, IonButton, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import { IonPage, IonText, IonRefresher, IonRefresherContent, IonProgressBar, IonHeader, IonButton, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import { db, firebaseAuth } from "../firebase-service";
 import { useRoute } from 'vue-router';
@@ -57,10 +65,19 @@ const fetchPosts = async () => {
   });
 }
 
+const refreshPosts = async (event: CustomEvent) => {
+  isLoading.value = true;
+  await fetchPosts();
+  isLoading.value = false;
+  event.target.complete();
+}
+
+// refresh posts after posting
 watch(() => route.path, async (newPath, oldPath) => {
-  if (oldPath === 'create-post' && newPath === '/feed') {
-    // Call your method to fetch posts here
+  if (oldPath === '/create-post' && newPath === '/feed') {
+    isLoading.value = true;
     await fetchPosts();
+    isLoading.value = false;
   }
 });
 

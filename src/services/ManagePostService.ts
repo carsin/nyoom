@@ -31,7 +31,7 @@ class ManagePostService {
     this.user = user;
   }
 
-  // Method to fetch comments for a specific post
+  // fetch comments with user avatars for a specific post
   async fetchComments(postId: string) {
     try {
       const commentsCollection = collection(db, 'posts', postId, 'comments');
@@ -94,6 +94,7 @@ class ManagePostService {
     }
   }
 
+  // modify existing caption
   async updateCaption(postId: string, newCaption: string, oldCaption: string) {
     if (newCaption === oldCaption) {
       return { success: false, message: "You have entered the same caption!" };
@@ -175,12 +176,11 @@ class ManagePostService {
       const postData = postSnap.data();
       const imageUrl = postData.imageUrl;
 
-      // Delete the post document
-      await deleteDoc(postRef);
+      await deleteDoc(postRef); // delete the post document
 
-      // If there's an image URL, delete the file from storage
-      if (imageUrl) {
-        const imageRef = storageRef(storage, imageUrl); // Replace with the correct path if necessary
+      
+      if (imageUrl) { // if there's an image URL, delete the file from storage
+        const imageRef = storageRef(storage, imageUrl);
         await deleteObject(imageRef);
       }
       return { success: true, message: "Successfully deleted the post. Good riddance!" };

@@ -148,7 +148,7 @@
 import { onMounted, onUnmounted, computed, ref } from 'vue';
 import { alertController, IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonList, IonItem, IonAvatar, IonNote } from '@ionic/vue';
 import { arrowUpCircle, arrowDownCircle, trash, pencil, checkmark, close } from 'ionicons/icons';
-import { getDocs, addDoc, deleteDoc, collection, query, orderBy, where, doc, onSnapshot } from "firebase/firestore";
+import { getDocs, collection, query, where, doc, onSnapshot } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
 import { useRouter } from 'vue-router';
 import { MAX_CAPTION_LENGTH, MAX_COMMENT_LENGTH } from "../util/constants"

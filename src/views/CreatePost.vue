@@ -12,7 +12,7 @@
           <ion-col size-md="6" offset-md="3">
             <ion-list>
               <ion-item v-if="imageFile">
-                <img :src="imagePreviewUrl" id="imagePreview" alt="Uploaded Image" />
+                <img :src="imagePreviewUrl" class="post-image" id="imagePreview" alt="Uploaded Image" />
               </ion-item>
               <ion-item>
                 <ion-label color="primary" position="stacked">Upload a photo: </ion-label>

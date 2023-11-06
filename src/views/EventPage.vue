@@ -32,6 +32,19 @@
             </ion-button>
           </ion-buttons>
         </ion-toolbar>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #1" event-type="Car Meet"></EventCardComponent>
+            </ion-col>
+            <ion-col size="6">
+              <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #2" event-type="Car Meet"></EventCardComponent>
+            </ion-col>
+            <ion-col size="6">
+              <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #3" event-type="Car Meet"></EventCardComponent>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
           
           <!--<p>{{ message }}</p>
         </ion-toolbar>
@@ -60,10 +73,30 @@
           <ion-title class="ion-text-center">Subscribed Events</ion-title>
         </ion-toolbar>
         <ion-toolbar>
-          <ion-searchbar show-clear-button="focus" placeholder="Search parts"
+          <ion-searchbar show-clear-button="focus" placeholder="Search Events"
             class="ion-padding-start ion-padding-end"></ion-searchbar>
+          <ion-buttons slot="end">
+            <ion-button expand="block">
+              <ion-icon :icon="funnel"></ion-icon>
+            </ion-button>
+          </ion-buttons>
         </ion-toolbar>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #1" event-type="Car Meet"></EventCardComponent>
+            </ion-col>
+            <ion-col size="6">
+              <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #2" event-type="Car Meet"></EventCardComponent>
+            </ion-col>
+            <ion-col size="6">
+              <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #3" event-type="Car Meet"></EventCardComponent>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
       </div>
+
+      
         <!-- <ion-grid>
           <ion-row>
             <ion-col>
@@ -95,8 +128,9 @@
 import { useStore } from "vuex";
 import { computed } from "vue";
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSearchbar, 
-         IonButton, IonSegment, IonSegmentButton, IonLabel, IonButtons, IonIcon } from '@ionic/vue';
+         IonButton, IonSegment, IonSegmentButton, IonLabel, IonButtons, IonIcon, IonCard } from '@ionic/vue';
 import { funnel } from "ionicons/icons";
+import EventCardComponent from '@/components/EventCardComponent.vue';
 
 const store = useStore();
 const selectedTab = computed(() => store.state.eventTabs.selectedTab);

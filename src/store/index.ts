@@ -14,6 +14,17 @@ const store = createStore({
         },
       },
     },
+    eventTabs: {
+      namespaced: true,
+      state: {
+        selectedTab: "recommended", // Initial value
+      },
+      mutations: {
+        setSelectedTab(state, tab) {
+          state.selectedTab = tab;
+        },
+      },
+    },
     // Other modules, if needed
   },
   plugins: [createPersistedState()],

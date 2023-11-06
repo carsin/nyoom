@@ -33,7 +33,7 @@ import {
   IonItem,
   modalController,
 } from '@ionic/vue';
-import { defineComponent, ref } from 'vue';
+import { ref } from 'vue';
 
 const name = ref();
 const selectedOption = ref('');

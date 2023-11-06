@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 import { home, search, balloon, cart, person } from 'ionicons/icons';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import { firebaseAuth, db } from "../firebase-service";
 import { doc, getDoc } from "firebase/firestore";
 import { useRoute } from 'vue-router';

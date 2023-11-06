@@ -14,7 +14,7 @@
     </ion-header>
       <ion-content :fullscreen="true">
         <ion-grid>
-          <div align="center">
+          <div align="center"> <!-- TODO: remove align="center", it adds a code smell -->
             <ion-row>
               <ion-col size="6">
                 <ion-card href="audiModels">
@@ -140,7 +140,6 @@
               </ion-col>
               <ion-col size="6">
                 <ion-card>
-                  <!-- <ion-title align="center" class="wide"> -->
                   <img class="center-align" alt="Fiat logo" src="../assets/logos/fiat.png" height='100' max-width='425'/>
                   <ion-card-header>
                     <ion-card-subtitle>Fiat</ion-card-subtitle>
@@ -436,5 +435,5 @@
 </style>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar } from '@ionic/vue';
 </script>

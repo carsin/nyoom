@@ -101,10 +101,12 @@
       <!-- Comment input -->
       <ion-row class="ion-align-items-center">
         <ion-col size="9">
-          <ion-item>
-            <ion-textarea v-model="newCommentText" placeholder="Add comment..."
-              :maxlength="MAX_COMMENT_LENGTH"></ion-textarea>
-          </ion-item>
+          <ion-list>
+            <ion-item>
+              <ion-input v-model="newCommentText" placeholder="Add comment..."
+                :maxlength="MAX_COMMENT_LENGTH" @keyup.enter="handleCommentSubmit"></ion-input>
+            </ion-item>
+          </ion-list>
         </ion-col>
         <ion-col class="ion-text-right" size="3">
           <ion-button v-if="newCommentText.length > 0" @click="handleCommentSubmit">Comment</ion-button>
@@ -146,7 +148,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, ref } from 'vue';
-import { alertController, IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonList, IonItem, IonAvatar, IonNote } from '@ionic/vue';
+import { alertController, IonCard, IonLabel, IonButton, IonChip, IonCardContent, IonCardSubtitle, IonCardTitle, IonGrid, IonIcon, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonList, IonItem, IonAvatar, IonNote, IonInput } from '@ionic/vue';
 import { arrowUpCircle, arrowDownCircle, trash, pencil, checkmark, close } from 'ionicons/icons';
 import { getDocs, collection, query, where, doc, onSnapshot } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";

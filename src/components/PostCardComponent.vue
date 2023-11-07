@@ -93,7 +93,7 @@
               <ion-button v-if="comment.canDelete" fill="clear" slot="end" @click="handleCommentDelete(comment.id)">
                 <ion-icon slot="icon-only" color="danger" :icon="trash" />
               </ion-button>
-              <ion-note slot="end">{{ comment.timestamp }}</ion-note>
+              <ion-note slot="end" class="ion-no-margin">{{ comment.timestamp }}</ion-note>
             </ion-item>
           </ion-list>
         </ion-col>

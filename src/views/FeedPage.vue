@@ -24,6 +24,7 @@
       <ion-text v-else class="ion-text-center">
         <h3> <i> No one has posted anything :( </i></h3>
       </ion-text>
+      <ChatBoxUI/>
     </ion-content>
   </ion-page>
 </template>
@@ -33,6 +34,7 @@ import { ref, onMounted, watch } from 'vue';
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { IonPage, IonText, IonRefresher, IonRefresherContent, IonProgressBar, IonHeader, IonButton, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import PostCardComponent from '@/components/PostCardComponent.vue';
+import ChatBoxUI from '@/components/ChatBoxUI.vue';
 import { db, firebaseAuth } from "../firebase-service";
 import { useRoute } from 'vue-router';
 

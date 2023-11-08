@@ -1,4 +1,4 @@
-import { collection, query, orderBy, getDocs, getDoc, addDoc, where, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { doc, collection, query, orderBy, getDocs, getDoc, addDoc, deleteDoc, updateDoc } from "firebase/firestore";
 import { ref as storageRef, deleteObject } from "firebase/storage"
 import { firebaseAuth, db, storage } from "../firebase-service";
 import { MAX_CAPTION_LENGTH } from "../util/constants"
@@ -38,24 +38,27 @@ class ManagePostService {
       const commentsQuery = query(commentsCollection, orderBy('timestamp', 'desc'));
       const querySnapshot = await getDocs(commentsQuery);
 
-      const comments = await Promise.all(querySnapshot.docs.map(async (doc) => {
-        const commentData = doc.data();
-        const userQuery = query(collection(db, 'users'), where('username', '==', commentData.username));
-        const userQuerySnapshot = await getDocs(userQuery);
+      const comments = await Promise.all(querySnapshot.docs.map(async (commentDoc) => {
+        const commentData = commentDoc.data();
+        const userDocRef = doc(db, 'users', commentData.userId);
+        const userDocSnap = await getDoc(userDocRef);
 
         let avatarUrl = '';
-        if (!userQuerySnapshot.empty) {
-          const userData = userQuerySnapshot.docs[0].data();
+        let commentUsername = '';
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
           avatarUrl = userData.avatarUrl;
+          commentUsername = userData.username;
         }
 
         const commentTimestamp = commentData.timestamp ? commentData.timestamp.toDate().toLocaleString() : new Date();
 
         return {
-          id: doc.id,
-          text: commentData.text,
-          username: commentData.username,
+          id: commentDoc.id,
+          userId: commentData.userId,
+          username: commentUsername,
           avatarUrl: avatarUrl,
+          text: commentData.text,
           canDelete: this.user?.uid === commentData.userId,
           timestamp: commentTimestamp, // You might want to format this
         };
@@ -74,7 +77,6 @@ class ManagePostService {
       const commentsCollection = collection(db, 'posts', postId, 'comments');
       const payload = {
         text: text,
-        username: username,
         userId: this.user.uid,
         timestamp: new Date(),
       };
@@ -174,11 +176,9 @@ class ManagePostService {
       }
 
       const postData = postSnap.data();
-      const imageUrl = postData.imageUrl;
-
       await deleteDoc(postRef); // delete the post document
-
       
+      const imageUrl = postData.imageUrl;
       if (imageUrl) { // if there's an image URL, delete the file from storage
         const imageRef = storageRef(storage, imageUrl);
         await deleteObject(imageRef);

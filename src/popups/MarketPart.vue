@@ -11,7 +11,7 @@
 
     <!-- Display trash and edit icons if the user IDs match -->
     <div v-if="selectedPart?.userId === user?.uid">
-      <ion-button fill="clear" v-if="!editingPart" @click="editingPart = true">
+      <ion-button fill="clear" v-if="!editingPart" @click="startEditing">
         <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
       </ion-button>
       <ion-button
@@ -29,19 +29,25 @@
           :icon="trash"
         />
       </ion-button>
-      <!-- Condtional caption editing menu -->
+      <!-- Conditional part editing menu -->
       <ion-row v-if="editingPart">
         <ion-col size="11">
           <ion-label position="stacked" color="primary"
-            ><b>Edit Part Info</b>
-          </ion-label>
-          <ion-textarea
-            v-model="newPrice"
-            placeholder="Enter new price"
-            aria-label="Edit price"
-            :counter="true"
-            :autoGrow="true"
-          />
+            ><b>Edit Part Info</b></ion-label
+          >
+          <ion-input v-model="newPrice" placeholder="Edit price"></ion-input>
+          <ion-input
+            v-model="newCondition"
+            placeholder="Edit condition"
+          ></ion-input>
+          <ion-input
+            v-model="newDescription"
+            placeholder="Edit description"
+          ></ion-input>
+          <ion-input
+            v-model="newLocation"
+            placeholder="Edit location"
+          ></ion-input>
         </ion-col>
         <ion-col size="1" class="ion-text-right">
           <ion-button
@@ -65,7 +71,6 @@
       <ion-subtitle>{{ selectedPart?.condition }}</ion-subtitle>
       <br />
       <ion-subtitle>{{ selectedPart?.description }}</ion-subtitle>
-
       <div v-if="selectedPart?.userId !== user?.uid">
         <ion-button @click="BuyNow">Buy Now</ion-button>
         <ion-button @click="MessageSeller">Message Seller</ion-button>
@@ -103,7 +108,6 @@ const editingPart = ref(false); // State to manage the caption editing mode
 
 const cancel = () => modalController.dismiss(null, "cancel");
 
-//console.log("passed value part is: ", selectedPart.value);
 const toast = ref({ isOpen: false, message: "", color: "" });
 
 // show a confirmation dialog before deletion of post
@@ -141,14 +145,24 @@ const handlePartDelete = async () => {
   });
   await alert.present();
 };
-const newPrice = ref(selectedPart.value.price || ""); // Reactive variable to store the new price
 
-// Save the updated price
+const newPrice = ref(selectedPart.value.price || ""); // Reactive variable to store the new price
+const newCondition = ref(selectedPart.value.condition || ""); // Reactive variable to store the new condition
+const newDescription = ref(selectedPart.value.description || ""); // Reactive variable to store the new description
+const newLocation = ref(selectedPart.value.location || ""); // Reactive variable to store the new location
+
+const startEditing = () => {
+  editingPart.value = true;
+  newPrice.value = selectedPart.value.price; // Display current price when editing starts
+};
 const handlePartUpdate = async () => {
-  const result = await partManager.updateListing(
-    selectedPart.value.id,
-    newPrice.value
-  );
+  const result = await partManager.updateListing(selectedPart.value.id, {
+    price: newPrice.value, // Replace with the new price
+    condition: newCondition.value, // Replace with the new condition
+    description: newDescription.value, // Replace with the new description
+    location: newLocation.value, // Replace with the new location
+  });
+
   if (result.success) {
     toast.value = { isOpen: true, color: "success", message: result.message };
     editingPart.value = false;

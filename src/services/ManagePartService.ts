@@ -20,8 +20,7 @@ class ManagePartService {
     this.user = user;
   }
 
-  // modify existing listing
-  async updateListing(partId: string, newPrice: number) {
+  async updateListing(partId: string, updatedFields: Record<string, any>) {
     try {
       const partRef = doc(db, "parts", partId);
       const partDoc = await getDoc(partRef);
@@ -30,8 +29,8 @@ class ManagePartService {
         const partData = partDoc.data();
 
         if (this.user && partData.userId === this.user.uid) {
-          await updateDoc(partRef, { price: newPrice });
-          return { success: true, message: "Price edit confirmed!" };
+          await updateDoc(partRef, updatedFields);
+          return { success: true, message: "Listing updated successfully!" };
         } else {
           return {
             success: false,
@@ -44,7 +43,7 @@ class ManagePartService {
     } catch (error: any) {
       return {
         success: false,
-        message: "Error while saving new price: " + error.message,
+        message: "Error while updating the listing: " + error.message,
       };
     }
   }

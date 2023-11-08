@@ -43,11 +43,7 @@
           <ion-row>
             <ion-col v-for="part in parts" :key="part.id" size="6">
               <ion-card @click="partModal(part)">
-                <img
-                  alt="Part image"
-                  :src="part.images"
-                  class="custom-image"
-                />
+                <img alt="Part image" :src="part.images" class="custom-image" />
                 <ion-card-header>
                   <ion-card-subtitle>{{ part.condition }}</ion-card-subtitle>
                   <ion-card-subtitle class="card-price">{{
@@ -127,7 +123,7 @@
 
 .card-price {
   color: green;
-  font-weight: "bold";
+  font-weight: bold;
   max-width: 200px;
   overflow: hidden;
 }
@@ -159,7 +155,7 @@ import {
   IonIcon,
 } from "@ionic/vue";
 import { funnel } from "ionicons/icons";
-import { collection, query, getDocs, } from "firebase/firestore";
+import { collection, query, getDocs } from "firebase/firestore";
 import { db } from "../firebase-service";
 import { useRouter, useRoute } from "vue-router";
 
@@ -167,8 +163,7 @@ const isLoading = ref(true); // Variable to manage loading state
 const route = useRoute();
 const router = useRouter();
 const partData = ref([{}]); // Reactive variable to store user data
-const toast = ref({ isOpen: false, message: "", color: "" });
-const posts = ref([]); // Variable to hold the user's posts
+const offerData = ref([{}]); // Reactive variable to store user data
 let noResults = false;
 
 onMounted(async () => {
@@ -187,11 +182,26 @@ onMounted(async () => {
       ...doc.data(),
     }));
   }
+  const offersQuery = query(collection(db, "offers"));
+  const offerSnapshot = await getDocs(offersQuery);
+
+  if (offerSnapshot.empty) {
+    //later implement an empty
+    noResults = true;
+  } else {
+    // parts exists
+    isLoading.value = false;
+
+    offerData.value = offerSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  }
 });
 
 const store = useStore();
 const parts = partData;
-const offers = computed(() => store.getters.offers);
+const offers = offerData;
 const selectedTab = computed(() => store.state.tabs.selectedTab);
 
 const selectTab = (tab: string) => {
@@ -204,7 +214,6 @@ const isAutoShopTab = computed(() => selectedTab.value === "auto-shop");
 import MarketFilter from "../popups/MarketFilter.vue";
 import MarketPart from "../popups/MarketPart.vue";
 import MarketOffer from "@/popups/MarketOffer.vue";
-
 
 const message = ref("Sort by: Featured (default)");
 
@@ -221,28 +230,32 @@ const filterModal = async () => {
     message.value = `Sort by: ${data}`;
   }
 };
-const partModal = (part:any) => {
-  modalController.create({
-    component: MarketPart,
-    componentProps: {
-      part: part,
-    },
-    cssClass: 'your-modal-css-class', // Add a custom CSS class if needed
-  }).then((modal) => {
-    modal.present();
-  });
+const partModal = (part: any) => {
+  modalController
+    .create({
+      component: MarketPart,
+      componentProps: {
+        part: part,
+      },
+      cssClass: "your-modal-css-class", // Add a custom CSS class if needed
+    })
+    .then((modal) => {
+      modal.present();
+    });
 };
 
-const offerModal = (offer:any) => {
-  modalController.create({
-    component: MarketOffer,
-    componentProps: {
-      offer: offer,
-    },
-    cssClass: 'your-modal-css-class', // Add a custom CSS class if needed
-  }).then((modal) => {
-    modal.present();
-  });
+const offerModal = (offer: any) => {
+  modalController
+    .create({
+      component: MarketOffer,
+      componentProps: {
+        offer: offer,
+      },
+      cssClass: "your-modal-css-class", // Add a custom CSS class if needed
+    })
+    .then((modal) => {
+      modal.present();
+    });
 };
 
 const postPart = () => {

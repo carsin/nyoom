@@ -8,9 +8,6 @@
           </ion-button>
         </ion-buttons>
         <ion-title>{{ selectedOffer?.deal }}</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="confirm" :strong="true">Confirm</ion-button>
-        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
@@ -30,8 +27,6 @@ import {
   IonToolbar,
   IonButtons,
   IonButton,
-  IonList,
-  IonItem,
   modalController,
 } from "@ionic/vue";
 import { ref } from "vue";
@@ -41,10 +36,11 @@ const props = defineProps({
   offer: Object,
 });
 
+//Doesnt work RN because need to add to DB
 const selectedOffer = ref(props.offer);
+console.log("selected offer: ", selectedOffer.value);
 
 const cancel = () => modalController.dismiss(null, "cancel");
-const confirm = () => modalController.dismiss(selectedOffer.value, "confirm");
 
 console.log("passed value offer is: ", selectedOffer.value);
 </script>

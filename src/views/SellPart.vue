@@ -139,6 +139,7 @@ const uploadImage = async (event: any) => {
 
 // sending post to posts firestore collection
 const seller = ref("");
+const sellerId = ref("");
 const itemName = ref("");
 const price = ref<number>(0);
 const description = ref("");

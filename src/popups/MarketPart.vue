@@ -49,15 +49,13 @@
             placeholder="Edit location"
           ></ion-input>
         </ion-col>
-        <ion-col size="1" class="ion-text-right">
-          <ion-button
-            v-if="editingPart"
-            color="success"
-            @click="handlePartUpdate"
-          >
-            <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
-          </ion-button>
-        </ion-col>
+        <ion-button
+          v-if="editingPart"
+          color="success"
+          @click="handlePartUpdate"
+        >
+          <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
+        </ion-button>
       </ion-row>
     </div>
 

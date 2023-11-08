@@ -55,7 +55,7 @@
           <ion-grid>
             <ion-row>
               <ion-col v-for="part in parts" :key="part.id" size="6">
-                <ion-card @click="partModal(part)">
+                <ion-card @click="partModal(part)" class="card-dimensions">
                   <img
                     alt="Part image"
                     :src="part.images"
@@ -66,9 +66,9 @@
                     <ion-card-subtitle class="card-price">{{
                       part.price
                     }}</ion-card-subtitle>
-                    <ion-card-subtitle class="card-title">{{
-                      part.itemName
-                    }}</ion-card-subtitle>
+                    <ion-card-subtitle class="card-title">
+                      {{ part.itemName ? truncateText(part.itemName, 18) : "" }}
+                    </ion-card-subtitle>
                   </ion-card-header>
                 </ion-card>
               </ion-col>
@@ -146,6 +146,12 @@
   color: green;
   font-weight: bold;
   max-width: 200px;
+  overflow: hidden;
+}
+.card-dimensions {
+  color: green;
+  font-weight: bold;
+  height: 200px;
   overflow: hidden;
 }
 </style>
@@ -246,6 +252,13 @@ watch(
     }
   }
 );
+
+const truncateText = (text: string, maxLength: number) => {
+  if (text.length > maxLength) {
+    return text.slice(0, maxLength) + "...";
+  }
+  return text;
+};
 
 const store = useStore();
 const parts = partData;

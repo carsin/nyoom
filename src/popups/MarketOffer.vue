@@ -3,23 +3,22 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button color="medium" @click="cancel"> X </ion-button>
+          <ion-button color="medium" @click="cancel">
+            <!-- <ion-icon name="arrow-back-outline"></ion-icon> -->X
+          </ion-button>
         </ion-buttons>
-        <ion-title>{{ selectedPart?.itemName }}</ion-title>
+        <ion-title>{{ selectedOffer?.deal }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="confirm" :strong="true">Confirm</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
-    <img alt="Part image" :src="selectedPart?.images" class="custom-image" />
+    <img alt="Offer image" :src="selectedOffer?.images" class="custom-image" />
     <br />
-    <ion-subtitle>{{ selectedPart?.condition }}</ion-subtitle>
+    <ion-subtitle>{{ selectedOffer?.shopName }}</ion-subtitle>
     <br />
-    <ion-subtitle>{{ selectedPart?.price }}</ion-subtitle>
-    <br />
-    <ion-button @click="BuyNow">Buy Now</ion-button>
-    <ion-button @click="MessageSeller">Message Seller</ion-button>
+    <ion-button @click="BookNow">Book Now</ion-button>
   </ion-content>
 </template>
 
@@ -34,21 +33,20 @@ import {
   IonList,
   IonItem,
   modalController,
-  IonIcon,
 } from "@ionic/vue";
 import { ref } from "vue";
 
-// Define the expected 'part' prop
+// Define the expected 'offer' prop
 const props = defineProps({
-  part: Object,
+  offer: Object,
 });
 
-const selectedPart = ref(props.part);
+const selectedOffer = ref(props.offer);
 
 const cancel = () => modalController.dismiss(null, "cancel");
-const confirm = () => modalController.dismiss(selectedPart.value, "confirm");
+const confirm = () => modalController.dismiss(selectedOffer.value, "confirm");
 
-console.log("passed value part is: ", selectedPart.value);
+console.log("passed value offer is: ", selectedOffer.value);
 </script>
 
 <style scoped>

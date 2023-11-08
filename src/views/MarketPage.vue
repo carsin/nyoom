@@ -45,7 +45,7 @@
               <ion-card @click="partModal(part)">
                 <img
                   alt="Part image"
-                  :src="part.imageUrl"
+                  :src="part.images"
                   class="custom-image"
                 />
                 <ion-card-header>
@@ -84,13 +84,10 @@
         <ion-grid>
           <ion-row>
             <ion-col v-for="offer in offers" :key="offer.id" size="6">
-              <ion-card
-                :href="'/market/autoshop/' + offer.id"
-                class="custom-card"
-              >
+              <ion-card @click="offerModal(offer)">
                 <img
                   alt="Offer image"
-                  :src="offer.imageUrl"
+                  :src="offer.images"
                   class="custom-image"
                 />
                 <ion-card-header>
@@ -206,6 +203,7 @@ const isAutoShopTab = computed(() => selectedTab.value === "auto-shop");
 
 import MarketFilter from "../popups/MarketFilter.vue";
 import MarketPart from "../popups/MarketPart.vue";
+import MarketOffer from "@/popups/MarketOffer.vue";
 
 
 const message = ref("Sort by: Featured (default)");
@@ -228,6 +226,18 @@ const partModal = (part:any) => {
     component: MarketPart,
     componentProps: {
       part: part,
+    },
+    cssClass: 'your-modal-css-class', // Add a custom CSS class if needed
+  }).then((modal) => {
+    modal.present();
+  });
+};
+
+const offerModal = (offer:any) => {
+  modalController.create({
+    component: MarketOffer,
+    componentProps: {
+      offer: offer,
     },
     cssClass: 'your-modal-css-class', // Add a custom CSS class if needed
   }).then((modal) => {

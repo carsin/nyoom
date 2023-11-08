@@ -3,7 +3,8 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Profile Settings</ion-title>
-        <ion-button class="ion-padding-end" slot="end" fill="outline" :href="userProfileHref">
+        <ion-button class="ion-padding-end" slot="end" fill="outline"
+          @click="router.go(-1)">
           Back to Profile
         </ion-button>
       </ion-toolbar>
@@ -16,8 +17,7 @@
           <ion-col>
             <ion-list>
               <ion-item>
-                <img v-if="avatarUrl" class="profile-avatar" :src="avatarUrl" alt="Avatar image"/>
-                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
+                <img class="profile-avatar" :src="avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="Avatar image"/>
               </ion-item>
               <ion-item>
                 <ion-label position="stacked" id="avatar" color="primary" aria-label="Change Avatar">Change Avatar:</ion-label>
@@ -77,25 +77,24 @@ import { firebaseAuth, db } from "../firebase-service";
 import { doc, getDoc } from 'firebase/firestore';
 import { MAX_BIO_LENGTH } from "../util/constants"
 import { profileManager } from '../services/ManageProfileService';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const uploadProgress = ref(0);
 const isUploading = ref(false);
 const toast = ref({ isOpen: false, message: '', color: '' });
 const avatarUrl = ref('');
 const newBiography = ref(''); // reactive variable to store the new biography input
-const userProfileHref = ref('/feed');
 const user = firebaseAuth.currentUser;
 
-// get users data and update profile picture on load
 onMounted(async () => {
+  // get users data and update profile picture on load
   if (user) {
     const userDocRef = doc(db, 'users', user.uid);
     const docSnap = await getDoc(userDocRef);
     if (docSnap.exists()) {
       avatarUrl.value = docSnap.data().avatarUrl;
-      const username = docSnap.data().username;
       newBiography.value = docSnap.data().biography;
-      userProfileHref.value = `/user/${username}`; // update back button url reference
     }
   }
 });
@@ -110,8 +109,8 @@ const handleBioUpdate = async () => {
 };
 
 const updateAvatar = async (event: any) => {
-  const file = event.target.files[0];
   isUploading.value = true;
+  const file = event.target.files[0];
   const result = await profileManager.updateAvatar(file, (progress) => {
     uploadProgress.value = progress;
   });

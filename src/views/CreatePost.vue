@@ -96,11 +96,11 @@ const handleCreatePost = async () => {
     return;
   }
 
-  // get userdata for username and uid
+  
   try {
     const postsCollection = collection(db, 'posts');
     if (user) {
-      // get user data
+      // get userdata for username and uid
       const userDocRef = doc(db, 'users', user.uid);
       const docSnap = await getDoc(userDocRef);
       if (docSnap.exists()) {

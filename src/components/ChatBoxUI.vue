@@ -1,47 +1,68 @@
 <template>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="isChatVisible">
     <ion-fab-button @click="toggleChat">
-      <ion-icon :icon="isChatOpen ? close: chatbubbles"></ion-icon>
+      <ion-icon :icon="isChatOpen ? close : chatbubbles"></ion-icon>
     </ion-fab-button>
     <ion-fab-list side="top" v-show="isChatOpen">
       <div class="chat-container">
-        <div>
-          <!-- Search results to start new conversations -->
+        <!-- Search View -->
+        <div v-if="currentView === 'search'">
+          <ion-progress-bar v-if="isSearching" type="indeterminate"></ion-progress-bar>
+          <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers"
+            placeholder="Search users to message..."></ion-searchbar>
           <ion-list v-if="searchResults.length > 0">
             <ion-list-header lines="full">
               <ion-label>User Search Results:</ion-label>
             </ion-list-header>
-            <ion-item v-for="user in searchResults" class="searchuser-result-item" :key="user.uid" @click="startConversationWithUser(user)">
+            <ion-item v-for="user in searchResults" :key="user.uid" @click="prepareConversation(user)">
               <ion-avatar slot="start">
-                <img :src="user.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'">
+                <img :src="user.avatarUrl || defaultAvatar">
               </ion-avatar>
               <ion-label>{{ user.username }}</ion-label>
             </ion-item>
-          </ion-list>
-          <!-- List of current conversations -->
-          <ion-list v-if="conversations.length > 0">
-            <ion-list-header lines="full">
-              <ion-label>Conversations</ion-label>
+            <ion-list-header lines="full" v-if="conversations.length > 0">
+              <ion-label>Active Conversations:</ion-label>
             </ion-list-header>
-            <ion-item v-for="conversation in conversations" :key="conversation.id" @click="enterConversation(conversation)">
-              <ion-avatar slot="start">
-                <img :src="conversation.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'">
-              </ion-avatar>
-              <ion-label>{{ conversation.title }}</ion-label>
+            <ion-item v-for="conversation in conversations" :key="conversation.id"
+              @click="prepareConversation(conversation)">
+              <!-- <ion-avatar slot="start"> -->
+              <!--   <img :src="getParticipantAvatar(conversation.participants) || defaultAvatar"> -->
+              <!-- </ion-avatar> -->
+              <!-- <ion-label>{{ getParticipantUsername(conversation.participants) }}</ion-label> -->
+              <!-- display the last message or message time here -->
             </ion-item>
           </ion-list>
         </div>
-        <!-- Chat content goes here -->
-        <div class="messages">
-          <!-- This will contain messages -->
+        <!-- Conversation View -->
+        <div v-if="currentView === 'conversation'">
+          <ion-list class="message-list ion-no-padding">
+            <ion-list-header lines="full" v-if="activeConversationDisplay">
+              <!-- Message header -->
+              <ion-avatar class="recipient-header-avatar">
+                <img :src="activeConversationDisplay.avatarUrl || defaultAvatar" alt="Recipient avatar">
+              </ion-avatar>
+              <ion-label>{{ activeConversationDisplay.username }}</ion-label>
+              <ion-button size="large" fill="clear" @click="backToConversations">
+                <ion-icon :icon="arrowBack"></ion-icon>
+              </ion-button>
+          </ion-list-header>
+            <!-- Messages  -->
+            <ion-item v-for="message in messages" :key="message.id">
+              <ion-label>
+                <p>{{ message.senderId === currentUser.uid ? 'You' : message.senderName }}: {{ message.content }}</p>
+                <!-- <p class="message-timestamp">{{ message.timestamp.toDate() }}</p> -->
+              </ion-label>
+            </ion-item>
+          </ion-list>
+          <div class="message-input-box">
+            <ion-item lines="none">
+              <ion-input placeholder="Type a message..." v-model="message" @keyup.enter="sendMessage"></ion-input>
+              <ion-button fill="clear" @click="sendMessage">
+                <ion-icon slot="icon-only" :icon="send"></ion-icon>
+              </ion-button>
+            </ion-item>
+          </div>
         </div>
-        <ion-searchbar v-model="searchQuery" @ionChange="searchUsers" @keyup.enter="searchUsers" placeholder="Search users to message..."></ion-searchbar>
-        <ion-item lines="none">
-          <ion-input placeholder="Type a message..." v-model="message" @keyup.enter="sendMessage"></ion-input>
-          <ion-button fill="clear" @click="sendMessage">
-            <ion-icon slot="icon-only" :icon="send"></ion-icon>
-          </ion-button>
-        </ion-item>
       </div>
     </ion-fab-list>
     <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="3000" :color="toast.color"></ion-toast>
@@ -49,31 +70,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { IonFab, IonToast, IonFabButton, IonFabList, IonListHeader, IonIcon, IonItem, IonInput, IonSearchbar, IonAvatar, IonLabel, IonButton, IonList } from '@ionic/vue';
-import { chatbubbles, close, send} from 'ionicons/icons';
-import { limit, collection, query, where, getDocs } from 'firebase/firestore';
-import { db, firebaseAuth } from "../firebase-service";
+import { ref, computed, onMounted } from 'vue';
+import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar } from '@ionic/vue';
+import { chatbubbles, close, send, arrowBack } from 'ionicons/icons';
+import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
+import { collection, query, onSnapshot, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
-const isChatVisible = ref(true); // You can toggle this based on route if needed
+const isChatVisible = ref(true);
 const isChatOpen = ref(false);
-const message = ref("");
+const isSearching = ref(false);
+const currentView = ref('search'); // 'search' or 'conversation'
 const searchQuery = ref('');
 const searchResults = ref([]);
+const message = ref('');
+const messages = ref([]);
 const conversations = ref([]);
+const activeConversation = ref(); // Store active conversation details here
+const defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
 const toast = ref({ isOpen: false, message: '', color: '' });
-const preparedConversation = ref('');
-const user = firebaseAuth.currentUser;
+const currentUser = firebaseAuth.currentUser;
+
+onMounted(() => {
+  fetchConversations();
+});
+
+
+const fetchConversations = () => {
+  const conversationsRef = collection(db, 'conversations');
+  const q = query(conversationsRef, where('participants', 'array-contains', currentUser?.uid));
+
+  // Real-time listener for the conversations
+  onSnapshot(q, (querySnapshot) => {
+    conversations.value = querySnapshot.docs.map((doc) => {
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    });
+  });
+};
 
 const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
-};
-
-const sendMessage = () => {
-  if (message.value.trim() !== "") {
-    // Handle sending message
-    console.log(message.value);
-    message.value = ""; // Reset input after sending
+  if (!isChatOpen.value) {
+    // Reset views when closing the chat
+    searchQuery.value = '';
+    searchResults.value = [];
   }
 };
 
@@ -82,73 +124,163 @@ const searchUsers = async () => {
     searchResults.value = [];
     return;
   }
-  console.log("searching for: " + searchQuery.value);
+  isSearching.value = true;
 
   const usersRef = collection(db, 'users');
-  const q = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'), limit(10));
-  const querySnapshot = await getDocs(q);
-  searchResults.value = querySnapshot.docs.map(doc => ({
-    uid: doc.id,
-    ...doc.data()
-  }));
-  if (searchResults.value.length == 0) {
-    toast.value = { isOpen: true, message: "No users found!", color: 'danger' };
-  }
-  console.log("results: " + searchResults.value);
+  const userQuery = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'));
+  const querySnapshot = await getDocs(userQuery);
+  searchResults.value = querySnapshot.docs
+    .map(doc => ({
+      uid: doc.id,
+      ...doc.data()
+    }))
+    .filter(user => user.uid !== currentUser?.uid); // filter out the current user
+  isSearching.value = false;
 };
 
-const startConversationWithUser = async (selectedUser) => {
-  // clear results and searchbox
-  searchResults.value = [];
-  searchQuery.value = "";
-  conversations.value.push({
-    title: selectedUser.username,
-    avatar: selectedUser.avatarUrl,
-  })
-  // Check if a conversation already exists between the current user and the selected user
-  // If it exists, navigate to that conversation instead of creating a new one
+const activeConversationDisplay = computed(() => {
+  if (activeConversation.value) {
+    return {
+      avatarUrl: activeConversation.value.recipient.avatarUrl || defaultAvatar,
+      username: activeConversation.value.recipient.username
+    };
+  }
+  return null;
+});
+
+
+const prepareConversation = async (selectedUser) => {
+  if (!currentUser) {
+    console.error('No current user logged in.');
+    return;
+  }
+
+  // Define the current user's UID and the selected user's UID
+  const currentUserUid = currentUser.uid;
+  const selectedUserUid = selectedUser.uid;
+
+  // Query to check if a conversation between the two users already exists
+  const conversationQuery = query(
+    collection(db, 'conversations'),
+    where('participants', 'array-contains', currentUserUid)
+  );
+
+  let conversationId = null;
+  const querySnapshot = await getDocs(conversationQuery);
+
+  // Check if a document with the selected user as a participant already exists
+  querySnapshot.forEach((conversationDoc) => {
+    const data = conversationDoc.data();
+    if (data.participants.includes(selectedUserUid)) {
+      // Conversation found
+      activeConversation.value = {
+        id: conversationDoc.id,
+        ...data
+      };
+      conversationId = conversationDoc.id; // Capture the conversation ID
+      console.log("found conversation!")
+    } else {
+      console.log("new conversation");
+    }
+  });
   
-  // Prepare the conversation object in memory with the user's information
-  const newConversation = {
-    participants: {
-      [user.uid]: true, // current user
-      [selectedUser.uid]: true // selected user
-    },
-    messages: [], // Start with an empty array, will be populated with the first message
-    // Add other initial fields as necessary
+  // Start listening to messages
+  if (conversationId) {
+    listenToMessages(conversationId);
+  }
+
+  // If no conversation exists, prepare a new one without an ID (it will be assigned once the first message is sent)
+  if (!conversationId) {
+    activeConversation.value = {
+      participants: [currentUserUid, selectedUserUid],
+      recipient: {
+        avatarUrl: selectedUser.avatarUrl,
+        username: selectedUser.username
+      },
+      messages: []
+    };
+  }
+  currentView.value = 'conversation'; // switch to conversation view
+};
+
+const listenToMessages = (conversationId) => {
+  const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+  onSnapshot(messagesRef, (snapshot) => {
+    messages.value = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })).sort((a, b) => a.timestamp - b.timestamp); // Assuming each message has a 'timestamp'
+  });
+};
+
+const sendMessage = async () => {
+  if (message.value.trim() === '') return;
+
+  // If it's a new conversation (no id yet), create it in Firestore
+  if (!activeConversation.value.id) {
+    const conversationRef = await addDoc(collection(db, 'conversations'), {
+      participants: activeConversation.value.participants,
+      createdAt: serverTimestamp()
+    });
+    activeConversation.value.id = conversationRef.id; // Set the newly created conversation ID
+    listenToMessages(activeConversation.value.id);
+  }
+
+  // Prepare the message object
+  const messageToSend = {
+    senderId: currentUser?.uid, // Replace with actual current user ID
+    content: message.value,
+    timestamp: serverTimestamp()
   };
 
-  // Store the prepared conversation object in a ref or a reactive state
-  // to be used when the first message is sent
-  preparedConversation.value = newConversation;
+  // Send the message to Firestore
+  await sendMessageToFirestore(activeConversation.value.id, messageToSend);
 
-  // Optionally navigate to a "new message" view where the user can type their first message
-  // You might want to pass the preparedConversation object or ID to that view
+  // Clear the message input after sending
+  message.value = '';
 };
 
-const enterConversation = (conversation) => {
-  // Logic to open the existing conversation
-  console.log('Entering conversation:', conversation.title);
+// Function to send a message to Firestore within a conversation's 'messages' subcollection
+const sendMessageToFirestore = async (conversationId, message) => {
+  try {
+    // Reference to the 'messages' subcollection under the specific conversation document
+    const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+
+    // Add a new message document to the 'messages' subcollection
+    await addDoc(messagesRef, message);
+
+    console.log('Message sent to Firestore', { conversationId, message });
+  } catch (error) {
+    console.error('Error sending message to Firestore', error);
+  }
+};
+
+
+const backToConversations = () => {
+  searchQuery.value = '';
+  searchResults.value = [];
+  currentView.value = 'search';
+  activeConversation.value = null; // clear the active conversation
 };
 </script>
 
 <style scoped>
 .chat-container {
-  position: absolute;
   bottom: 55px;
   right: 0;
   width: 300px;
-  height: 400px;
+  height: 500px;
   background-color: var(--ion-background-color);
-  border: 1px solid #ccc;
+  /* border: 1px solid var(--ion-color-step-650); */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: absolute; /* Set the position context for absolute children */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-between; /* This will push the child divs apart */
 }
 
 .messages {
-  padding: 10px;
+  display: flexbox;
   overflow-y: auto;
   flex-grow: 1;
 }
@@ -158,4 +290,16 @@ const enterConversation = (conversation) => {
   color: var(--ion-color-step-650);
 }
 
+.message-input-box {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.recipient-header-avatar {
+  margin: 8px 16px 8px 0;
+  height: 3.2rem;
+  width: 3.2rem;
+}
 </style>

@@ -15,7 +15,7 @@
         <ion-icon name="pencil-outline"></ion-icon>
         Edit
       </ion-button>
-      <ion-button @click="deletePart">
+      <ion-button @click="handlePartDelete">
         <ion-icon name="trash-outline"></ion-icon>
         Delete
       </ion-button>
@@ -37,6 +37,8 @@
 
 <script lang="ts" setup>
 import { firebaseAuth } from "@/firebase-service";
+import router from "@/router";
+import { partManager } from "@/services/ManagePartService";
 import {
   IonContent,
   IonHeader,
@@ -46,6 +48,7 @@ import {
   IonButton,
   modalController,
   IonIcon,
+  alertController,
 } from "@ionic/vue";
 import { ref } from "vue";
 
@@ -59,31 +62,43 @@ const selectedPart = ref(props.part);
 
 const cancel = () => modalController.dismiss(null, "cancel");
 
-//console.log("passed value part is: ", selectedPart.value);
+console.log("passed value part is: ", selectedPart.value);
+const toast = ref({ isOpen: false, message: "", color: "" });
 
-const deletePart = async () => {
-  try {
-    // Here, implement the code to delete the part from the database
-    // You can use Firebase or your database service of choice
-
-    // Display a success message
-    toast.value = {
-      isOpen: true,
-      message: "Part deleted successfully!",
-      color: "success",
-    };
-
-    // After deletion, navigate the user back to the market page
-    // You can use router.push("/market") or your navigation method
-  } catch (error) {
-    console.error("Error deleting part:", error);
-    // Display an error message if the deletion fails
-    toast.value = {
-      isOpen: true,
-      message: "Error deleting part: " + error.message,
-      color: "danger",
-    };
-  }
+// show a confirmation dialog before deletion of post
+const handlePartDelete = async () => {
+  const alert = await alertController.create({
+    header: "Confirm Delete",
+    message: "Are you sure you want to delete this listing?",
+    buttons: [
+      {
+        text: "Cancel",
+        role: "cancel",
+      },
+      {
+        text: "Delete",
+        handler: async () => {
+          // handle the deletion of the post
+          const result = await partManager.deletePart(selectedPart?.value.id);
+          if (result.success) {
+            toast.value = {
+              isOpen: true,
+              color: "success",
+              message: result.message,
+            };
+            router.go(0);
+          } else {
+            toast.value = {
+              isOpen: true,
+              color: "danger",
+              message: result.message,
+            };
+          }
+        },
+      },
+    ],
+  });
+  await alert.present();
 };
 </script>
 

@@ -141,7 +141,7 @@ const uploadImage = async (event: any) => {
 const seller = ref("");
 const sellerId = ref("");
 const itemName = ref("");
-const price = ref<number>(0);
+const price = ref<number | null>(null);
 const description = ref("");
 const condition = ref("");
 const location = ref("");
@@ -152,6 +152,16 @@ const createPart = async () => {
   const user = firebaseAuth.currentUser;
 
   try {
+    // Check if the imageURL is empty
+    if (!imageURL) {
+      toast.value = {
+        isOpen: true,
+        message: "Please upload an image for the part.",
+        color: "danger",
+      };
+      return; // Don't proceed if the image is empty
+    }
+
     // Check if the price is a valid number
     if (isNaN(price.value)) {
       throw new Error("Price must be a valid number.");

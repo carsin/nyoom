@@ -20,6 +20,35 @@ class ManagePartService {
     this.user = user;
   }
 
+  // modify existing listing
+  async updateListing(partId: string, newPrice: number) {
+    try {
+      const partRef = doc(db, "parts", partId);
+      const partDoc = await getDoc(partRef);
+
+      if (partDoc.exists()) {
+        const partData = partDoc.data();
+
+        if (this.user && partData.userId === this.user.uid) {
+          await updateDoc(partRef, { price: newPrice });
+          return { success: true, message: "Price edit confirmed!" };
+        } else {
+          return {
+            success: false,
+            message: "You are not the owner of this listing.",
+          };
+        }
+      } else {
+        return { success: false, message: "Listing does not exist." };
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        message: "Error while saving new price: " + error.message,
+      };
+    }
+  }
+
   async deletePart(partId: string) {
     if (!this.user) {
       return { success: false, message: "Error: You are not signed in!" };

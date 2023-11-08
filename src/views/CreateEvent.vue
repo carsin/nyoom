@@ -1,9 +1,8 @@
-<template>
+  <template>
     <ion-page>
       <ion-header>
         <ion-toolbar>
           <ion-title>Create Event</ion-title>
-          <!-- <ion-button class="ion-margin-end" slot="end" fill="outline" href="/events">Back</ion-button> -->
           <router-link slot="end" to="/events">
             <ion-button fill="outline" class="ion-padding-end">Back</ion-button>
           </router-link>
@@ -18,19 +17,31 @@
                 <ion-item v-if="imageFile">
                   <img :src="imagePreviewUrl" class="post-image" id="imagePreview" alt="Uploaded Image" />
                 </ion-item>
-                <ion-item>
+                <ion-item class="no-border">
                   <ion-label color="primary" position="stacked">Upload a photo: </ion-label>
                   <input type="file" accept="image/*" @change="handleImagePreview" class="ion-margin-top" />
-                  <ion-button @click="handleImageUpload" size="default">Upload Image</ion-button>
+                  <ion-button @click="handleImageUpload" size="default" fill="outline">Upload Image</ion-button>
                 </ion-item>
-                <ion-item>
-                  <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Caption</b>: </ion-label>
-                  <ion-textarea :maxlength="MAX_CAPTION_LENGTH" id="caption-input" v-model="address"
-                    placeholder="Say something witty :p" aria-label="Caption input" :autoGrow="true"
+                <ion-item class="no-border">
+                  <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Event Name</b>: </ion-label>
+                  <ion-textarea :maxlength="MAX_EVENT_NAME_LENGTH" id="caption-input" v-model="eventName"
+                    placeholder="Name The Event" aria-label="Caption input" :autoGrow="true"
+                    :counter="true"></ion-textarea>
+                </ion-item>
+                <ion-item class="no-border">
+                  <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Event Description</b>: </ion-label>
+                  <ion-textarea :maxlength="MAX_CAPTION_LENGTH" id="caption-input" v-model="description"
+                    placeholder="Describe The Event" aria-label="Caption input" :autoGrow="true"
+                    :counter="true"></ion-textarea>
+                </ion-item>
+                <ion-item class="no-border">
+                  <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Adddress</b>: </ion-label>
+                  <ion-textarea :maxlength="MAX_EVENT_NAME_LENGTH" id="caption-input" v-model="address"
+                    placeholder="Street Address, City, State, Zip Code" aria-label="Caption input" :autoGrow="true"
                     :counter="true"></ion-textarea>
                 </ion-item>
               </ion-list>
-              <ion-button :disabled="address.length > MAX_CAPTION_LENGTH || !imageUrl" expand="block" @click="handleCreatePost">Create Post</ion-button>
+              <ion-button :disabled="description.length > MAX_CAPTION_LENGTH || !imageUrl" expand="block" @click="handleCreatePost" fill="outline">Create Post</ion-button>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -38,6 +49,14 @@
       </ion-content>
     </ion-page>
   </template>
+
+<style>
+
+.no-border{
+    --border-style: none;
+}
+
+</style>
   
   <script setup lang="ts">
   import { ref } from 'vue';
@@ -46,12 +65,18 @@
   import { doc, getDoc, collection, addDoc } from "firebase/firestore";
   import { useRouter } from 'vue-router';
   import { uploadImageToFirebase } from '@/util/uploadImage';
-  import { MAX_CAPTION_LENGTH } from "../util/constants"
+  import { MAX_CAPTION_LENGTH} from "../util/constants"
+
+  const MAX_EVENT_NAME_LENGTH = 50;
   
   const isUploading = ref(false);
   const uploadProgress = ref(0);
   const toast = ref({ isOpen: false, message: '', color: '' });
+  const description = ref('');
+  const eventName = ref('');
   const address = ref('');
+  const date = ref('');
+  const time = ref('');
   const router = useRouter();
   let imageUrl = '';
   let imagePath = '';
@@ -95,24 +120,26 @@
     if (!imageUrl || !imagePath) {
       toast.value = { isOpen: true, message: 'No image uploaded!', color: "danger" };
       return;
-    } else if (address.value.length > MAX_CAPTION_LENGTH) {
+    } else if (description.value.length > MAX_CAPTION_LENGTH) {
       toast.value = { isOpen: true, message: 'Caption too long!', color: "danger" };
       return;
     }
   
     // get userdata for username and uid
     try {
-      const postsCollection = collection(db, 'posts');
+      const eventsCollection = collection(db, 'events');
       if (user) {
         // get user data
         const userDocRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(userDocRef);
         if (docSnap.exists()) {
-          await addDoc(postsCollection, {
+          await addDoc(eventsCollection, {
             userId: user.uid,
             username: docSnap.data().username,
             imageUrl: imageUrl,
             imagePath: imagePath,
+            eventName: eventName.value,
+            description: description.value,
             address: address.value,
             subscribers: [],
             timestamp: new Date()

@@ -22,7 +22,7 @@
       <div v-if="isPartsTab">
         <ion-toolbar>
           <ion-title class="ion-text-center">Local Parts</ion-title>
-          <ion-button expand="block" @click="navigateToNewRoute">
+          <ion-button expand="block" @click="postPart">
             Sell Something!
           </ion-button>
         </ion-toolbar>
@@ -33,7 +33,7 @@
             class="ion-padding-start ion-padding-end"
           ></ion-searchbar>
           <ion-buttons slot="end">
-            <ion-button expand="block" @click="openModal">
+            <ion-button expand="block" @click="filterModal">
               <ion-icon :icon="funnel" />
             </ion-button>
           </ion-buttons>
@@ -42,7 +42,7 @@
         <ion-grid>
           <ion-row>
             <ion-col v-for="part in parts" :key="part.id" size="6">
-              <ion-card :href="'/market/' + part.id" class="custom-card">
+              <ion-card @click="partModal(part)">
                 <img
                   alt="Part image"
                   :src="part.imageUrl"
@@ -74,7 +74,7 @@
             placeholder="Search deals"
           ></ion-searchbar>
           <ion-buttons slot="end">
-            <ion-button expand="block" @click="openModal">
+            <ion-button expand="block" @click="filterModal">
               <ion-icon :icon="funnel" />
             </ion-button>
           </ion-buttons>
@@ -205,10 +205,12 @@ const isPartsTab = computed(() => selectedTab.value === "parts");
 const isAutoShopTab = computed(() => selectedTab.value === "auto-shop");
 
 import MarketFilter from "../popups/MarketFilter.vue";
+import MarketPart from "../popups/MarketPart.vue";
+
 
 const message = ref("Sort by: Featured (default)");
 
-const openModal = async () => {
+const filterModal = async () => {
   const modal = await modalController.create({
     component: MarketFilter,
   });
@@ -221,8 +223,19 @@ const openModal = async () => {
     message.value = `Sort by: ${data}`;
   }
 };
+const partModal = (part:any) => {
+  modalController.create({
+    component: MarketPart,
+    componentProps: {
+      part: part,
+    },
+    cssClass: 'your-modal-css-class', // Add a custom CSS class if needed
+  }).then((modal) => {
+    modal.present();
+  });
+};
 
-const navigateToNewRoute = () => {
+const postPart = () => {
   router.push("/market/post-part");
 };
 </script>

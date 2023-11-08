@@ -2,6 +2,10 @@
   <ion-page>
     <ion-header>
       <ion-toolbar collapse="condense">
+        <ion-progress-bar
+          v-if="isLoading"
+          type="indeterminate"
+        ></ion-progress-bar>
         <ion-title>Market</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -39,24 +43,41 @@
           </ion-buttons>
           <p>{{ message }}</p>
         </ion-toolbar>
-        <ion-grid>
-          <ion-row>
-            <ion-col v-for="part in parts" :key="part.id" size="6">
-              <ion-card @click="partModal(part)">
-                <img alt="Part image" :src="part.images" class="custom-image" />
-                <ion-card-header>
-                  <ion-card-subtitle>{{ part.condition }}</ion-card-subtitle>
-                  <ion-card-subtitle class="card-price">{{
-                    part.price
-                  }}</ion-card-subtitle>
-                  <ion-card-subtitle class="card-title">{{
-                    part.itemName
-                  }}</ion-card-subtitle>
-                </ion-card-header>
-              </ion-card>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+        <ion-refresher slot="fixed" @ionRefresh="refreshParts($event)">
+          <ion-refresher-content
+            pulling-text="Pull to fetch new parts"
+            refreshing-spinner="circles"
+            refreshing-text="Fetching new parts..."
+          >
+          </ion-refresher-content>
+        </ion-refresher>
+        <div v-if="isPartsTab && parts.length > 0">
+          <ion-grid>
+            <ion-row>
+              <ion-col v-for="part in parts" :key="part.id" size="6">
+                <ion-card @click="partModal(part)">
+                  <img
+                    alt="Part image"
+                    :src="part.images"
+                    class="custom-image"
+                  />
+                  <ion-card-header>
+                    <ion-card-subtitle>{{ part.condition }}</ion-card-subtitle>
+                    <ion-card-subtitle class="card-price">{{
+                      part.price
+                    }}</ion-card-subtitle>
+                    <ion-card-subtitle class="card-title">{{
+                      part.itemName
+                    }}</ion-card-subtitle>
+                  </ion-card-header>
+                </ion-card>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+        <ion-text v-else class="ion-text-center">
+          <h3><i> No one has posted anything :( </i></h3>
+        </ion-text>
       </div>
 
       <!-- Content for the "Autoshop" tab -->
@@ -131,7 +152,7 @@
 
 <script setup lang="ts">
 import { useStore } from "vuex";
-import { computed, ref, onMounted } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import {
   IonHeader,
   modalController,
@@ -158,6 +179,9 @@ import { funnel } from "ionicons/icons";
 import { collection, query, getDocs } from "firebase/firestore";
 import { db } from "../firebase-service";
 import { useRouter, useRoute } from "vue-router";
+import MarketFilter from "../popups/MarketFilter.vue";
+import MarketPart from "../popups/MarketPart.vue";
+import MarketOffer from "@/popups/MarketOffer.vue";
 
 const isLoading = ref(true); // Variable to manage loading state
 const route = useRoute();
@@ -167,6 +191,11 @@ const offerData = ref([{}]); // Reactive variable to store user data
 let noResults = false;
 
 onMounted(async () => {
+  await fetchParts();
+  isLoading.value = false;
+});
+
+const fetchParts = async () => {
   const partsQuery = query(collection(db, "parts"));
   const partSnapshot = await getDocs(partsQuery);
 
@@ -197,7 +226,26 @@ onMounted(async () => {
       ...doc.data(),
     }));
   }
-});
+};
+
+const refreshParts = async (event: CustomEvent) => {
+  isLoading.value = true;
+  await fetchParts();
+  isLoading.value = false;
+  event.target.complete();
+};
+
+// refresh posts after posting
+watch(
+  () => route.path,
+  async (newPath, oldPath) => {
+    if (oldPath === "/market/post-part" && newPath === "/market") {
+      isLoading.value = true;
+      await fetchParts();
+      isLoading.value = false;
+    }
+  }
+);
 
 const store = useStore();
 const parts = partData;
@@ -210,11 +258,6 @@ const selectTab = (tab: string) => {
 
 const isPartsTab = computed(() => selectedTab.value === "parts");
 const isAutoShopTab = computed(() => selectedTab.value === "auto-shop");
-
-import MarketFilter from "../popups/MarketFilter.vue";
-import MarketPart from "../popups/MarketPart.vue";
-import MarketOffer from "@/popups/MarketOffer.vue";
-
 const message = ref("Sort by: Featured (default)");
 
 const filterModal = async () => {
@@ -237,7 +280,7 @@ const partModal = (part: any) => {
       componentProps: {
         part: part,
       },
-      cssClass: "your-modal-css-class", // Add a custom CSS class if needed
+      cssClass: "your-modal-css-class", // TODO: Add a custom CSS class
     })
     .then((modal) => {
       modal.present();
@@ -251,7 +294,7 @@ const offerModal = (offer: any) => {
       componentProps: {
         offer: offer,
       },
-      cssClass: "your-modal-css-class", // Add a custom CSS class if needed
+      cssClass: "your-modal-css-class", // TODO: Add a custom CSS class
     })
     .then((modal) => {
       modal.present();

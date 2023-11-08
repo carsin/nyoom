@@ -5,6 +5,23 @@
     </ion-fab-button>
     <ion-fab-list side="top" v-show="isChatOpen">
       <div class="chat-container">
+        <div>
+          <ion-searchbar v-model="searchQuery" @ionChange="searchUsers" @keyup.enter="searchUsers" placeholder="Search users to message..."></ion-searchbar>
+          <ion-list>
+            <!-- List of current conversations -->
+            <ion-item v-for="conversation in conversations" :key="conversation.id"
+              @click="enterConversation(conversation)">
+              <ion-label>{{ conversation.title }}</ion-label>
+            </ion-item>
+            <!-- Search results to start new conversations -->
+            <ion-item v-for="user in searchResults" :key="user.uid" @click="startConversationWithUser(user)">
+              <ion-avatar slot="start">
+                <img :src="user.avatarUrl || defaultAvatar">
+              </ion-avatar>
+              <ion-label>{{ user.username }}</ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
         <!-- Chat content goes here -->
         <div class="messages">
           <!-- This will contain messages -->
@@ -22,12 +39,18 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonInput, IonButton } from '@ionic/vue';
+import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonInput, IonSearchbar, IonAvatar, IonLabel, IonButton, IonList } from '@ionic/vue';
 import { chatbubblesOutline, closeOutline, sendOutline } from 'ionicons/icons';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from "../firebase-service";
 
 const isChatVisible = ref(true); // You can toggle this based on route if needed
 const isChatOpen = ref(false);
 const message = ref("");
+const searchQuery = ref('');
+const searchResults = ref([]);
+const conversations = ref([]);
+const defaultAvatar = 'default-avatar-url'; // Replace with your default avatar URL
 
 const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
@@ -39,6 +62,39 @@ const sendMessage = () => {
     console.log(message.value);
     message.value = ""; // Reset input after sending
   }
+};
+
+const searchUsers = async () => {
+  if (searchQuery.value.trim() === '') {
+    searchResults.value = [];
+    return;
+  }
+  console.log("searching for: " + searchQuery.value);
+
+  const usersRef = collection(db, 'users');
+  const q = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'));
+  const querySnapshot = await getDocs(q);
+  searchResults.value = querySnapshot.docs.map(doc => ({
+    uid: doc.id,
+    ...doc.data()
+  }));
+  console.log("results: " + searchResults.value);
+};
+
+const startConversationWithUser = (user) => {
+  // Here you would implement the logic to create a new conversation with the selected user
+  console.log('Starting conversation with:', user.username);
+  // clear results and searchbox
+  searchResults.value = [];
+  searchQuery.value = "";
+  conversations.value.push({
+    title: user.username,
+  })
+};
+
+const enterConversation = (conversation) => {
+  // Logic to open the existing conversation
+  console.log('Entering conversation:', conversation.title);
 };
 </script>
 

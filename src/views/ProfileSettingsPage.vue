@@ -17,7 +17,7 @@
             <ion-list>
               <ion-item>
                 <img v-if="avatarUrl" class="profile-avatar" :src="avatarUrl" alt="Avatar image"/>
-                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
+                <img v-else class="profile-avatar" ref="imageFileUpload" src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Default avatar" />
               </ion-item>
               <ion-item>
                 <ion-label position="stacked" id="avatar" color="primary" aria-label="Change Avatar">Change Avatar:</ion-label>

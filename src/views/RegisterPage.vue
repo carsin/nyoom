@@ -91,6 +91,7 @@ const passwordError = ref('');
 const confirmPasswordError = ref('');
 
 const checkUsernameTaken = async (username: string) => {
+  username = username.toLocaleLowerCase();
   const usersRef = collection(db, 'users');
   const q = query(usersRef, where('username', '==', username));
   const querySnapshot = await getDocs(q);
@@ -107,6 +108,7 @@ function validateEmail(email: string) {
 }
 
 async function validateUsername(username: string) {
+  username = username.toLocaleLowerCase();
   if (!username) {
     return 'Username is required';
   } else if (username.length < 3) {
@@ -153,6 +155,8 @@ const handleRegister = async () => {
     isLoading.value = false;
     return;
   }
+  
+  const username = formData.value.username.toLocaleLowerCase();
 
   try {
     const userCredentials = await createUserWithEmailAndPassword(firebaseAuth, formData.value.email.toString(), formData.value.password.toString());
@@ -162,7 +166,7 @@ const handleRegister = async () => {
     // store user info in Firestore
     const userDocRef = doc(db, 'users', user.uid);
     await setDoc(userDocRef, {
-      username: formData.value.username,
+      username: username,
       avatarUrl: "",
       email: formData.value.email,
       biography: "",

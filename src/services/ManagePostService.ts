@@ -174,11 +174,9 @@ class ManagePostService {
       }
 
       const postData = postSnap.data();
-      const imageUrl = postData.imageUrl;
-
       await deleteDoc(postRef); // delete the post document
-
       
+      const imageUrl = postData.imageUrl;
       if (imageUrl) { // if there's an image URL, delete the file from storage
         const imageRef = storageRef(storage, imageUrl);
         await deleteObject(imageRef);

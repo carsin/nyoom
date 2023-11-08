@@ -1,6 +1,7 @@
 import { MAX_BIO_LENGTH } from "../util/constants"
-import { doc, updateDoc } from 'firebase/firestore';
-import { firebaseAuth, db } from "../firebase-service";
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
+import { firebaseAuth, db, storage } from "../firebase-service";
 import { uploadImageToFirebase } from '../util/uploadImage';
 
 class ManageProfileService {
@@ -30,6 +31,19 @@ class ManageProfileService {
 
   async updateAvatar(file: any, updateProgressCallback: (progress: number) => void) {
     try {
+    // First, get the current user's document to find the existing avatarPath
+    const userDocRef = doc(db, 'users', this.user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (userDocSnap.exists()) {
+      const userData = userDocSnap.data();
+      if (userData.avatarPath) {
+        console.log("deleting old avatar from storage");
+        const oldAvatarRef = ref(storage, userData.avatarPath);
+        await deleteObject(oldAvatarRef);
+        console.log("deleted!");
+      }
+    }
       const newAvatarUrl = await uploadImageToFirebase(file, 'avatars', updateProgressCallback);
       
       if (this.user) {

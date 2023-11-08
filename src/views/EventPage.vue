@@ -3,6 +3,9 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Events</ion-title>
+        <router-link slot="end" to="/create-event">
+          <ion-button fill="outline" class="ion-padding-end">Create Event</ion-button>
+        </router-link>
       </ion-toolbar>
       <!-- <ion-toolbar>
         <ion-searchbar show-clear-button="focus" placeholder="Search events"></ion-searchbar>
@@ -34,13 +37,13 @@
         </ion-toolbar>
         <ion-grid>
           <ion-row>
-            <ion-col size="6">
+            <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #1" event-type="Car Meet"></EventCardComponent>
             </ion-col>
-            <ion-col size="6">
+            <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #2" event-type="Car Meet"></EventCardComponent>
             </ion-col>
-            <ion-col size="6">
+            <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #3" event-type="Car Meet"></EventCardComponent>
             </ion-col>
           </ion-row>
@@ -83,13 +86,13 @@
         </ion-toolbar>
         <ion-grid>
           <ion-row>
-            <ion-col size="12">
+            <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #1" event-type="Car Meet"></EventCardComponent>
             </ion-col>
-            <ion-col size="12">
+            <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #2" event-type="Car Meet"></EventCardComponent>
             </ion-col>
-            <ion-col size="12">
+            <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #3" event-type="Car Meet"></EventCardComponent>
             </ion-col>
           </ion-row>

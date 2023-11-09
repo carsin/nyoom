@@ -20,7 +20,9 @@
               </ion-avatar>
               <ion-label>{{ user.username }}</ion-label>
             </ion-item>
-            <ion-list-header lines="full" v-if="conversations.length > 0">
+          </ion-list>
+          <ion-list v-if="conversations.length > 0">
+            <ion-list-header lines="full">
               <ion-label>Active Conversations:</ion-label>
             </ion-list-header>
             <ion-item v-for="conversation in conversations" :key="conversation.id"
@@ -28,7 +30,7 @@
               <!-- <ion-avatar slot="start"> -->
               <!--   <img :src="getParticipantAvatar(conversation.participants) || defaultAvatar"> -->
               <!-- </ion-avatar> -->
-              <!-- <ion-label>{{ getParticipantUsername(conversation.participants) }}</ion-label> -->
+              <ion-label> Convo: {{ getRecipientInfo(conversation.participants).username }}</ion-label>
               <!-- display the last message or message time here -->
             </ion-item>
           </ion-list>
@@ -75,6 +77,7 @@ import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel
 import { chatbubbles, close, send, arrowBack } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
 import { collection, query, onSnapshot, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { userInfoService } from '../services/UserInfoService'; // Import your Firebase configuration
 
 const isChatVisible = ref(true);
 const isChatOpen = ref(false);
@@ -109,45 +112,6 @@ const fetchConversations = () => {
     });
   });
 };
-
-const toggleChat = () => {
-  isChatOpen.value = !isChatOpen.value;
-  if (!isChatOpen.value) {
-    // Reset views when closing the chat
-    searchQuery.value = '';
-    searchResults.value = [];
-  }
-};
-
-const searchUsers = async () => {
-  if (searchQuery.value.trim() === '') {
-    searchResults.value = [];
-    return;
-  }
-  isSearching.value = true;
-
-  const usersRef = collection(db, 'users');
-  const userQuery = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'));
-  const querySnapshot = await getDocs(userQuery);
-  searchResults.value = querySnapshot.docs
-    .map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    }))
-    .filter(user => user.uid !== currentUser?.uid); // filter out the current user
-  isSearching.value = false;
-};
-
-const activeConversationDisplay = computed(() => {
-  if (activeConversation.value) {
-    return {
-      avatarUrl: activeConversation.value.recipient.avatarUrl || defaultAvatar,
-      username: activeConversation.value.recipient.username
-    };
-  }
-  return null;
-});
-
 
 const prepareConversation = async (selectedUser) => {
   if (!currentUser) {
@@ -203,6 +167,20 @@ const prepareConversation = async (selectedUser) => {
   currentView.value = 'conversation'; // switch to conversation view
 };
 
+const getRecipientInfo = async (participants: []) => {
+  const recipientUid = participants.find(uid => uid !== currentUser?.uid);
+  try {
+    const userData = await userInfoService.fetchUserData(recipientUid);
+    console.log(userData);
+    return {
+      username: userData?.username,
+      avatarUrl: userData?.avatarUrl,
+    }
+  } catch(error: any) {
+    toast.value = { isOpen: true, message: "Error fetching conversation participant info: " + error.message, color: 'danger' };
+  }
+}
+
 const listenToMessages = (conversationId) => {
   const messagesRef = collection(db, 'conversations', conversationId, 'messages');
   onSnapshot(messagesRef, (snapshot) => {
@@ -255,6 +233,43 @@ const sendMessageToFirestore = async (conversationId, message) => {
   }
 };
 
+const toggleChat = () => {
+  isChatOpen.value = !isChatOpen.value;
+  if (!isChatOpen.value) {
+    // Reset views when closing the chat
+    searchQuery.value = '';
+    searchResults.value = [];
+  }
+};
+
+const searchUsers = async () => {
+  if (searchQuery.value.trim() === '') {
+    searchResults.value = [];
+    return;
+  }
+  isSearching.value = true;
+
+  const usersRef = collection(db, 'users');
+  const userQuery = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'));
+  const querySnapshot = await getDocs(userQuery);
+  searchResults.value = querySnapshot.docs
+    .map(doc => ({
+      uid: doc.id,
+      ...doc.data()
+    }))
+    .filter(user => user.uid !== currentUser?.uid); // filter out the current user
+  isSearching.value = false;
+};
+
+const activeConversationDisplay = computed(() => {
+  if (activeConversation.value) {
+    return {
+      avatarUrl: activeConversation.value.recipient.avatarUrl || defaultAvatar,
+      username: activeConversation.value.recipient.username
+    };
+  }
+  return null;
+});
 
 const backToConversations = () => {
   searchQuery.value = '';

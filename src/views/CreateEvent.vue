@@ -24,24 +24,31 @@
                 </ion-item>
                 <ion-item class="no-border">
                   <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Event Name</b>: </ion-label>
-                  <ion-textarea :maxlength="MAX_EVENT_NAME_LENGTH" id="caption-input" v-model="eventName"
-                    placeholder="Name The Event" aria-label="Caption input" :autoGrow="true"
+                  <ion-textarea :maxlength="MAX_EVENT_NAME_LENGTH" id="name-input" v-model="eventName"
+                    placeholder="Name The Event" aria-label="Event Name input" :autoGrow="true"
                     :counter="true"></ion-textarea>
                 </ion-item>
                 <ion-item class="no-border">
                   <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Event Description</b>: </ion-label>
-                  <ion-textarea :maxlength="MAX_CAPTION_LENGTH" id="caption-input" v-model="description"
-                    placeholder="Describe The Event" aria-label="Caption input" :autoGrow="true"
+                  <ion-textarea :maxlength="MAX_CAPTION_LENGTH" id="description-input" v-model="description"
+                    placeholder="Describe The Event" aria-label="Description input" :autoGrow="true"
                     :counter="true"></ion-textarea>
                 </ion-item>
                 <ion-item class="no-border">
                   <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Adddress</b>: </ion-label>
-                  <ion-textarea :maxlength="MAX_EVENT_NAME_LENGTH" id="caption-input" v-model="address"
-                    placeholder="Street Address, City, State, Zip Code" aria-label="Caption input" :autoGrow="true"
+                  <ion-textarea :maxlength="MAX_EVENT_NAME_LENGTH" id="addres-input" v-model="address"
+                    placeholder="Street Address, City, State, Zip Code" aria-label="Address input" :autoGrow="true"
                     :counter="true"></ion-textarea>
                 </ion-item>
+                <ion-item class="no-border">
+                  <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Date and Time</b>: </ion-label>
+                  <ion-datetime-button datetime="datetime" class="date-picker"></ion-datetime-button>
+                  <ion-modal :keep-contents-mounted="true">
+                    <ion-datetime id="datetime"></ion-datetime>
+                  </ion-modal>
+                </ion-item>
               </ion-list>
-              <ion-button :disabled="description.length > MAX_CAPTION_LENGTH || !imageUrl" expand="block" @click="handleCreatePost" fill="outline">Create Post</ion-button>
+              <ion-button :disabled="description.length > MAX_CAPTION_LENGTH || !imageUrl" expand="block" @click="handleCreatePost" fill="outline">Create Event</ion-button>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -55,12 +62,15 @@
 .no-border{
     --border-style: none;
 }
+.date-picker{
+  padding-top: 10px;
+}
 
 </style>
   
   <script setup lang="ts">
   import { ref } from 'vue';
-  import { IonPage, IonList, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonTextarea, IonButton, IonToast } from '@ionic/vue';
+  import { IonPage, IonList, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonTextarea, IonButton, IonToast, IonDatetimeButton, IonDatetime, IonModal } from '@ionic/vue';
   import { firebaseAuth, db } from "../firebase-service";
   import { doc, getDoc, collection, addDoc } from "firebase/firestore";
   import { useRouter } from 'vue-router';

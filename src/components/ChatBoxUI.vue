@@ -9,7 +9,7 @@
         <div v-if="currentView === 'search'">
           <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
           <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers"
-            placeholder="Search users to message..."></ion-searchbar>
+            placeholder="Search users to message..." class="ion-no-padding"></ion-searchbar>
           <ion-list v-if="searchResults.length > 0">
             <ion-list-header lines="full">
               <ion-label>User Search Results:</ion-label>
@@ -21,17 +21,22 @@
               <ion-label>{{ user.username }}</ion-label>
             </ion-item>
           </ion-list>
-          <ion-list v-if="conversations.length > 0">
+          <ion-list v-if="conversations.length > 0" class="ion-no-padding">
             <ion-list-header lines="full">
               <ion-label>Active Conversations:</ion-label>
             </ion-list-header>
             <ion-item v-for="conversation in conversations" :key="conversation.id"
               @click="prepareConversation(conversation)">
-              <ion-avatar  class="recipient-avatar">
+              <ion-avatar class="recipient-avatar">
                 <img :src="conversation.recipientAvatarUrl || defaultAvatar" alt="Recipient avatar">
               </ion-avatar>
-              <ion-label>{{ conversation.recipientUsername }}</ion-label>
-              <!-- display the last message or message time here -->
+              <div class="conversation-details">
+                <ion-label>
+                  <h2>{{ conversation.recipientUsername }}</h2>
+                  <p>{{ conversation.lastMessageContent || 'No messages yet' }}</p>
+                  <p>{{ conversation.lastMessageTimestamp || 'No timestamp' }}</p>
+                </ion-label>
+              </div>
             </ion-item>
           </ion-list>
         </div>
@@ -47,18 +52,20 @@
               <ion-button size="large" fill="clear" @click="backToConversations">
                 <ion-icon :icon="arrowBack"></ion-icon>
               </ion-button>
-          </ion-list-header>
+            </ion-list-header>
             <!-- Messages  -->
             <ion-item v-for="message in messages" :key="message.id">
               <ion-label>
-                <p> <b>{{ message.senderId === currentUser.uid ? 'You' : message.senderName }}</b>: {{ message.content }}</p>
-                <p v-if="message.timestamp" class="message-timestamp ion-text-end">{{ formatTimestamp(message.timestamp) }}</p>
+                <p> <b>{{ message.senderId === currentUser.uid ? 'You' : activeConversationDisplay.username }}</b>: {{ message.content }}
+                </p>
+                <p v-if="message.timestamp" class="message-timestamp ion-text-end">{{ formatTimestamp(message.timestamp)
+                }}</p>
               </ion-label>
             </ion-item>
           </ion-list>
           <div class="message-input-box">
             <ion-item lines="none">
-              <ion-input placeholder="Type a message..." v-model="message" @keyup.enter="sendMessage"></ion-input>
+              <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage"></ion-input>
               <ion-button fill="clear" @click="sendMessage">
                 <ion-icon slot="icon-only" :icon="send"></ion-icon>
               </ion-button>
@@ -76,7 +83,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
-import { collection, query, onSnapshot, limit, orderBy, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, limit, doc, updateDoc, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { userInfoService } from '../services/UserInfoService'; // Import your Firebase configuration
 
@@ -86,7 +93,7 @@ const isLoading = ref(false);
 const currentView = ref('search'); // 'search' or 'conversation'
 const searchQuery = ref('');
 const searchResults = ref([]);
-const message = ref('');
+const messageContent = ref('');
 const messages = ref([]);
 const conversations = ref([]);
 const activeConversation = ref(); // Store active conversation details here
@@ -114,7 +121,7 @@ const fetchConversations = async () => {
 
   // Real-time listener for the conversations
   const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-    const conversationsWithLastMessagePromises = querySnapshot.docs.map(async (doc) => {
+    const conversationsWithDetailsPromises = querySnapshot.docs.map(async (doc) => {
       const conversation = {
         id: doc.id,
         ...doc.data(),
@@ -131,31 +138,21 @@ const fetchConversations = async () => {
         }
       }
 
-      // Fetch the last message for the conversation
-      const messagesRef = collection(db, 'conversations', conversation.id, 'messages');
-      const lastMessageQuery = query(messagesRef, orderBy('timestamp', 'desc'), limit(1));
-      const messageSnapshot = await getDocs(lastMessageQuery);
-      let lastMessage = messageSnapshot.docs.map(doc => doc.data())[0] || null;
-
-      // If there is a last message, format the timestamp
-      if (lastMessage && lastMessage.timestamp) {
-        lastMessage.formattedTimestamp = lastMessage.timestamp.toDate().toLocaleString();
-      }
+      // Format the timestamp of the last message
+      let formattedTimestamp = formatTimestamp(conversation.lastMessageTimestamp);
 
       return {
         ...conversation,
         recipientUsername: userData?.username,
         recipientAvatarUrl: userData?.avatarUrl,
-        lastMessage: lastMessage ? {
-          content: lastMessage.content,
-          timestamp: lastMessage.formattedTimestamp,
-          senderId: lastMessage.senderId
-        } : null
+        lastMessageContent: conversation.lastMessageContent || 'No messages',
+        lastMessageTimestamp: formattedTimestamp || '',
+        lastMessageSender: conversation.lastMessageSender || ''
       };
     });
 
     // Wait for all conversations and last messages to be fetched
-    conversations.value = await Promise.all(conversationsWithLastMessagePromises);
+    conversations.value = await Promise.all(conversationsWithDetailsPromises);
     isLoading.value = false;
   });
 
@@ -166,7 +163,7 @@ const prepareConversation = async (conversationOrUser) => {
   isLoading.value = true;
 
   if (!currentUser) {
-    console.error('No current user logged in.');
+    toast.value = { isOpen: true, message: "You are not logged in!", color: 'danger' };
     isLoading.value = false;
     return;
   }
@@ -189,8 +186,8 @@ const prepareConversation = async (conversationOrUser) => {
   // Fetch recipient data
   try {
     recipientData = await userInfoService.fetchUserData(recipientUid);
-  } catch (error) {
-    console.error('Failed to fetch recipient data:', error);
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error fetching recipient data: " + error.message, color: 'danger' };
     isLoading.value = false;
     return;
   }
@@ -262,7 +259,7 @@ const listenToMessages = (conversationId) => {
 };
 
 const sendMessage = async () => {
-  if (message.value.trim() === '') return;
+  if (messageContent.value.trim() === '') return;
 
   // If it's a new conversation (no id yet), create it in Firestore
   if (!activeConversation.value.id) {
@@ -277,29 +274,30 @@ const sendMessage = async () => {
   // Prepare the message object
   const messageToSend = {
     senderId: currentUser?.uid, // Replace with actual current user ID
-    content: message.value,
-    timestamp: serverTimestamp()
+    content: messageContent.value,
+    timestamp: Timestamp.now(),
   };
+  
+  // Clear the message input after sending
+  messageContent.value = '';
 
   // Send the message to Firestore
-  await sendMessageToFirestore(activeConversation.value.id, messageToSend);
-
-  // Clear the message input after sending
-  message.value = '';
-};
-
-// Function to send a message to Firestore within a conversation's 'messages' subcollection
-const sendMessageToFirestore = async (conversationId, message) => {
   try {
     // Reference to the 'messages' subcollection under the specific conversation document
-    const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+    const messagesRef = collection(db, 'conversations', activeConversation.value.id, 'messages');
 
     // Add a new message document to the 'messages' subcollection
-    await addDoc(messagesRef, message);
-
-    console.log('Message sent to Firestore', { conversationId, message });
-  } catch (error) {
-    console.error('Error sending message to Firestore', error);
+    await addDoc(messagesRef, messageToSend);
+    // Update the conversation with the last message details
+    const conversationRef = doc(db, 'conversations', activeConversation.value.id);
+  
+    await updateDoc(conversationRef, {
+      lastMessageSender: currentUser?.uid,
+      lastMessageContent: messageToSend.content,
+      lastMessageTimestamp: messageToSend.timestamp,
+    });
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error sending message: " + error.message, color: 'danger' };
   }
 };
 
@@ -349,11 +347,9 @@ const backToConversations = () => {
 };
 
 const formatTimestamp = (timestamp: Timestamp): string => {
-  // Convert Firestore Timestamp to JavaScript Date object
-  const date = timestamp.toDate();
-
-  // Use date-fns to format the date
-  return format(date, 'pp P');
+  if (timestamp) {
+    return format(timestamp.toDate(), 'pp P'); // use date-fns to format the date
+  }
 };
 </script>
 

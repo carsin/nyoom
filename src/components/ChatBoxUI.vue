@@ -6,7 +6,7 @@
     <ion-fab-list side="top" v-show="isChatOpen">
       <div class="chat-container">
         <!-- Search View -->
-        <div v-if="currentView === 'search'">
+        <div class="search-view" v-if="currentView === 'search'">
           <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
           <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers"
             placeholder="Search users to message..." class="ion-no-padding"></ion-searchbar>
@@ -14,7 +14,7 @@
             <ion-list-header lines="full">
               <ion-label>User Search Results:</ion-label>
             </ion-list-header>
-            <ion-item v-for="user in searchResults" :key="user.uid" @click="prepareConversation(user)">
+            <ion-item class="searchuser-result-item" v-for="user in searchResults" :key="user.uid" @click="prepareConversation(user)">
               <ion-avatar slot="start">
                 <img :src="user.avatarUrl || defaultAvatar">
               </ion-avatar>
@@ -41,10 +41,10 @@
           </ion-list>
         </div>
         <!-- Conversation View -->
-        <div v-if="currentView === 'conversation'">
+        <div class="conversation-view" v-if="currentView === 'conversation'">
           <ion-list class="message-list ion-no-padding">
-            <ion-list-header lines="full" v-if="activeConversationDisplay">
-              <!-- Message header -->
+            <!-- Conversation header -->
+            <ion-list-header class="conversation-header" lines="full" v-if="activeConversationDisplay">
               <ion-avatar class="recipient-avatar">
                 <img :src="activeConversationDisplay.avatarUrl || defaultAvatar" alt="Recipient avatar">
               </ion-avatar>
@@ -54,11 +54,11 @@
               </ion-button>
             </ion-list-header>
             <!-- Messages  -->
-            <ion-item v-for="message in messages" :key="message.id">
-              <ion-label>
+            <ion-item v-for="message in messages" :key="message.id" >
+              <ion-label v-if="message.timestamp">
                 <p> <b>{{ message.senderId === currentUser.uid ? 'You' : activeConversationDisplay.username }}</b>: {{ message.content }}
                 </p>
-                <p v-if="message.timestamp" class="message-timestamp ion-text-end">{{ formatTimestamp(message.timestamp)
+                <p class="message-timestamp ion-text-end">{{ formatTimestamp(message.timestamp)
                 }}</p>
               </ion-label>
             </ion-item>
@@ -83,7 +83,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
-import { collection, query, onSnapshot, limit, doc, updateDoc, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { writeBatch, collection, query, onSnapshot, limit, doc, where, getDocs, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { userInfoService } from '../services/UserInfoService'; // Import your Firebase configuration
 
@@ -253,7 +253,7 @@ const listenToMessages = (conversationId) => {
     messages.value = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    })).sort((a, b) => a.timestamp - b.timestamp); // Assuming each message has a 'timestamp'
+    })).sort((a, b) => b.timestamp - a.timestamp); // Assuming each message has a 'timestamp'
   });
   isLoading.value = false;
 };
@@ -261,41 +261,43 @@ const listenToMessages = (conversationId) => {
 const sendMessage = async () => {
   if (messageContent.value.trim() === '') return;
 
-  // If it's a new conversation (no id yet), create it in Firestore
+  const batch = writeBatch(db);
+
+  // if it's a new conversation, create it in Firestore
+  let conversationRef;
   if (!activeConversation.value.id) {
-    const conversationRef = await addDoc(collection(db, 'conversations'), {
+    conversationRef = doc(collection(db, 'conversations'));
+    batch.set(conversationRef, {
       participants: activeConversation.value.participants,
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      lastMessageSender: currentUser?.uid,
+      lastMessageContent: messageContent.value,
+      lastMessageTimestamp: serverTimestamp(),
     });
-    activeConversation.value.id = conversationRef.id; // Set the newly created conversation ID
-    listenToMessages(activeConversation.value.id);
+    activeConversation.value.id = conversationRef.id; // set the newly created conversation ID
+  } else {
+    conversationRef = doc(db, 'conversations', activeConversation.value.id);
+    batch.update(conversationRef, { // update the conversation with the last message details
+      lastMessageSender: currentUser?.uid,
+      lastMessageContent: messageContent.value,
+      lastMessageTimestamp: serverTimestamp(),
+    });
   }
 
-  // Prepare the message object
-  const messageToSend = {
-    senderId: currentUser?.uid, // Replace with actual current user ID
+  const messagesRef = collection(db, 'conversations', activeConversation.value.id, 'messages');
+  // add a new message to the messages subcollection
+  const messageDocRef = doc(messagesRef);
+  batch.set(messageDocRef, {
+    senderId: currentUser?.uid,
     content: messageContent.value,
-    timestamp: Timestamp.now(),
-  };
-  
-  // Clear the message input after sending
-  messageContent.value = '';
+    timestamp: serverTimestamp(),
+  });
 
-  // Send the message to Firestore
+  // send the message and update conversation in a single batched write
   try {
-    // Reference to the 'messages' subcollection under the specific conversation document
-    const messagesRef = collection(db, 'conversations', activeConversation.value.id, 'messages');
-
-    // Add a new message document to the 'messages' subcollection
-    await addDoc(messagesRef, messageToSend);
-    // Update the conversation with the last message details
-    const conversationRef = doc(db, 'conversations', activeConversation.value.id);
-  
-    await updateDoc(conversationRef, {
-      lastMessageSender: currentUser?.uid,
-      lastMessageContent: messageToSend.content,
-      lastMessageTimestamp: messageToSend.timestamp,
-    });
+    await batch.commit();
+    messageContent.value = ''; // clear the message input after successful send
+    listenToMessages(activeConversation.value.id);
   } catch (error: any) {
     toast.value = { isOpen: true, message: "Error sending message: " + error.message, color: 'danger' };
   }
@@ -355,23 +357,28 @@ const formatTimestamp = (timestamp: Timestamp): string => {
 
 <style scoped>
 .chat-container {
-  bottom: 55px;
-  right: 0;
+  bottom: 25px;
+  right: 5px;
   width: 300px;
   height: 500px;
   background-color: var(--ion-background-color);
-  /* border: 1px solid var(--ion-color-step-650); */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  position: absolute; /* Set the position context for absolute children */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  position: absolute;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* This will push the child divs apart */
 }
 
-.messages {
-  display: flexbox;
+.search-view,
+.conversation-view {
   overflow-y: auto;
   flex-grow: 1;
+}
+
+.conversation-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--ion-background-color);
 }
 
 .searchuser-result-item:hover {
@@ -380,10 +387,11 @@ const formatTimestamp = (timestamp: Timestamp): string => {
 }
 
 .message-input-box {
-  position: absolute;
+  position: sticky;
   bottom: 0;
   left: 0;
   width: 100%;
+  background-color: inherit;
 }
 
 .recipient-avatar {

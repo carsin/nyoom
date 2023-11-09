@@ -18,7 +18,7 @@
                   <img :src="imagePreviewUrl" class="post-image" id="imagePreview" alt="Uploaded Image" />
                 </ion-item>
                 <ion-item class="no-border">
-                  <ion-label color="primary" position="stacked">Upload a photo: </ion-label>
+                  <ion-label color="primary" position="stacked"> <b>Upload a photo</b>: </ion-label>
                   <input type="file" accept="image/*" @change="handleImagePreview" class="ion-margin-top" />
                   <ion-button @click="handleImageUpload" size="default" fill="outline">Upload Image</ion-button>
                 </ion-item>
@@ -40,15 +40,15 @@
                     placeholder="Street Address, City, State, Zip Code" aria-label="Address input" :autoGrow="true"
                     :counter="true"></ion-textarea>
                 </ion-item>
-                <ion-item class="no-border">
+                <ion-item class="no-border no-click">
                   <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Date and Time</b>: </ion-label>
                   <ion-datetime-button datetime="datetime" class="date-picker"></ion-datetime-button>
                   <ion-modal :keep-contents-mounted="true">
-                    <ion-datetime id="datetime"></ion-datetime>
+                    <ion-datetime id="datetime" ref="datetime"></ion-datetime>
                   </ion-modal>
                 </ion-item>
               </ion-list>
-              <ion-button :disabled="description.length > MAX_CAPTION_LENGTH || !imageUrl" expand="block" @click="handleCreatePost" fill="outline">Create Event</ion-button>
+              <ion-button :disabled="description.length > MAX_CAPTION_LENGTH || !imageUrl" expand="block" @click="handleCreateEvent" fill="outline">Create Event</ion-button>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -62,15 +62,25 @@
 .no-border{
     --border-style: none;
 }
+
+.no-click{
+  --ripple-color: transparent;
+  --background-hover-opacity: 0;
+}
+
 .date-picker{
   padding-top: 10px;
+}
+
+.left{
+  padding-right: 165px;
 }
 
 </style>
   
   <script setup lang="ts">
   import { ref } from 'vue';
-  import { IonPage, IonList, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonTextarea, IonButton, IonToast, IonDatetimeButton, IonDatetime, IonModal } from '@ionic/vue';
+  import { IonPage, IonList, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonTextarea, IonButton, IonToast, IonDatetimeButton, IonDatetime, IonModal, IonButtons } from '@ionic/vue';
   import { firebaseAuth, db } from "../firebase-service";
   import { doc, getDoc, collection, addDoc } from "firebase/firestore";
   import { useRouter } from 'vue-router';
@@ -85,14 +95,22 @@
   const description = ref('');
   const eventName = ref('');
   const address = ref('');
-  const date = ref('');
-  const time = ref('');
+  const datetime = ref();
   const router = useRouter();
   let imageUrl = '';
   let imagePath = '';
   
   const imageFile = ref<File | null>(null);
   const imagePreviewUrl = ref<string | undefined>(undefined);
+
+  // const cancel = () => {
+  //   datetime.value.$el.cancel();
+  //   console.log(datetime.value);
+  // }
+  // const confirm = () => {
+  //   datetime.value.$el.confirm();
+  //   console.log(datetime.value);
+  // }
   
   const handleImagePreview = (event: Event) => {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -124,7 +142,7 @@
   };
   
   // sending post to posts firestore collection
-  const handleCreatePost = async () => {
+  const handleCreateEvent = async () => {
     const user = firebaseAuth.currentUser;
   
     if (!imageUrl || !imagePath) {
@@ -151,12 +169,13 @@
             eventName: eventName.value,
             description: description.value,
             address: address.value,
+            datetime: datetime.value,
             subscribers: [],
             timestamp: new Date()
           });
         }
         toast.value = { isOpen: true, message: 'Post created successfully!', color: "success" };
-        router.push("/feed");
+        router.push("/events");
       }
     } catch (error: any) {
       toast.value = { isOpen: true, message: 'Error while posting: ' + error.message, color: "danger" };

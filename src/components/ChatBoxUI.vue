@@ -7,7 +7,7 @@
       <div class="chat-container">
         <!-- Search View -->
         <div v-if="currentView === 'search'">
-          <ion-progress-bar v-if="isSearching" type="indeterminate"></ion-progress-bar>
+          <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
           <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers"
             placeholder="Search users to message..."></ion-searchbar>
           <ion-list v-if="searchResults.length > 0">
@@ -27,10 +27,10 @@
             </ion-list-header>
             <ion-item v-for="conversation in conversations" :key="conversation.id"
               @click="prepareConversation(conversation)">
-              <!-- <ion-avatar slot="start"> -->
-              <!--   <img :src="getParticipantAvatar(conversation.participants) || defaultAvatar"> -->
-              <!-- </ion-avatar> -->
-              <ion-label> Convo: {{ getRecipientInfo(conversation.participants).username }}</ion-label>
+              <ion-avatar  class="recipient-avatar">
+                <img :src="conversation.recipientAvatarUrl || defaultAvatar" alt="Recipient avatar">
+              </ion-avatar>
+              <ion-label>{{ conversation.recipientUsername }}</ion-label>
               <!-- display the last message or message time here -->
             </ion-item>
           </ion-list>
@@ -40,7 +40,7 @@
           <ion-list class="message-list ion-no-padding">
             <ion-list-header lines="full" v-if="activeConversationDisplay">
               <!-- Message header -->
-              <ion-avatar class="recipient-header-avatar">
+              <ion-avatar class="recipient-avatar">
                 <img :src="activeConversationDisplay.avatarUrl || defaultAvatar" alt="Recipient avatar">
               </ion-avatar>
               <ion-label>{{ activeConversationDisplay.username }}</ion-label>
@@ -51,8 +51,8 @@
             <!-- Messages  -->
             <ion-item v-for="message in messages" :key="message.id">
               <ion-label>
-                <p>{{ message.senderId === currentUser.uid ? 'You' : message.senderName }}: {{ message.content }}</p>
-                <!-- <p class="message-timestamp">{{ message.timestamp.toDate() }}</p> -->
+                <p> <b>{{ message.senderId === currentUser.uid ? 'You' : message.senderName }}</b>: {{ message.content }}</p>
+                <p class="message-timestamp ion-text-end">{{ formatTimestamp(message.timestamp) }}</p>
               </ion-label>
             </ion-item>
           </ion-list>
@@ -72,16 +72,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
 import { collection, query, onSnapshot, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { format } from 'date-fns';
 import { userInfoService } from '../services/UserInfoService'; // Import your Firebase configuration
 
 const isChatVisible = ref(true);
 const isChatOpen = ref(false);
-const isSearching = ref(false);
+const isLoading = ref(false);
 const currentView = ref('search'); // 'search' or 'conversation'
 const searchQuery = ref('');
 const searchResults = ref([]);
@@ -90,30 +91,63 @@ const messages = ref([]);
 const conversations = ref([]);
 const activeConversation = ref(); // Store active conversation details here
 const defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+const userCache = new Map(); // cache to store fetched user data
 const toast = ref({ isOpen: false, message: '', color: '' });
 const currentUser = firebaseAuth.currentUser;
+let unsubscribe: Function; // Initialize unsubscribe as null
 
-onMounted(() => {
-  fetchConversations();
+onMounted(async () => {
+  unsubscribe = await fetchConversations();
 });
 
+onUnmounted(() => { // unsubscribe when the component unmounts
+  if (unsubscribe) {
+    unsubscribe();
+  }
+});
 
-const fetchConversations = () => {
+const fetchConversations = async () => {
+  isLoading.value = true;
   const conversationsRef = collection(db, 'conversations');
   const q = query(conversationsRef, where('participants', 'array-contains', currentUser?.uid));
 
   // Real-time listener for the conversations
-  onSnapshot(q, (querySnapshot) => {
-    conversations.value = querySnapshot.docs.map((doc) => {
+  const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+    const convs = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Fetch user details for all conversations in parallel
+    const userDetailsPromises = convs.map(async (conversation) => {
+      const otherUserId = conversation.participants.find(uid => uid !== currentUser?.uid);
+      let userData = userCache.get(otherUserId);
+
+      // Fetch user data if not in cache
+      if (!userData) {
+        userData = await userInfoService.fetchUserData(otherUserId);
+        if (userData) {
+          userCache.set(otherUserId, userData);
+        }
+      }
+
       return {
-        id: doc.id,
-        ...doc.data(),
+        ...conversation,
+        recipientUsername: userData?.username,
+        recipientAvatarUrl: userData?.avatarUrl,
       };
     });
+
+    // Wait for all user details to be fetched
+    conversations.value = await Promise.all(userDetailsPromises);
   });
+
+  isLoading.value = false;
+  return unsubscribe; // Return the unsubscribe function to call when the component unmounts
 };
 
-const prepareConversation = async (selectedUser) => {
+const prepareConversation = async (conversation) => {
+  isLoading.value = true;
   if (!currentUser) {
     console.error('No current user logged in.');
     return;
@@ -121,7 +155,7 @@ const prepareConversation = async (selectedUser) => {
 
   // Define the current user's UID and the selected user's UID
   const currentUserUid = currentUser.uid;
-  const selectedUserUid = selectedUser.uid;
+  const recipientUid = conversation.participants.find(uid => uid !== currentUser?.uid);
 
   // Query to check if a conversation between the two users already exists
   const conversationQuery = query(
@@ -131,17 +165,23 @@ const prepareConversation = async (selectedUser) => {
 
   let conversationId = null;
   const querySnapshot = await getDocs(conversationQuery);
+  const recipientData = await userInfoService.fetchUserData(recipientUid);
 
   // Check if a document with the selected user as a participant already exists
   querySnapshot.forEach((conversationDoc) => {
     const data = conversationDoc.data();
-    if (data.participants.includes(selectedUserUid)) {
+    if (data.participants.includes(recipientUid)) {
       // Conversation found
       activeConversation.value = {
         id: conversationDoc.id,
+        recipient: {
+          avatarUrl: recipientData?.avatarUrl,
+          username: recipientData?.username
+        },
         ...data
       };
       conversationId = conversationDoc.id; // Capture the conversation ID
+      console.log(activeConversation.value);
       console.log("found conversation!")
     } else {
       console.log("new conversation");
@@ -156,32 +196,20 @@ const prepareConversation = async (selectedUser) => {
   // If no conversation exists, prepare a new one without an ID (it will be assigned once the first message is sent)
   if (!conversationId) {
     activeConversation.value = {
-      participants: [currentUserUid, selectedUserUid],
+      participants: [currentUserUid, recipientUid],
       recipient: {
-        avatarUrl: selectedUser.avatarUrl,
-        username: selectedUser.username
+        avatarUrl: recipientData?.avatarUrl,
+        username: recipientData?.username
       },
       messages: []
     };
   }
+  isLoading.value = false;
   currentView.value = 'conversation'; // switch to conversation view
 };
 
-const getRecipientInfo = async (participants: []) => {
-  const recipientUid = participants.find(uid => uid !== currentUser?.uid);
-  try {
-    const userData = await userInfoService.fetchUserData(recipientUid);
-    console.log(userData);
-    return {
-      username: userData?.username,
-      avatarUrl: userData?.avatarUrl,
-    }
-  } catch(error: any) {
-    toast.value = { isOpen: true, message: "Error fetching conversation participant info: " + error.message, color: 'danger' };
-  }
-}
-
 const listenToMessages = (conversationId) => {
+  isLoading.value = true;
   const messagesRef = collection(db, 'conversations', conversationId, 'messages');
   onSnapshot(messagesRef, (snapshot) => {
     messages.value = snapshot.docs.map(doc => ({
@@ -189,6 +217,7 @@ const listenToMessages = (conversationId) => {
       ...doc.data()
     })).sort((a, b) => a.timestamp - b.timestamp); // Assuming each message has a 'timestamp'
   });
+  isLoading.value = false;
 };
 
 const sendMessage = async () => {
@@ -247,7 +276,7 @@ const searchUsers = async () => {
     searchResults.value = [];
     return;
   }
-  isSearching.value = true;
+  isLoading.value = true;
 
   const usersRef = collection(db, 'users');
   const userQuery = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'));
@@ -258,11 +287,12 @@ const searchUsers = async () => {
       ...doc.data()
     }))
     .filter(user => user.uid !== currentUser?.uid); // filter out the current user
-  isSearching.value = false;
+  isLoading.value = false;
 };
 
 const activeConversationDisplay = computed(() => {
   if (activeConversation.value) {
+    console.log(activeConversation.value);
     return {
       avatarUrl: activeConversation.value.recipient.avatarUrl || defaultAvatar,
       username: activeConversation.value.recipient.username
@@ -276,6 +306,14 @@ const backToConversations = () => {
   searchResults.value = [];
   currentView.value = 'search';
   activeConversation.value = null; // clear the active conversation
+};
+
+const formatTimestamp = (timestamp: Timestamp): string => {
+  // Convert Firestore Timestamp to JavaScript Date object
+  const date = timestamp.toDate();
+
+  // Use date-fns to format the date
+  return format(date, 'pp P');
 };
 </script>
 
@@ -312,7 +350,7 @@ const backToConversations = () => {
   width: 100%;
 }
 
-.recipient-header-avatar {
+.recipient-avatar {
   margin: 8px 16px 8px 0;
   height: 3.2rem;
   width: 3.2rem;

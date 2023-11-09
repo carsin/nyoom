@@ -76,7 +76,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
-import { collection, query, onSnapshot, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, limit, orderBy, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { userInfoService } from '../services/UserInfoService'; // Import your Firebase configuration
 
@@ -108,18 +108,18 @@ onUnmounted(() => { // unsubscribe when the component unmounts
 
 const fetchConversations = async () => {
   isLoading.value = true;
+
   const conversationsRef = collection(db, 'conversations');
   const q = query(conversationsRef, where('participants', 'array-contains', currentUser?.uid));
 
   // Real-time listener for the conversations
   const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-    const convs = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const conversationsWithLastMessagePromises = querySnapshot.docs.map(async (doc) => {
+      const conversation = {
+        id: doc.id,
+        ...doc.data(),
+      };
 
-    // Fetch user details for all conversations in parallel
-    const userDetailsPromises = convs.map(async (conversation) => {
       const otherUserId = conversation.participants.find(uid => uid !== currentUser?.uid);
       let userData = userCache.get(otherUserId);
 
@@ -131,18 +131,34 @@ const fetchConversations = async () => {
         }
       }
 
+      // Fetch the last message for the conversation
+      const messagesRef = collection(db, 'conversations', conversation.id, 'messages');
+      const lastMessageQuery = query(messagesRef, orderBy('timestamp', 'desc'), limit(1));
+      const messageSnapshot = await getDocs(lastMessageQuery);
+      let lastMessage = messageSnapshot.docs.map(doc => doc.data())[0] || null;
+
+      // If there is a last message, format the timestamp
+      if (lastMessage && lastMessage.timestamp) {
+        lastMessage.formattedTimestamp = lastMessage.timestamp.toDate().toLocaleString();
+      }
+
       return {
         ...conversation,
         recipientUsername: userData?.username,
         recipientAvatarUrl: userData?.avatarUrl,
+        lastMessage: lastMessage ? {
+          content: lastMessage.content,
+          timestamp: lastMessage.formattedTimestamp,
+          senderId: lastMessage.senderId
+        } : null
       };
     });
 
-    // Wait for all user details to be fetched
-    conversations.value = await Promise.all(userDetailsPromises);
+    // Wait for all conversations and last messages to be fetched
+    conversations.value = await Promise.all(conversationsWithLastMessagePromises);
+    isLoading.value = false;
   });
 
-  isLoading.value = false;
   return unsubscribe; // Return the unsubscribe function to call when the component unmounts
 };
 
@@ -304,7 +320,7 @@ const searchUsers = async () => {
   isLoading.value = true;
 
   const usersRef = collection(db, 'users');
-  const userQuery = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'));
+  const userQuery = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'), limit(5));
   const querySnapshot = await getDocs(userQuery);
   searchResults.value = querySnapshot.docs
     .map(doc => ({
@@ -317,7 +333,6 @@ const searchUsers = async () => {
 
 const activeConversationDisplay = computed(() => {
   if (activeConversation.value) {
-    console.log(activeConversation.value.participants);
     return {
       avatarUrl: activeConversation.value.recipient.avatarUrl || defaultAvatar,
       username: activeConversation.value.recipient.username

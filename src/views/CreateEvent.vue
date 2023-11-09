@@ -43,8 +43,8 @@
                 <ion-item class="no-border no-click">
                   <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Date and Time</b>: </ion-label>
                   <ion-datetime-button datetime="datetime" class="date-picker"></ion-datetime-button>
-                  <ion-modal :keep-contents-mounted="true">
-                    <ion-datetime id="datetime" ref="datetime"></ion-datetime>
+                  <ion-modal :keep-contents-mounted="true" >
+                    <ion-datetime id="datetime" v-model="datetime"></ion-datetime>
                   </ion-modal>
                 </ion-item>
               </ion-list>
@@ -102,15 +102,6 @@
   
   const imageFile = ref<File | null>(null);
   const imagePreviewUrl = ref<string | undefined>(undefined);
-
-  // const cancel = () => {
-  //   datetime.value.$el.cancel();
-  //   console.log(datetime.value);
-  // }
-  // const confirm = () => {
-  //   datetime.value.$el.confirm();
-  //   console.log(datetime.value);
-  // }
   
   const handleImagePreview = (event: Event) => {
     const file = (event.target as HTMLInputElement).files?.[0];

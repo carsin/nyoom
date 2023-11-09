@@ -52,7 +52,7 @@
             <ion-item v-for="message in messages" :key="message.id">
               <ion-label>
                 <p> <b>{{ message.senderId === currentUser.uid ? 'You' : message.senderName }}</b>: {{ message.content }}</p>
-                <p class="message-timestamp ion-text-end">{{ formatTimestamp(message.timestamp) }}</p>
+                <p v-if="message.timestamp" class="message-timestamp ion-text-end">{{ formatTimestamp(message.timestamp) }}</p>
               </ion-label>
             </ion-item>
           </ion-list>
@@ -146,66 +146,91 @@ const fetchConversations = async () => {
   return unsubscribe; // Return the unsubscribe function to call when the component unmounts
 };
 
-const prepareConversation = async (conversation) => {
+const prepareConversation = async (conversationOrUser) => {
   isLoading.value = true;
+
   if (!currentUser) {
     console.error('No current user logged in.');
+    isLoading.value = false;
     return;
   }
 
-  // Define the current user's UID and the selected user's UID
   const currentUserUid = currentUser.uid;
-  const recipientUid = conversation.participants.find(uid => uid !== currentUser?.uid);
+  let recipientUid;
+  let recipientData;
 
-  // Query to check if a conversation between the two users already exists
-  const conversationQuery = query(
-    collection(db, 'conversations'),
-    where('participants', 'array-contains', currentUserUid)
-  );
+  // Distinguish between an existing conversation and a new one based on the presence of an 'id' property
+  const isExistingConversation = conversationOrUser.id !== undefined;
 
-  let conversationId = null;
-  const querySnapshot = await getDocs(conversationQuery);
-  const recipientData = await userInfoService.fetchUserData(recipientUid);
-
-  // Check if a document with the selected user as a participant already exists
-  querySnapshot.forEach((conversationDoc) => {
-    const data = conversationDoc.data();
-    if (data.participants.includes(recipientUid)) {
-      // Conversation found
-      activeConversation.value = {
-        id: conversationDoc.id,
-        recipient: {
-          avatarUrl: recipientData?.avatarUrl,
-          username: recipientData?.username
-        },
-        ...data
-      };
-      conversationId = conversationDoc.id; // Capture the conversation ID
-      console.log(activeConversation.value);
-      console.log("found conversation!")
-    } else {
-      console.log("new conversation");
-    }
-  });
-  
-  // Start listening to messages
-  if (conversationId) {
-    listenToMessages(conversationId);
+  if (isExistingConversation) {
+    // Existing conversation - get the other participant's UID
+    recipientUid = conversationOrUser.participants.find(uid => uid !== currentUserUid);
+  } else {
+    // New conversation - the parameter is a user object, so get the UID directly
+    recipientUid = conversationOrUser.uid;
   }
 
-  // If no conversation exists, prepare a new one without an ID (it will be assigned once the first message is sent)
-  if (!conversationId) {
+  // Fetch recipient data
+  try {
+    recipientData = await userInfoService.fetchUserData(recipientUid);
+  } catch (error) {
+    console.error('Failed to fetch recipient data:', error);
+    isLoading.value = false;
+    return;
+  }
+
+  // Prepare the recipient data for the activeConversation
+  const recipientInfo = {
+    avatarUrl: recipientData?.avatarUrl || 'default-avatar-url', // Replace with your default avatar URL
+    username: recipientData?.username || 'Unknown'
+  };
+
+  if (isExistingConversation) {
+    // Set the active conversation with recipient data
     activeConversation.value = {
-      participants: [currentUserUid, recipientUid],
-      recipient: {
-        avatarUrl: recipientData?.avatarUrl,
-        username: recipientData?.username
-      },
-      messages: []
+      ...conversationOrUser,
+      recipient: recipientInfo
     };
+    // Start listening to messages
+    listenToMessages(conversationOrUser.id);
+  } else {
+    // New conversation: Check if a conversation already exists with the recipient
+    let conversationExists = false;
+    const conversationsRef = collection(db, 'conversations');
+    const conversationQuery = query(
+      conversationsRef,
+      where('participants', 'array-contains', currentUserUid)
+    );
+
+    const querySnapshot = await getDocs(conversationQuery);
+    for (const conversationDoc of querySnapshot.docs) {
+      const data = conversationDoc.data();
+      if (data.participants.includes(recipientUid)) {
+        // Conversation found
+        activeConversation.value = {
+          id: conversationDoc.id,
+          recipient: recipientInfo,
+          ...data
+        };
+        conversationExists = true;
+        // Start listening to messages
+        listenToMessages(conversationDoc.id);
+        break;
+      }
+    }
+
+    // If no conversation exists, prepare a new one without an ID
+    if (!conversationExists) {
+      activeConversation.value = {
+        participants: [currentUserUid, recipientUid],
+        recipient: recipientInfo,
+        messages: []
+      };
+    }
   }
+
   isLoading.value = false;
-  currentView.value = 'conversation'; // switch to conversation view
+  currentView.value = 'conversation'; // Switch to conversation view
 };
 
 const listenToMessages = (conversationId) => {
@@ -292,7 +317,7 @@ const searchUsers = async () => {
 
 const activeConversationDisplay = computed(() => {
   if (activeConversation.value) {
-    console.log(activeConversation.value);
+    console.log(activeConversation.value.participants);
     return {
       avatarUrl: activeConversation.value.recipient.avatarUrl || defaultAvatar,
       username: activeConversation.value.recipient.username

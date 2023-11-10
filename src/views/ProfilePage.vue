@@ -33,13 +33,11 @@
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
-                  <ion-list>
-                    <ion-item>
-                      <ion-button>
-                        <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
-                      </ion-button>
-                    </ion-item>
-                  </ion-list>
+                  <router-link to="/garage">
+                    <ion-button>
+                      <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
+                    </ion-button>
+                  </router-link>
                 </ion-buttons>
               </ion-col>
             </ion-row>

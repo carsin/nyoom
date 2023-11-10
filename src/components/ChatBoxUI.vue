@@ -79,11 +79,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
-import { writeBatch, collection, query, onSnapshot, limit, doc, where, getDocs, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { writeBatch, collection, query, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { userInfoService } from '../services/UserInfoService'; // Import your Firebase configuration
 
@@ -101,16 +101,21 @@ const defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
 const userCache = new Map(); // cache to store fetched user data
 const toast = ref({ isOpen: false, message: '', color: '' });
 const currentUser = firebaseAuth.currentUser;
-let unsubscribe: Function; // Initialize unsubscribe as null
+let unsubscribeConvoListener: Function;
+let unsubscribeMessageListener: Function;
 
 onMounted(async () => {
-  unsubscribe = await fetchConversations();
+  unsubscribeConvoListener = await fetchConversations();
 });
 
-onUnmounted(() => { // unsubscribe when the component unmounts
-  if (unsubscribe) {
-    unsubscribe();
+onBeforeUnmount(() => { // unsubscribe when the component unmounts
+  if (unsubscribeConvoListener) {
+    unsubscribeConvoListener();
   }
+  if (unsubscribeMessageListener) {
+    unsubscribeMessageListener();
+  }
+
 });
 
 const fetchConversations = async () => {
@@ -205,7 +210,7 @@ const prepareConversation = async (conversationOrUser) => {
       recipient: recipientInfo
     };
     // Start listening to messages
-    listenToMessages(conversationOrUser.id);
+    unsubscribeConvoListener = listenToMessages(conversationOrUser.id);
   } else {
     // New conversation: Check if a conversation already exists with the recipient
     let conversationExists = false;
@@ -227,7 +232,7 @@ const prepareConversation = async (conversationOrUser) => {
         };
         conversationExists = true;
         // Start listening to messages
-        listenToMessages(conversationDoc.id);
+        unsubscribeConvoListener = listenToMessages(conversationDoc.id);
         break;
       }
     }
@@ -249,13 +254,25 @@ const prepareConversation = async (conversationOrUser) => {
 const listenToMessages = (conversationId) => {
   isLoading.value = true;
   const messagesRef = collection(db, 'conversations', conversationId, 'messages');
-  onSnapshot(messagesRef, (snapshot) => {
+
+  // Optionally, you can use query and orderBy to sort the messages
+  const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
+
+  // Using onSnapshot to listen for real-time updates
+  const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+    isLoading.value = false;
     messages.value = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    })).sort((a, b) => b.timestamp - a.timestamp); // Assuming each message has a 'timestamp'
+    }));
+  }, (error) => {
+    // Handle the error case
+    console.error("Error fetching messages: ", error);
+    isLoading.value = false;
   });
-  isLoading.value = false;
+
+  // Return the unsubscribe function in case you need to stop listening to updates
+  return unsubscribe;
 };
 
 const sendMessage = async () => {

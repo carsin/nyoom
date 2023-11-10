@@ -17,18 +17,22 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/onboard",
     component: () => import("@/views/TitlePage.vue"),
+    meta: { hideChatbox: true }
   },
   {
     path: "/login",
     component: () => import("@/views/LoginPage.vue"),
+    meta: { hideChatbox: true }
   },
   {
     path: "/register",
     component: () => import("@/views/RegisterPage.vue"),
+    meta: { hideChatbox: true }
   },
   {
     path: "/verify-email",
     component: () => import("@/views/VerifyEmail.vue"),
+    meta: { hideChatbox: true }
   },
   {
     path: "/tabs",
@@ -86,10 +90,12 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/404",
         component: () => import("@/views/404Page.vue"),
+        meta: { hideChatbox: true }
       },
       {
         path: "/:catchAll(.*)",
         component: () => import("@/views/404Page.vue"),
+        meta: { hideChatbox: true }
       },
     ],
   },

@@ -68,7 +68,7 @@
  
 <script setup lang="ts">
 import { ref } from 'vue';
-import { IonPage, IonHeader, IonLoading, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonInput, IonButton, IonToast } from '@ionic/vue';
+import { IonPage, IonHeader, IonLoading, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonInput, IonButton, IonToast, IonNote } from '@ionic/vue';
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { useRouter } from 'vue-router';
 import { firebaseAuth, db } from "../firebase-service";

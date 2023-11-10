@@ -6,8 +6,8 @@
     <ion-fab-list side="top" v-show="isChatOpen">
       <div class="chat-container">
         <!-- Search View -->
+        <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
         <div class="search-view" v-if="currentView === 'search'">
-          <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
           <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers"
             placeholder="Search users to message..." class="ion-no-padding"></ion-searchbar>
           <ion-list v-if="searchResults.length > 0">
@@ -277,6 +277,13 @@ const listenToMessages = (conversationId) => {
 
 const sendMessage = async () => {
   if (messageContent.value.trim() === '') return;
+  if (isLoading.value) {
+    toast.value = { isOpen: true, message: "Already sending message!", color: 'danger' };
+    return;
+  }
+  isLoading.value = true;
+  let message = messageContent.value;
+  messageContent.value = '';
 
   const batch = writeBatch(db);
 
@@ -288,7 +295,7 @@ const sendMessage = async () => {
       participants: activeConversation.value.participants,
       createdAt: serverTimestamp(),
       lastMessageSender: currentUser?.uid,
-      lastMessageContent: messageContent.value,
+      lastMessageContent: message,
       lastMessageTimestamp: serverTimestamp(),
     });
     activeConversation.value.id = conversationRef.id; // set the newly created conversation ID
@@ -296,7 +303,7 @@ const sendMessage = async () => {
     conversationRef = doc(db, 'conversations', activeConversation.value.id);
     batch.update(conversationRef, { // update the conversation with the last message details
       lastMessageSender: currentUser?.uid,
-      lastMessageContent: messageContent.value,
+      lastMessageContent: message,
       lastMessageTimestamp: serverTimestamp(),
     });
   }
@@ -306,18 +313,20 @@ const sendMessage = async () => {
   const messageDocRef = doc(messagesRef);
   batch.set(messageDocRef, {
     senderId: currentUser?.uid,
-    content: messageContent.value,
+    content: message,
     timestamp: serverTimestamp(),
   });
+  
 
   // send the message and update conversation in a single batched write
   try {
     await batch.commit();
-    messageContent.value = ''; // clear the message input after successful send
     listenToMessages(activeConversation.value.id);
   } catch (error: any) {
+    messageContent.value = message; 
     toast.value = { isOpen: true, message: "Error sending message: " + error.message, color: 'danger' };
   }
+  isLoading.value = false;
 };
 
 const toggleChat = () => {

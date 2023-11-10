@@ -387,7 +387,7 @@ const formatTimestamp = (timestamp: Timestamp): string => {
 }
 
 .message-input-box {
-  position: sticky;
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;

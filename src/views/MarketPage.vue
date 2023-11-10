@@ -180,6 +180,10 @@ import {
   IonButtons,
   IonLabel,
   IonIcon,
+  IonText,
+  IonProgressBar, 
+  IonRefresher,
+  IonRefresherContent,
 } from "@ionic/vue";
 import { funnel } from "ionicons/icons";
 import { collection, query, getDocs } from "firebase/firestore";

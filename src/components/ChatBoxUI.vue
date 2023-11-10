@@ -8,13 +8,14 @@
         <!-- Search View -->
         <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
         <div class="search-view" v-if="currentView === 'search'">
-          <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers"
-            placeholder="Search users to message..." class="ion-no-padding"></ion-searchbar>
+          <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers" placeholder="Search users to message..."
+            class="ion-no-padding"></ion-searchbar>
           <ion-list v-if="searchResults.length > 0">
             <ion-list-header lines="full">
               <ion-label>User Search Results:</ion-label>
             </ion-list-header>
-            <ion-item class="searchuser-result-item" v-for="user in searchResults" :key="user.uid" @click="prepareConversation(user)">
+            <ion-item class="searchuser-result-item" v-for="user in searchResults" :key="user.uid"
+              @click="prepareConversation(user)">
               <ion-avatar slot="start">
                 <img :src="user.avatarUrl || defaultAvatar">
               </ion-avatar>
@@ -54,12 +55,20 @@
               </ion-button>
             </ion-list-header>
             <!-- Messages  -->
-            <ion-item v-for="message in messages" :key="message.id" >
-              <ion-label v-if="message.timestamp">
-                <p> <b>{{ message.senderId === currentUser.uid ? 'You' : activeConversationDisplay.username }}</b>: {{ message.content }}
-                </p>
-                <p class="message-timestamp ion-text-end">{{ formatTimestamp(message.timestamp)
-                }}</p>
+            <ion-item v-for="message in messages" :key="message.id">
+              <ion-label>
+                <ion-grid>
+                  <ion-row>
+                    <ion-col>
+                      <p> <b>{{ message.senderId === currentUser.uid ? 'You' : activeConversationDisplay.username }}</b> <i v-if="message.timestamp" class="message-timestamp ion-text-end"> {{ formatTimestamp(message.timestamp) }} </i> </p>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col>
+                      <p>{{ message.content }}</p>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
               </ion-label>
             </ion-item>
           </ion-list>
@@ -80,7 +89,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar } from '@ionic/vue';
+import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar, IonGrid, IonCol, IonRow } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
 import { writeBatch, collection, query, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, Timestamp } from 'firebase/firestore';

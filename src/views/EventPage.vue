@@ -37,7 +37,17 @@
         </ion-toolbar>
         <ion-grid>
           <ion-row>
-            <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
+            <div v-if="events.length > 0">
+              <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="event in events" :key="event.id">
+                <EventCardComponent :imageId="event.id" :username="event.username" :eventDescription="event.eventDescription"
+                  :image_src="event.imageUrl" :imagePath="event.imagePath" :userId="event.userId" :timestamp="event.timestamp"
+                  :eventName="event.eventName" :eventType="event.eventType" :datetime="event.datetime" showAvatar />
+              </ion-col>
+            </div>
+            <ion-text v-else class="ion-text-center">
+              <h3> <i> No one has posted anything :( </i></h3>
+            </ion-text>
+            <!-- <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #1" event-type="Car Meet"></EventCardComponent>
             </ion-col>
             <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
@@ -45,30 +55,9 @@
             </ion-col>
             <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #3" event-type="Car Meet"></EventCardComponent>
-            </ion-col>
+            </ion-col> -->
           </ion-row>
         </ion-grid>
-          
-          <!--<p>{{ message }}</p>
-        </ion-toolbar>
-        <ion-grid>
-          <ion-row>
-            <ion-col v-for="part in parts" :key="part.id" size="6">
-              <ion-card :href="'/market/' + part.id" class="custom-card">
-                <img alt="Part image" :src="part.imageUrl" class="custom-image" />
-                <ion-card-header>
-                  <ion-card-subtitle>{{ part.condition }}</ion-card-subtitle>
-                  <ion-card-subtitle class="card-price">{{
-                    part.price
-                  }}</ion-card-subtitle>
-                  <ion-card-subtitle class="card-title">{{
-                    part.title
-                  }}</ion-card-subtitle>
-                </ion-card-header>
-              </ion-card>
-            </ion-col>
-          </ion-row>
-        </ion-grid> -->
       </div>
 
       <div v-if="isSubscribedTab">
@@ -128,15 +117,64 @@
 </style>
 
 <script setup lang="ts">
+import { ref, onMounted, watch } from 'vue';
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { useStore } from "vuex";
 import { computed } from "vue";
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSearchbar, 
          IonButton, IonSegment, IonSegmentButton, IonLabel, IonButtons, IonIcon, IonCard } from '@ionic/vue';
 import { funnel } from "ionicons/icons";
+import { db, firebaseAuth } from "../firebase-service";
+import { useRoute } from 'vue-router';
+
 import EventCardComponent from '@/components/EventCardComponent.vue';
 
+const events = ref([]); // Variable to hold the events
 const store = useStore();
 const selectedTab = computed(() => store.state.eventTabs.selectedTab);
+const isLoading = ref(true); // Variable to manage loading state
+const user = firebaseAuth.currentUser;
+const route = useRoute();
+
+onMounted(async () => {
+  await fetchEvents();
+  isLoading.value = false;
+});
+
+const fetchEvents = async () => {
+  // Query all events and order by timestamp
+  const eventsQuery = query(
+    collection(db, 'events'),
+    orderBy('timestamp', 'desc') // Ordering by timestamp in descending order
+  );
+  const querySnapshot = await getDocs(eventsQuery);
+
+  events.value = querySnapshot.docs.map(doc => {
+    const eventData = doc.data();
+    return {
+      id: doc.id,
+      // isUpvoted: eventData.upvoters.includes(user?.uid),
+      // isDownvoted: eventData.downvoters.includes(user?.uid),
+      ...eventData
+    };
+  });
+}
+
+const refreshEvents = async (event: CustomEvent) => {
+  isLoading.value = true;
+  await fetchEvents();
+  isLoading.value = false;
+  event.target.complete();
+}
+
+// refresh posts after posting
+watch(() => route.path, async (newPath, oldPath) => {
+  if (oldPath === '/create-event' && newPath === '/events') {
+    isLoading.value = true;
+    await fetchEvents();
+    isLoading.value = false;
+  }
+});
 
 const selectTab = (tab: String) => {
   store.commit("eventTabs/setSelectedTab", tab);

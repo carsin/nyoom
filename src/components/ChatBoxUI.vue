@@ -256,7 +256,7 @@ const listenToMessages = (conversationId) => {
   const messagesRef = collection(db, 'conversations', conversationId, 'messages');
 
   // Optionally, you can use query and orderBy to sort the messages
-  const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
+  const messagesQuery = query(messagesRef, orderBy('timestamp', 'desc'));
 
   // Using onSnapshot to listen for real-time updates
   const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {

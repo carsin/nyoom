@@ -41,8 +41,10 @@
         <!-- <ion-card-title>@{{ username }}</ion-card-title> -->
       </ion-row>
         
-      <ion-row>
-        <img :src="image_src" alt="Event image content" />
+      <ion-row class="ion-justify-content-center">
+        <div class="post-image-container">
+          <img class="post-image" :src="image_src" alt="Event image content" />
+        </div>
       </ion-row>
       <ion-row>
         <ion-col>
@@ -61,6 +63,22 @@
 </template>
 
 <style>
+
+.post-image-container {
+  padding: 0px 16px 0px; /* horizontal padding only */
+  border-radius: 8px;
+  overflow: hidden; /* ensure that the border-radius is applied to the image inside */
+  line-height: 0; /* removes any extra space below the image */
+}
+
+.post-image {
+  border-radius: 0.5rem;
+  width: auto; /* maintain the aspect ratio */
+  height: auto; /* maintain the aspect ratio */
+  max-height: 35rem;
+  display: block; /* remove bottom space */
+  max-width: 100%; /* ensure the image does not overflow the padding */
+}
 
 .vert-center{
   vertical-align: center;

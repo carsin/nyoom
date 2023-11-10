@@ -22,7 +22,7 @@
           </ion-segment-button>
         </ion-segment>
 
-        <div v-if="isRecommendedTab">
+      <div v-if="isRecommendedTab">
         <ion-toolbar>
           <ion-title class="ion-text-center">Recommended Events</ion-title>
         </ion-toolbar>
@@ -35,18 +35,14 @@
             </ion-button>
           </ion-buttons>
         </ion-toolbar>
-        <ion-grid>
-          <ion-row>
-            <div v-if="events.length > 0">
-              <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="event in events" :key="event.id">
+        <div v-if="events.length > 0">
+          <ion-grid>
+            <ion-row>
+              <ion-col size-sm="12" size-md="12" size-lg="6" v-for="event in events" :key="event.id">
                 <EventCardComponent :imageId="event.id" :username="event.username" :eventDescription="event.eventDescription"
                   :image_src="event.imageUrl" :imagePath="event.imagePath" :userId="event.userId" :timestamp="event.timestamp"
                   :eventName="event.eventName" :eventType="event.eventType" :datetime="event.datetime" showAvatar />
               </ion-col>
-            </div>
-            <ion-text v-else class="ion-text-center">
-              <h3> <i> No one has posted anything :( </i></h3>
-            </ion-text>
             <!-- <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #1" event-type="Car Meet"></EventCardComponent>
             </ion-col>
@@ -56,8 +52,12 @@
             <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4">
               <EventCardComponent username="username" image_src="https://ionicframework.com/docs/img/demos/card-media.png" event-title="Event #3" event-type="Car Meet"></EventCardComponent>
             </ion-col> -->
-          </ion-row>
-        </ion-grid>
+            </ion-row>
+          </ion-grid>
+        </div>
+        <ion-text v-else class="ion-text-center">
+          <h3> <i> No one has posted anything :( </i></h3>
+        </ion-text>
       </div>
 
       <div v-if="isSubscribedTab">

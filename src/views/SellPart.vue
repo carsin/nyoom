@@ -170,6 +170,10 @@ const createPart = async () => {
     if (price.value === null || price.value === "") {
       throw new Error("Price cannot be empty.");
     }
+    // Check if the item name is not null or empty
+    if (itemName.value === null || itemName.value === "") {
+      throw new Error("Item name cannot be empty.");
+    }
 
     if (user) {
       // get user data

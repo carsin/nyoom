@@ -70,11 +70,11 @@
               </ion-row>
             </ion-grid>
           </ion-toolbar>
-          <div v-if="posts.length > 0">
+          <div v-if="vehicles.length > 0">
             <ion-grid>
               <ion-row>
-                <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="post in posts" :key="post.id">
-                  <PostCardComponent :imageId="post.id" :username="post.username" :caption="post.caption" :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl" :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted" :isDownvoted="post.isDownvoted"/>
+                <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="vehicle in vehicles" :key="vehicle.id">
+                  <VehicleComponent :imageId="vehicle.id" :username="vehicle.username" :caption="vehicle.caption" :image_src="vehicle.imageUrl" :userId="vehicle.userId" :timestamp="vehicle.timestamp"/>
                 </ion-col>
               </ion-row>
             </ion-grid>
@@ -88,3 +88,9 @@
       </ion-content>
     </ion-page>
   </template>
+
+<script setup lang="ts">
+const vehicles = ref([]); // Variable to hold the vehicles
+import PersonalHeader from '@/components/PersonalHeader.vue';
+import VehicleComponent from '@/components/VehicleComponent.vue';
+</script>

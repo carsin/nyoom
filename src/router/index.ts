@@ -10,18 +10,8 @@ const routes: Array<RouteRecordRaw> = [
     redirect: "/onboard",
   },
   {
-    path: "/market/:id",
-    component: () => import("../views/PartDetails.vue"),
-    meta: { requiresAuth: true },
-  },
-  {
     path: "/market/post-part",
     component: () => import("../views/SellPart.vue"),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/market/autoshop/:id",
-    component: () => import("../views/OfferDetails.vue"),
     meta: { requiresAuth: true },
   },
   {

@@ -45,9 +45,6 @@
       <!-- </ion-item> -->
       <!-- <ion-button id="change-password" expand="block" fill="outline"> Send Password Change to Email </ion-button> -->
       <!---->
-      <!-- <ion-toast trigger="change-username" message="Username change request received, confirm this change from your registered email." :duration="3000"></ion-toast> -->
-      <!-- <ion-toast trigger="change-email" message="Email request change received, confirm this change from your previous email address." :duration="3000"></ion-toast> -->
-      <!-- <ion-toast trigger="change-password" message="Password request change sent to email." :duration="3000"></ion-toast> -->
       <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000" @didDismiss="toast.isOpen = false"></ion-toast>
     </ion-content>
   </ion-page>

@@ -1,6 +1,6 @@
 <template>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="isChatVisible">
-    <ion-fab-button @click="toggleChat">
+    <ion-fab-button class="enter-chat-button" @click="toggleChat">
       <ion-icon :icon="isChatOpen ? close : chatbubbles"></ion-icon>
     </ion-fab-button>
     <ion-fab-list side="top" v-show="isChatOpen">
@@ -55,9 +55,9 @@
               </ion-button>
             </ion-list-header>
             <!-- Messages  -->
-            <ion-item v-for="message in messages" :key="message.id">
+            <ion-item v-for="message in messages" :key="message.id" lines="inset">
               <ion-label>
-                <ion-grid>
+                <ion-grid class="ion-no-padding">
                   <ion-row>
                     <ion-col>
                       <p> <b>{{ message.senderId === currentUser.uid ? 'You' : activeConversationDisplay.username }}</b> <i v-if="message.timestamp" class="message-timestamp ion-text-end"> {{ formatTimestamp(message.timestamp) }} </i> </p>
@@ -385,15 +385,15 @@ const backToConversations = () => {
 
 const formatTimestamp = (timestamp: Timestamp): string => {
   if (timestamp) {
-    return format(timestamp.toDate(), 'pp P'); // use date-fns to format the date
+    return format(timestamp.toDate(), 'pp M/d/yy'); // use date-fns to format the date
   }
 };
 </script>
 
 <style scoped>
 .chat-container {
-  bottom: 25px;
-  right: 5px;
+  bottom: 12vh;
+  right: 2vw;
   width: 300px;
   height: 500px;
   background-color: var(--ion-background-color);
@@ -403,8 +403,15 @@ const formatTimestamp = (timestamp: Timestamp): string => {
   flex-direction: column;
 }
 
+.enter-chat-button {
+  position: absolute;
+  bottom: 6vh; 
+  right: 1vw; 
+}
+
 .search-view,
 .conversation-view {
+  background-color: var(--ion-background-color);
   overflow-y: auto;
   flex-grow: 1;
 }

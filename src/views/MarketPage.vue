@@ -37,7 +37,7 @@
             class="ion-padding-start ion-padding-end"
           ></ion-searchbar>
           <ion-buttons slot="end">
-            <ion-button expand="block" @click="filterModal">
+            <ion-button expand="block" @click="filterModal(user.uid)">
               <ion-icon :icon="funnel" />
             </ion-button>
           </ion-buttons>
@@ -181,24 +181,26 @@ import {
   IonLabel,
   IonIcon,
   IonText,
-  IonProgressBar, 
+  IonProgressBar,
   IonRefresher,
   IonRefresherContent,
 } from "@ionic/vue";
 import { funnel } from "ionicons/icons";
-import { collection, query, getDocs } from "firebase/firestore";
-import { db } from "../firebase-service";
+import { collection, query, getDocs, where } from "firebase/firestore";
+import { db, firebaseAuth } from "../firebase-service";
 import { useRouter, useRoute } from "vue-router";
 import MarketFilter from "../popups/MarketFilter.vue";
 import MarketPart from "../popups/MarketPart.vue";
 import MarketOffer from "@/popups/MarketOffer.vue";
 
+const user = firebaseAuth.currentUser;
 const isLoading = ref(true); // Variable to manage loading state
 const route = useRoute();
 const router = useRouter();
 const partData = ref([{}]); // Reactive variable to store user data
 const offerData = ref([{}]); // Reactive variable to store user data
 let noResults = false;
+const filterSelection = ref("Featured");
 
 onMounted(async () => {
   await fetchParts();
@@ -206,7 +208,20 @@ onMounted(async () => {
 });
 
 const fetchParts = async () => {
-  const partsQuery = query(collection(db, "parts"));
+  let partsQuery = query(collection(db, "parts"));
+  // console.log(filterSelection.value);
+  // console.log(partsQuery);
+  let partsQuery1 = partsQuery;
+
+  if (filterSelection.value === "My Listings") {
+    console.log("inside mylistings");
+    partsQuery = query(
+      collection(db, "parts"),
+      where("userId", "==", user?.uid)
+    );
+    console.log(partsQuery);
+  }
+
   const partSnapshot = await getDocs(partsQuery);
 
   if (partSnapshot.empty) {
@@ -257,6 +272,16 @@ watch(
   }
 );
 
+watch(
+  () => filterSelection.value,
+  async () => {
+    isLoading.value = true;
+    console.log("refresh out of filter");
+    await fetchParts();
+    isLoading.value = false;
+  }
+);
+
 const truncateText = (text: string, maxLength: number) => {
   if (text.length > maxLength) {
     return text.slice(0, maxLength) + "...";
@@ -277,9 +302,12 @@ const isPartsTab = computed(() => selectedTab.value === "parts");
 const isAutoShopTab = computed(() => selectedTab.value === "auto-shop");
 const message = ref("Sort by: Featured (default)");
 
-const filterModal = async () => {
+const filterModal = async (userId: any) => {
   const modal = await modalController.create({
     component: MarketFilter,
+    componentProps: {
+      userId: userId,
+    },
   });
 
   modal.present();
@@ -287,9 +315,11 @@ const filterModal = async () => {
   const { data, role } = await modal.onWillDismiss();
 
   if (role === "confirm") {
+    filterSelection.value = `${data}`;
     message.value = `Sort by: ${data}`;
   }
 };
+
 const partModal = (part: any) => {
   modalController
     .create({

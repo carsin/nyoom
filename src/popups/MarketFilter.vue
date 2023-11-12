@@ -60,15 +60,16 @@ import {
   IonItem,
   modalController,
 } from "@ionic/vue";
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
 
 const name = ref();
 const selectedOption = ref("");
+const props = defineProps(["userId"]);
 
 const cancel = () => modalController.dismiss(null, "cancel");
 const confirm = () => modalController.dismiss(selectedOption.value, "confirm");
 
-const selectOption = (option) => {
+const selectOption = (option: any) => {
   selectedOption.value = option;
 };
 </script>

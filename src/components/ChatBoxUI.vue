@@ -37,8 +37,8 @@
                   <h2>{{ conversation.recipientUsername }}
                     <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{ conversation.unreadCounts[currentUser?.uid] }} unread) </span>
                   </h2>
-                  <p>{{ conversation.lastMessageContent || 'No messages yet' }}</p>
-                  <p>{{ conversation.lastMessageTimestamp || 'No timestamp' }}</p>
+                  <p>{{ conversation.lastMessageContent || 'Cannot load message.'}}</p>
+                  <p>{{ conversation.lastMessageTimestamp || 'Timestamp loading...' }}</p>
                 </ion-label>
               </div>
             </ion-item>
@@ -53,7 +53,7 @@
                 <img :src="activeConversationDisplay.avatarUrl || defaultAvatar" alt="Recipient avatar">
               </ion-avatar>
               <ion-label>{{ activeConversationDisplay.username }}</ion-label>
-              <ion-button size="large" fill="clear" @click="backToConversations">
+              <ion-button class="" size="large" fill="clear" @click="backToConversations">
                 <ion-icon :icon="arrowBack"></ion-icon>
               </ion-button>
             </ion-list-header>
@@ -61,14 +61,14 @@
             <ion-item v-for="message in messages" :key="message.id" lines="inset">
               <ion-label>
                 <ion-grid class="ion-no-padding">
-                  <ion-row class="ion-align-items-center">
+                  <ion-row class="ion-align-items-center" style="flex-grow: 1;">
                     <ion-col size="auto"> <!-- sender username -->
                       <b class="message-username">{{ message.senderId === currentUser.uid ? currentUsername : activeConversationDisplay.username }}</b>
                     </ion-col>
-                    <ion-col> <!-- timestamp -->
+                    <ion-col suze="auto"> <!-- timestamp -->
                       <p v-if="message.timestamp" class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</p>
                     </ion-col>
-                    <ion-col size="auto" class="ion-text-end"> <!-- read receipt icon -->
+                    <ion-col size="auto" class="ion-text-end" style="flex-shrink: 0;"> <!-- read receipt icon -->
                       <ion-icon class="message-receipt" :icon="message.readStatus ? checkmark : mailOutline"></ion-icon>
                     </ion-col>
                   </ion-row>
@@ -102,7 +102,7 @@ import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel
 import { chatbubbles, close, send, arrowBack, mailOutline, checkmark } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
 import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
-import { format } from 'date-fns';
+import { format, parse as dateParse } from 'date-fns';
 import { userInfoService } from '../services/UserInfoService';
 
 const isChatVisible = ref(true);
@@ -110,7 +110,6 @@ const isChatOpen = ref(false);
 const isLoading = ref(false);
 const currentView = ref('search'); // 'search' or 'conversation'
 const searchQuery = ref('');
-const hasUnreadMessages = ref(false);
 const searchResults = ref([]);
 const messageContent = ref('');
 const messages = ref([]);
@@ -146,7 +145,7 @@ const fetchConversations = async () => {
   const conversationsRef = collection(db, 'conversations');
   const q = query(conversationsRef, where('participants', 'array-contains', currentUser?.uid));
 
-  // Real-time listener for the conversations
+  // real-time listener for conversations
   const unsubscribe = onSnapshot(q, async (querySnapshot) => {
     const conversationsWithDetailsPromises = querySnapshot.docs.map(async (doc) => {
       const conversation = {
@@ -157,7 +156,7 @@ const fetchConversations = async () => {
       const otherUserId = conversation.participants.find(uid => uid !== currentUser?.uid);
       let userData = userCache.get(otherUserId);
 
-      // Fetch user data if not in cache
+      // fetch user data if not in cache
       if (!userData) {
         userData = await userInfoService.fetchUserData(otherUserId);
         if (userData) {
@@ -165,7 +164,7 @@ const fetchConversations = async () => {
         }
       }
 
-      // Format the timestamp of the last message
+      // format the timestamp of the last message
       let formattedTimestamp = formatTimestamp(conversation.lastMessageTimestamp);
 
       return {
@@ -177,13 +176,21 @@ const fetchConversations = async () => {
         lastMessageSender: conversation.lastMessageSender || ''
       };
     });
+    
+    // sort conversations by timestamp in descending order
+    let fetchedConversations = await Promise.all(conversationsWithDetailsPromises);
+    fetchedConversations.sort((a, b) => {
+      const dateA = dateParse(a.lastMessageTimestamp, 'pp M/d/yy', new Date());
+      const dateB = dateParse(b.lastMessageTimestamp, 'pp M/d/yy', new Date());
+      return dateB.getTime() - dateA.getTime();
+    });
 
-    // Wait for all conversations and last messages to be fetched
-    conversations.value = await Promise.all(conversationsWithDetailsPromises);
+    // wait for all conversations and last messages to be fetched
+    conversations.value = fetchedConversations;
     isLoading.value = false;
   });
 
-  return unsubscribe; // Return the unsubscribe function to call when the component unmounts
+  return unsubscribe; // return the unsubscribe function to call when the component unmounts
 };
 
 const prepareConversation = async (conversationOrUser) => {
@@ -221,7 +228,7 @@ const prepareConversation = async (conversationOrUser) => {
 
   // prepare the recipient data for the activeConversation
   const recipientInfo = {
-    avatarUrl: recipientData?.avatarUrl || 'default-avatar-url', // Replace with your default avatar URL
+    avatarUrl: recipientData?.avatarUrl || defaultAvatar, // Replace with your default avatar URL
     username: recipientData?.username || 'Unknown'
   };
 
@@ -267,8 +274,8 @@ const prepareConversation = async (conversationOrUser) => {
         recipient: recipientInfo,
         messages: [],
         unreadCounts: {
-          currentUserUid: 0,
-          recipientUid: 0
+          [currentUserUid]: 0,
+          [recipientUid]: 0
         }
       };
     }
@@ -323,15 +330,16 @@ const sendMessage = async () => {
 
   // if it's a new conversation, create it in Firestore
   let conversationRef;
+  let timestamp = serverTimestamp();
   if (!activeConversation.value.id) {
     conversationRef = doc(collection(db, 'conversations'));
     batch.set(conversationRef, {
       participants: activeConversation.value.participants,
-      createdAt: serverTimestamp(),
+      createdAt: timestamp,
       unreadCounts: activeConversation.value.unreadCounts,
       lastMessageSender: currentUser?.uid,
       lastMessageContent: message,
-      lastMessageTimestamp: serverTimestamp(),
+      lastMessageTimestamp: timestamp,
     });
     activeConversation.value.id = conversationRef.id; // set the newly created conversation ID
   } else {
@@ -340,7 +348,7 @@ const sendMessage = async () => {
     batch.update(conversationRef, { // update the conversation with the last message details
       lastMessageSender: currentUser?.uid,
       lastMessageContent: message,
-      lastMessageTimestamp: serverTimestamp(),
+      lastMessageTimestamp: timestamp,
       [`unreadCounts.${recipientId}`]: increment(1) // Increment unread count for recipient
     });
   }
@@ -351,7 +359,7 @@ const sendMessage = async () => {
   batch.set(messageDocRef, {
     senderId: currentUser?.uid,
     content: message,
-    timestamp: serverTimestamp(),
+    timestamp: timestamp,
     readStatus: false,
   });
 
@@ -431,13 +439,14 @@ const formatTimestamp = (timestamp: Timestamp): string => {
   if (timestamp) {
     return format(timestamp.toDate(), 'pp M/d/yy'); // use date-fns to format the date
   }
+  return '';
 };
 </script>
 
 <style scoped>
 .chat-container {
-  bottom: 12vh;
-  right: 2vw;
+  bottom: 105px;
+  right: 55px;
   width: 300px;
   height: 500px;
   background-color: var(--ion-background-color);
@@ -449,8 +458,8 @@ const formatTimestamp = (timestamp: Timestamp): string => {
 
 .enter-chat-button {
   position: absolute;
-  bottom: 6vh;
-  right: 1vw;
+  bottom: 55px;
+  right: 3px;
 }
 
 .search-view,

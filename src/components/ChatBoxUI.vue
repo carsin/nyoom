@@ -9,7 +9,8 @@
         <!-- Search View -->
         <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
         <div class="search-view" v-if="currentView === 'search'">
-          <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers" placeholder="Search users to message..." class="ion-no-padding"></ion-searchbar>
+          <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers" placeholder="Search users to message..."
+            class="ion-no-padding"></ion-searchbar>
           <ion-list v-if="searchResults.length > 0">
             <ion-list-header lines="full">
               <ion-label>User Search Results:</ion-label>
@@ -34,9 +35,10 @@
               <div class="conversation-details">
                 <ion-label>
                   <h2>{{ conversation.recipientUsername }}
-                    <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{ conversation.unreadCounts[currentUser?.uid] }} unread) </span>
+                    <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{
+                      conversation.unreadCounts[currentUser?.uid] }} unread) </span>
                   </h2>
-                  <p>{{ conversation.lastMessageContent || 'Cannot load message.'}}</p>
+                  <p>{{ conversation.lastMessageContent || 'Cannot load message.' }}</p>
                   <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
                 </ion-label>
               </div>
@@ -48,10 +50,12 @@
           <ion-list class="message-list ion-no-padding">
             <!-- Conversation header -->
             <ion-list-header class="conversation-header" lines="full" v-if="activeConversationDisplay">
-              <ion-avatar class="recipient-avatar">
+              <ion-avatar @click="router.push('/user/' + activeConversationDisplay.username)" class="recipient-avatar">
                 <img :src="activeConversationDisplay.avatarUrl || defaultAvatar" alt="Recipient avatar">
               </ion-avatar>
-              <ion-label>{{ activeConversationDisplay.username }}</ion-label>
+              <ion-label class="conversation-username"
+                @click="router.push('/user/' + activeConversationDisplay.username)">{{ activeConversationDisplay.username
+                }}</ion-label>
               <ion-button class="" size="large" fill="clear" @click="backToConversations">
                 <ion-icon :icon="arrowBack"></ion-icon>
               </ion-button>
@@ -62,12 +66,15 @@
                 <ion-grid class="ion-no-padding">
                   <ion-row class="ion-align-items-center" style="flex-grow: 1;">
                     <ion-col size="auto"> <!-- sender username -->
-                      <b class="message-username">{{ message.senderId === currentUser.uid ? currentUsername : activeConversationDisplay.username }}</b>
+                      <b class="message-username conversation-username" @click="navigateToUserProfile(message)">
+                        {{ currentUser.uid ? currentUsername : activeConversationDisplay.username }}
+                      </b>
                     </ion-col>
                     <ion-col suze="auto"> <!-- timestamp -->
                       <p v-if="message.timestamp" class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</p>
                     </ion-col>
-                    <ion-col v-if="message.timestamp" size="auto" class="ion-text-end" style="flex-shrink: 0;"> <!-- read receipt icon -->
+                    <ion-col v-if="message.timestamp" size="auto" class="ion-text-end" style="flex-shrink: 0;">
+                      <!-- read receipt icon -->
                       <ion-icon class="message-receipt" :icon="message.readStatus ? checkmark : mailOutline"></ion-icon>
                     </ion-col>
                   </ion-row>
@@ -82,7 +89,8 @@
           </ion-list>
           <div class="message-input-box">
             <ion-item lines="none">
-              <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage" :maxlength="MAX_CHATMESSAGE_LENGTH" ></ion-input>
+              <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage"
+                :maxlength="MAX_CHATMESSAGE_LENGTH"></ion-input>
               <ion-button fill="clear" @click="sendMessage">
                 <ion-icon slot="icon-only" :icon="send"></ion-icon>
               </ion-button>
@@ -92,11 +100,11 @@
       </div>
     </ion-fab-list>
     <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="3000" :color="toast.color"></ion-toast>
-  </ion-fab>
-</template>
+  </ion-fab></template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar, IonGrid, IonCol, IonRow } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack, mailOutline, checkmark } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
@@ -120,6 +128,7 @@ const userCache = new Map(); // cache to store fetched user data
 const toast = ref({ isOpen: false, message: '', color: '' });
 const currentUser = firebaseAuth.currentUser;
 const currentUsername = ref('');
+const router = useRouter();
 let unsubscribeConvoListener: Function;
 let unsubscribeMessageListener: Function;
 
@@ -235,7 +244,6 @@ const prepareConversation = async (conversationOrUser) => {
     // reset unread count
     resetUnreadCount(conversationOrUser.id);
     // start listening to messages
-    console.log("listening to messages: old convo");
     unsubscribeConvoListener = listenToMessages(conversationOrUser.id);
   } else {
     // new conversation: Check if a conversation already exists with the recipient
@@ -422,6 +430,11 @@ const activeConversationDisplay = computed(() => {
   return null;
 });
 
+function navigateToUserProfile(message) {
+  const username = message.senderId === currentUser?.uid ? currentUsername.value : activeConversationDisplay.username;
+  router.push('/user/' + username);
+}
+
 const backToConversations = () => {
   searchQuery.value = '';
   searchResults.value = [];
@@ -493,6 +506,11 @@ const formatTimestamp = (timestamp: Timestamp): string => {
   width: 3.2rem;
 }
 
+.recipient-avatar:hover, .conversation-username:hover {
+  cursor: pointer;
+  color: var(--ion-color-step-650);
+}
+
 .message-username {
   padding-right: 4px;
 }
@@ -504,5 +522,4 @@ const formatTimestamp = (timestamp: Timestamp): string => {
 
 .message-receipt {
   padding-right: 4px;
-}
-</style>
+}</style>

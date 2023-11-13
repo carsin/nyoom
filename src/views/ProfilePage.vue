@@ -87,12 +87,12 @@
               <ion-col>
                 <ion-chip color="primary" @click="showUsers('Followers')">
                   <ion-text>
-                    <b> {{ userData.followers.length - 1 }} </b> Followers
+                    <b> {{ userData.followers.length }} </b> Followers
                   </ion-text>
                 </ion-chip>
                 <ion-chip color="primary" @click="showUsers('Following')">
                   <ion-text>
-                    <b> {{ userData.following.length - 1 }} </b> Following
+                    <b> {{ userData.following.length }} </b> Following
                   </ion-text>
                 </ion-chip>
               </ion-col>
@@ -268,7 +268,14 @@ const handleRealtimeUpdates = (userDocId) => {
   // Listening for real-time updates
   const unsubscribe = onSnapshot(userRef, (doc) => {
     if (doc.exists()) {
+      const newFollowers = doc.data().followers || [];
       userData.value = { uid: doc.id, ...doc.data() }; // Updating userData
+
+      // Check if the current user is following the profile user
+      const currentUser = firebaseAuth.currentUser;
+      if (currentUser) {
+        isFollowing.value = newFollowers.includes(currentUser.uid);
+      }
     }
   });
 
@@ -336,6 +343,10 @@ const getUserDetails = async (uids: []) => {
   return users;
 };
 
+const followState = ref(isFollowing.value);
+
+// ...
+
 // Function to handle follow/unfollow
 const handleFollow = async () => {
   const currentUser = firebaseAuth.currentUser;
@@ -345,14 +356,16 @@ const handleFollow = async () => {
       const userDocRef = doc(db, "users", userData.value.uid);
       const currentUserDocRef = doc(db, "users", currentUser.uid);
 
-      if (isFollowing.value) {
+      if (followState.value) {
         // Unfollow logic
-        await updateDoc(userDocRef, {
-          followers: arrayRemove(currentUser.uid),
-        });
-        await updateDoc(currentUserDocRef, {
-          following: arrayRemove(userData.value.uid),
-        });
+        await Promise.all([
+          updateDoc(userDocRef, {
+            followers: arrayRemove(currentUser.uid),
+          }),
+          updateDoc(currentUserDocRef, {
+            following: arrayRemove(userData.value.uid),
+          }),
+        ]);
         toast.value = {
           isOpen: true,
           message: "Successfully unfollowed " + username.value,
@@ -360,12 +373,14 @@ const handleFollow = async () => {
         };
       } else {
         // Follow logic
-        await updateDoc(userDocRef, {
-          followers: arrayUnion(currentUser.uid),
-        });
-        await updateDoc(currentUserDocRef, {
-          following: arrayUnion(userData.value.uid),
-        });
+        await Promise.all([
+          updateDoc(userDocRef, {
+            followers: arrayUnion(currentUser.uid),
+          }),
+          updateDoc(currentUserDocRef, {
+            following: arrayUnion(userData.value.uid),
+          }),
+        ]);
         toast.value = {
           isOpen: true,
           message: "Successfully followed " + username.value,
@@ -373,7 +388,8 @@ const handleFollow = async () => {
         };
       }
 
-      isFollowing.value = !isFollowing.value;
+      followState.value = !followState.value;
+      isFollowing.value = followState.value;
     } else {
       toast.value = {
         isOpen: true,

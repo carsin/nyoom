@@ -131,7 +131,6 @@ const handleFollow = async (account: any) => {
           color: "success",
         };
       }
-
       account.isFollowing = !account.isFollowing;
     } else {
       toast.value = {

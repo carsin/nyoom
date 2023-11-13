@@ -67,7 +67,7 @@
                   <ion-row class="ion-align-items-center" style="flex-grow: 1;">
                     <ion-col size="auto"> <!-- sender username -->
                       <b class="message-username conversation-username" @click="navigateToUserProfile(message)">
-                        {{ currentUser.uid ? currentUsername : activeConversationDisplay.username }}
+                        {{ currentUser.uid === message.senderId ? currentUsername : activeConversationDisplay.username }}
                       </b>
                     </ion-col>
                     <ion-col suze="auto"> <!-- timestamp -->
@@ -431,7 +431,7 @@ const activeConversationDisplay = computed(() => {
 });
 
 function navigateToUserProfile(message) {
-  const username = message.senderId === currentUser?.uid ? currentUsername.value : activeConversationDisplay.username;
+  const username = message.senderId === currentUser?.uid ? currentUsername.value : activeConversationDisplay.value.username;
   router.push('/user/' + username);
 }
 

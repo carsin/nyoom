@@ -18,7 +18,7 @@
             <ion-item class="searchuser-result-item" v-for="user in searchResults" :key="user.uid"
               @click="prepareConversation(user)">
               <ion-avatar slot="start">
-                <img :src="user.avatarUrl || defaultAvatar">
+                <img :src="user.avatarUrl || defaultAvatar" alt="Search result avatar">
               </ion-avatar>
               <ion-label>{{ user.username }}</ion-label>
             </ion-item>
@@ -199,18 +199,18 @@ const prepareConversation = async (conversationOrUser) => {
   let recipientUid;
   let recipientData;
 
-  // Distinguish between an existing conversation and a new one based on the presence of an 'id' property
+  // distinguish between an existing conversation and a new one based on the presence of an 'id' property
   const isExistingConversation = conversationOrUser.id !== undefined;
 
   if (isExistingConversation) {
-    // Existing conversation - get the other participant's UID
+    // existing conversation - get the other participant's UID
     recipientUid = conversationOrUser.participants.find(uid => uid !== currentUserUid);
   } else {
     // New conversation - the parameter is a user object, so get the UID directly
     recipientUid = conversationOrUser.uid;
   }
 
-  // Fetch recipient data
+  // fetch recipient data
   try {
     recipientData = await userInfoService.fetchUserData(recipientUid);
   } catch (error: any) {
@@ -219,25 +219,25 @@ const prepareConversation = async (conversationOrUser) => {
     return;
   }
 
-  // Prepare the recipient data for the activeConversation
+  // prepare the recipient data for the activeConversation
   const recipientInfo = {
     avatarUrl: recipientData?.avatarUrl || 'default-avatar-url', // Replace with your default avatar URL
     username: recipientData?.username || 'Unknown'
   };
 
   if (isExistingConversation) {
-    // Set the active conversation with recipient data
+    // set the active conversation with recipient data
     activeConversation.value = {
       ...conversationOrUser,
       recipient: recipientInfo
     };
     // reset unread count
     resetUnreadCount(conversationOrUser.id);
-    // Start listening to messages
+    // start listening to messages
     console.log("listening to messages: old convo");
     unsubscribeConvoListener = listenToMessages(conversationOrUser.id);
   } else {
-    // New conversation: Check if a conversation already exists with the recipient
+    // new conversation: Check if a conversation already exists with the recipient
     let conversationExists = false;
     const conversationsRef = collection(db, 'conversations');
     const conversationQuery = query(
@@ -255,8 +255,6 @@ const prepareConversation = async (conversationOrUser) => {
           recipient: recipientInfo,
           ...data
         };
-        console.log("listening to messages: new convo");
-        unsubscribeConvoListener = listenToMessages(conversationDoc.id);
         conversationExists = true;
         break;
       }
@@ -357,13 +355,12 @@ const sendMessage = async () => {
     readStatus: false,
   });
 
-
   // send the message and update conversation in a single batched write
   try {
     await batch.commit();
-    if (!unsubscribeConvoListener) { // restart message listener
-      toast.value = { isOpen: true, message: "Restarted message listener", color: 'primary' };
-      unsubscribeConvoListener = listenToMessages(activeConversation.value.id);
+    // start listening for messages
+    if (!unsubscribeMessageListener) { 
+      unsubscribeMessageListener = listenToMessages(activeConversation.value.id);
     }
   } catch (error: any) {
     messageContent.value = message;

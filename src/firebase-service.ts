@@ -37,7 +37,7 @@ export const parts_collection = collection(db, "parts");
 
 export const storage = getStorage(firebaseApp);
 
-// TODO: use when project deployed
+// use when project deployed
 // Initialize Analytics
 // import { getAnalytics } from "firebase/analytics";
 // const analytics = getAnalytics(fireBaseApp);

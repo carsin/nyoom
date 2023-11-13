@@ -2,6 +2,7 @@
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="isChatVisible">
     <ion-fab-button class="enter-chat-button" @click="toggleChat">
       <ion-icon :icon="isChatOpen ? close : chatbubbles"></ion-icon>
+      <span v-if="totalUnreadCount > 0"> {{ totalUnreadCount }}</span>
     </ion-fab-button>
     <ion-fab-list side="top" v-show="isChatOpen">
       <div class="chat-container">
@@ -17,14 +18,14 @@
             <ion-item class="searchuser-result-item" v-for="user in searchResults" :key="user.uid"
               @click="prepareConversation(user)">
               <ion-avatar slot="start">
-                <img :src="user.avatarUrl || defaultAvatar">
+                <img :src="user.avatarUrl || defaultAvatar" alt="Search result avatar">
               </ion-avatar>
               <ion-label>{{ user.username }}</ion-label>
             </ion-item>
           </ion-list>
           <ion-list v-if="conversations.length > 0" class="ion-no-padding">
             <ion-list-header lines="full">
-              <ion-label>Active Conversations:</ion-label>
+              <ion-label>Active Conversations</ion-label>
             </ion-list-header>
             <ion-item v-for="conversation in conversations" :key="conversation.id"
               @click="prepareConversation(conversation)">
@@ -33,9 +34,12 @@
               </ion-avatar>
               <div class="conversation-details">
                 <ion-label>
-                  <h2>{{ conversation.recipientUsername }}</h2>
-                  <p>{{ conversation.lastMessageContent || 'No messages yet' }}</p>
-                  <p>{{ conversation.lastMessageTimestamp || 'No timestamp' }}</p>
+                  <h2>{{ conversation.recipientUsername }}
+                    <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{
+                      conversation.unreadCounts[currentUser?.uid] }} unread) </span>
+                  </h2>
+                  <p>{{ conversation.lastMessageContent || 'Cannot load message.' }}</p>
+                  <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
                 </ion-label>
               </div>
             </ion-item>
@@ -46,11 +50,13 @@
           <ion-list class="message-list ion-no-padding">
             <!-- Conversation header -->
             <ion-list-header class="conversation-header" lines="full" v-if="activeConversationDisplay">
-              <ion-avatar class="recipient-avatar">
+              <ion-avatar @click="router.push('/user/' + activeConversationDisplay.username)" class="recipient-avatar">
                 <img :src="activeConversationDisplay.avatarUrl || defaultAvatar" alt="Recipient avatar">
               </ion-avatar>
-              <ion-label>{{ activeConversationDisplay.username }}</ion-label>
-              <ion-button size="large" fill="clear" @click="backToConversations">
+              <ion-label class="conversation-username"
+                @click="router.push('/user/' + activeConversationDisplay.username)">{{ activeConversationDisplay.username
+                }}</ion-label>
+              <ion-button class="" size="large" fill="clear" @click="backToConversations">
                 <ion-icon :icon="arrowBack"></ion-icon>
               </ion-button>
             </ion-list-header>
@@ -58,9 +64,18 @@
             <ion-item v-for="message in messages" :key="message.id" lines="inset">
               <ion-label>
                 <ion-grid class="ion-no-padding">
-                  <ion-row>
-                    <ion-col>
-                      <p> <b>{{ message.senderId === currentUser.uid ? 'You' : activeConversationDisplay.username }}</b> <i v-if="message.timestamp" class="message-timestamp ion-text-end"> {{ formatTimestamp(message.timestamp) }} </i> </p>
+                  <ion-row class="ion-align-items-center" style="flex-grow: 1;">
+                    <ion-col size="auto"> <!-- sender username -->
+                      <b class="message-username conversation-username" @click="navigateToUserProfile(message)">
+                        {{ currentUser.uid ? currentUsername : activeConversationDisplay.username }}
+                      </b>
+                    </ion-col>
+                    <ion-col suze="auto"> <!-- timestamp -->
+                      <p v-if="message.timestamp" class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</p>
+                    </ion-col>
+                    <ion-col v-if="message.timestamp" size="auto" class="ion-text-end" style="flex-shrink: 0;">
+                      <!-- read receipt icon -->
+                      <ion-icon class="message-receipt" :icon="message.readStatus ? checkmark : mailOutline"></ion-icon>
                     </ion-col>
                   </ion-row>
                   <ion-row>
@@ -74,7 +89,8 @@
           </ion-list>
           <div class="message-input-box">
             <ion-item lines="none">
-              <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage"></ion-input>
+              <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage"
+                :maxlength="MAX_CHATMESSAGE_LENGTH"></ion-input>
               <ion-button fill="clear" @click="sendMessage">
                 <ion-icon slot="icon-only" :icon="send"></ion-icon>
               </ion-button>
@@ -84,17 +100,18 @@
       </div>
     </ion-fab-list>
     <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="3000" :color="toast.color"></ion-toast>
-  </ion-fab>
-</template>
+  </ion-fab></template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar, IonGrid, IonCol, IonRow } from '@ionic/vue';
-import { chatbubbles, close, send, arrowBack } from 'ionicons/icons';
+import { chatbubbles, close, send, arrowBack, mailOutline, checkmark } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
-import { writeBatch, collection, query, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
-import { userInfoService } from '../services/UserInfoService'; // Import your Firebase configuration
+import { userInfoService } from '../services/UserInfoService';
+import { MAX_CHATMESSAGE_LENGTH, MAX_USERNAME_LENGTH } from "../util/constants"
 
 const isChatVisible = ref(true);
 const isChatOpen = ref(false);
@@ -110,11 +127,15 @@ const defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
 const userCache = new Map(); // cache to store fetched user data
 const toast = ref({ isOpen: false, message: '', color: '' });
 const currentUser = firebaseAuth.currentUser;
+const currentUsername = ref('');
+const router = useRouter();
 let unsubscribeConvoListener: Function;
 let unsubscribeMessageListener: Function;
 
 onMounted(async () => {
   unsubscribeConvoListener = await fetchConversations();
+  let fetchUsername = await userInfoService.getCurrentUserUsername();
+  if (fetchUsername) currentUsername.value = fetchUsername;
 });
 
 onBeforeUnmount(() => { // unsubscribe when the component unmounts
@@ -124,7 +145,6 @@ onBeforeUnmount(() => { // unsubscribe when the component unmounts
   if (unsubscribeMessageListener) {
     unsubscribeMessageListener();
   }
-
 });
 
 const fetchConversations = async () => {
@@ -133,7 +153,7 @@ const fetchConversations = async () => {
   const conversationsRef = collection(db, 'conversations');
   const q = query(conversationsRef, where('participants', 'array-contains', currentUser?.uid));
 
-  // Real-time listener for the conversations
+  // real-time listener for conversations
   const unsubscribe = onSnapshot(q, async (querySnapshot) => {
     const conversationsWithDetailsPromises = querySnapshot.docs.map(async (doc) => {
       const conversation = {
@@ -144,7 +164,7 @@ const fetchConversations = async () => {
       const otherUserId = conversation.participants.find(uid => uid !== currentUser?.uid);
       let userData = userCache.get(otherUserId);
 
-      // Fetch user data if not in cache
+      // fetch user data if not in cache
       if (!userData) {
         userData = await userInfoService.fetchUserData(otherUserId);
         if (userData) {
@@ -152,25 +172,28 @@ const fetchConversations = async () => {
         }
       }
 
-      // Format the timestamp of the last message
-      let formattedTimestamp = formatTimestamp(conversation.lastMessageTimestamp);
+      // format the timestamp of the last message
+      // let formattedTimestamp = formatTimestamp(conversation.lastMessageTimestamp);
 
       return {
         ...conversation,
         recipientUsername: userData?.username,
         recipientAvatarUrl: userData?.avatarUrl,
         lastMessageContent: conversation.lastMessageContent || 'No messages',
-        lastMessageTimestamp: formattedTimestamp || '',
+        lastMessageTimestamp: conversation.lastMessageTimestamp || '',
         lastMessageSender: conversation.lastMessageSender || ''
       };
     });
 
-    // Wait for all conversations and last messages to be fetched
-    conversations.value = await Promise.all(conversationsWithDetailsPromises);
+    // wait for all conversations and last messages to be fetched
+    let fetchedConversations = await Promise.all(conversationsWithDetailsPromises);
+    // sort conversations by timestamp in descending order
+    fetchedConversations.sort((a, b) => b.lastMessageTimestamp.toMillis() - a.lastMessageTimestamp.toMillis());
+    conversations.value = fetchedConversations;
     isLoading.value = false;
   });
 
-  return unsubscribe; // Return the unsubscribe function to call when the component unmounts
+  return unsubscribe; // return the unsubscribe function to call when the component unmounts
 };
 
 const prepareConversation = async (conversationOrUser) => {
@@ -186,18 +209,18 @@ const prepareConversation = async (conversationOrUser) => {
   let recipientUid;
   let recipientData;
 
-  // Distinguish between an existing conversation and a new one based on the presence of an 'id' property
+  // distinguish between an existing conversation and a new one based on the presence of an 'id' property
   const isExistingConversation = conversationOrUser.id !== undefined;
 
   if (isExistingConversation) {
-    // Existing conversation - get the other participant's UID
+    // existing conversation - get the other participant's UID
     recipientUid = conversationOrUser.participants.find(uid => uid !== currentUserUid);
   } else {
     // New conversation - the parameter is a user object, so get the UID directly
     recipientUid = conversationOrUser.uid;
   }
 
-  // Fetch recipient data
+  // fetch recipient data
   try {
     recipientData = await userInfoService.fetchUserData(recipientUid);
   } catch (error: any) {
@@ -206,22 +229,24 @@ const prepareConversation = async (conversationOrUser) => {
     return;
   }
 
-  // Prepare the recipient data for the activeConversation
+  // prepare the recipient data for the activeConversation
   const recipientInfo = {
-    avatarUrl: recipientData?.avatarUrl || 'default-avatar-url', // Replace with your default avatar URL
+    avatarUrl: recipientData?.avatarUrl || defaultAvatar, // Replace with your default avatar URL
     username: recipientData?.username || 'Unknown'
   };
 
   if (isExistingConversation) {
-    // Set the active conversation with recipient data
+    // set the active conversation with recipient data
     activeConversation.value = {
       ...conversationOrUser,
       recipient: recipientInfo
     };
-    // Start listening to messages
+    // reset unread count
+    resetUnreadCount(conversationOrUser.id);
+    // start listening to messages
     unsubscribeConvoListener = listenToMessages(conversationOrUser.id);
   } else {
-    // New conversation: Check if a conversation already exists with the recipient
+    // new conversation: Check if a conversation already exists with the recipient
     let conversationExists = false;
     const conversationsRef = collection(db, 'conversations');
     const conversationQuery = query(
@@ -240,8 +265,6 @@ const prepareConversation = async (conversationOrUser) => {
           ...data
         };
         conversationExists = true;
-        // Start listening to messages
-        unsubscribeConvoListener = listenToMessages(conversationDoc.id);
         break;
       }
     }
@@ -251,7 +274,11 @@ const prepareConversation = async (conversationOrUser) => {
       activeConversation.value = {
         participants: [currentUserUid, recipientUid],
         recipient: recipientInfo,
-        messages: []
+        messages: [],
+        unreadCounts: {
+          [currentUserUid]: 0,
+          [recipientUid]: 0
+        }
       };
     }
   }
@@ -274,6 +301,13 @@ const listenToMessages = (conversationId) => {
       id: doc.id,
       ...doc.data()
     }));
+    // Update read status
+    snapshot.docs.forEach(doc => {
+      if (doc.data().senderId !== currentUser?.uid && !doc.data().readStatus) {
+        const messageRef = doc.ref;
+        updateDoc(messageRef, { readStatus: true });
+      }
+    });
   }, (error) => {
     // Handle the error case
     console.error("Error fetching messages: ", error);
@@ -298,22 +332,26 @@ const sendMessage = async () => {
 
   // if it's a new conversation, create it in Firestore
   let conversationRef;
+  let timestamp = serverTimestamp();
   if (!activeConversation.value.id) {
     conversationRef = doc(collection(db, 'conversations'));
     batch.set(conversationRef, {
       participants: activeConversation.value.participants,
-      createdAt: serverTimestamp(),
+      createdAt: timestamp,
+      unreadCounts: activeConversation.value.unreadCounts,
       lastMessageSender: currentUser?.uid,
       lastMessageContent: message,
-      lastMessageTimestamp: serverTimestamp(),
+      lastMessageTimestamp: timestamp,
     });
     activeConversation.value.id = conversationRef.id; // set the newly created conversation ID
   } else {
     conversationRef = doc(db, 'conversations', activeConversation.value.id);
+    const recipientId = activeConversation.value.participants.find(uid => uid !== currentUser?.uid);
     batch.update(conversationRef, { // update the conversation with the last message details
       lastMessageSender: currentUser?.uid,
       lastMessageContent: message,
-      lastMessageTimestamp: serverTimestamp(),
+      lastMessageTimestamp: timestamp,
+      [`unreadCounts.${recipientId}`]: increment(1) // Increment unread count for recipient
     });
   }
 
@@ -323,16 +361,19 @@ const sendMessage = async () => {
   batch.set(messageDocRef, {
     senderId: currentUser?.uid,
     content: message,
-    timestamp: serverTimestamp(),
+    timestamp: timestamp,
+    readStatus: false,
   });
-  
 
   // send the message and update conversation in a single batched write
   try {
     await batch.commit();
-    listenToMessages(activeConversation.value.id);
+    // start listening for messages
+    if (!unsubscribeMessageListener) {
+      unsubscribeMessageListener = listenToMessages(activeConversation.value.id);
+    }
   } catch (error: any) {
-    messageContent.value = message; 
+    messageContent.value = message;
     toast.value = { isOpen: true, message: "Error sending message: " + error.message, color: 'danger' };
   }
   isLoading.value = false;
@@ -366,6 +407,19 @@ const searchUsers = async () => {
   isLoading.value = false;
 };
 
+const resetUnreadCount = async (conversationId) => {
+  const conversationRef = doc(db, 'conversations', conversationId);
+  await updateDoc(conversationRef, {
+    [`unreadCounts.${currentUser?.uid}`]: 0 // Reset unread count for the current user
+  });
+};
+
+const totalUnreadCount = computed(() => {
+  return conversations.value.reduce((total, conversation) => {
+    return total + (conversation.unreadCounts[currentUser?.uid] || 0);
+  }, 0);
+});
+
 const activeConversationDisplay = computed(() => {
   if (activeConversation.value) {
     return {
@@ -376,24 +430,34 @@ const activeConversationDisplay = computed(() => {
   return null;
 });
 
+function navigateToUserProfile(message) {
+  const username = message.senderId === currentUser?.uid ? currentUsername.value : activeConversationDisplay.username;
+  router.push('/user/' + username);
+}
+
 const backToConversations = () => {
   searchQuery.value = '';
   searchResults.value = [];
-  currentView.value = 'search';
+  messages.value = [];
+  if (unsubscribeMessageListener) {
+    unsubscribeMessageListener();
+  }
   activeConversation.value = null; // clear the active conversation
+  currentView.value = 'search';
 };
 
 const formatTimestamp = (timestamp: Timestamp): string => {
   if (timestamp) {
     return format(timestamp.toDate(), 'pp M/d/yy'); // use date-fns to format the date
   }
+  return '';
 };
 </script>
 
 <style scoped>
 .chat-container {
-  bottom: 12vh;
-  right: 2vw;
+  bottom: 105px;
+  right: 55px;
   width: 300px;
   height: 500px;
   background-color: var(--ion-background-color);
@@ -405,8 +469,8 @@ const formatTimestamp = (timestamp: Timestamp): string => {
 
 .enter-chat-button {
   position: absolute;
-  bottom: 6vh; 
-  right: 1vw; 
+  bottom: 55px;
+  right: 3px;
 }
 
 .search-view,
@@ -441,4 +505,21 @@ const formatTimestamp = (timestamp: Timestamp): string => {
   height: 3.2rem;
   width: 3.2rem;
 }
-</style>
+
+.recipient-avatar:hover, .conversation-username:hover {
+  cursor: pointer;
+  color: var(--ion-color-step-650);
+}
+
+.message-username {
+  padding-right: 4px;
+}
+
+.message-timestamp {
+  font-style: italic;
+  font-size: 90%;
+}
+
+.message-receipt {
+  padding-right: 4px;
+}</style>

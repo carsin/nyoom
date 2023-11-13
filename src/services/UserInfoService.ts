@@ -5,7 +5,7 @@ import { doc, getDoc, DocumentData } from "firebase/firestore";
 class UserInfoService {
   async getCurrentUserUsername(): Promise<string | null> {
     const user = firebaseAuth.currentUser;
-    if (!user) return null;
+    if (!user) return '';
 
     const userDocRef = doc(db, 'users', user.uid);
     const userDocSnap = await getDoc(userDocRef);
@@ -14,7 +14,7 @@ class UserInfoService {
       return userDocSnap.data().username;
     } else {
       console.error('User document not found');
-      return null;
+      return '';
     }
   }
   

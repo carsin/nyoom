@@ -21,7 +21,8 @@
           <!-- Username input -->
           <ion-item>
             <ion-input label="Username: " label-placement="stacked" @keyup.enter="handleRegister"
-              v-model="formData.username" placeholder="hehexd123"></ion-input>
+              v-model="formData.username" :maxlength="MAX_USERNAME_LENGTH"
+              placeholder="hehexd123"></ion-input>
           </ion-item>
           <ion-item class="form-error-note" v-if="showErrors && usernameError">
             <ion-note color="danger" class="">{{ usernameError }}</ion-note>
@@ -73,6 +74,7 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/
 import { useRouter } from 'vue-router';
 import { firebaseAuth, db } from "../firebase-service";
 import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { MAX_USERNAME_LENGTH } from "../util/constants"
 
 const formData = ref({
   email: '',
@@ -113,6 +115,8 @@ async function validateUsername(username: string) {
     return 'Username is required';
   } else if (username.length < 3) {
     return 'Username must be at least 3 characters long';
+  } else if (username.length > MAX_USERNAME_LENGTH) {
+    return 'Username must be ' + MAX_USERNAME_LENGTH + ' characters or less';
   } else if (/\W/.test(username)) { // adjust the regex based on username criteria
     return 'Username can only contain letters, numbers, and underscores';
   } else if (await checkUsernameTaken(username)) {

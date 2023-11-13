@@ -2,15 +2,14 @@
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="isChatVisible">
     <ion-fab-button class="enter-chat-button" @click="toggleChat">
       <ion-icon :icon="isChatOpen ? close : chatbubbles"></ion-icon>
-      <span v-if="totalUnreadCount > 0">{{ totalUnreadCount }}</span>
+      <span v-if="totalUnreadCount > 0"> {{ totalUnreadCount }}</span>
     </ion-fab-button>
     <ion-fab-list side="top" v-show="isChatOpen">
       <div class="chat-container">
         <!-- Search View -->
         <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
         <div class="search-view" v-if="currentView === 'search'">
-          <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers" placeholder="Search users to message..."
-            class="ion-no-padding"></ion-searchbar>
+          <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers" placeholder="Search users to message..." class="ion-no-padding"></ion-searchbar>
           <ion-list v-if="searchResults.length > 0">
             <ion-list-header lines="full">
               <ion-label>User Search Results:</ion-label>
@@ -38,7 +37,7 @@
                     <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{ conversation.unreadCounts[currentUser?.uid] }} unread) </span>
                   </h2>
                   <p>{{ conversation.lastMessageContent || 'Cannot load message.'}}</p>
-                  <p>{{ conversation.lastMessageTimestamp || 'Timestamp loading...' }}</p>
+                  <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
                 </ion-label>
               </div>
             </ion-item>
@@ -68,7 +67,7 @@
                     <ion-col suze="auto"> <!-- timestamp -->
                       <p v-if="message.timestamp" class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</p>
                     </ion-col>
-                    <ion-col size="auto" class="ion-text-end" style="flex-shrink: 0;"> <!-- read receipt icon -->
+                    <ion-col v-if="message.timestamp" size="auto" class="ion-text-end" style="flex-shrink: 0;"> <!-- read receipt icon -->
                       <ion-icon class="message-receipt" :icon="message.readStatus ? checkmark : mailOutline"></ion-icon>
                     </ion-col>
                   </ion-row>
@@ -83,7 +82,7 @@
           </ion-list>
           <div class="message-input-box">
             <ion-item lines="none">
-              <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage"></ion-input>
+              <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage" :maxlength="MAX_CHATMESSAGE_LENGTH" ></ion-input>
               <ion-button fill="clear" @click="sendMessage">
                 <ion-icon slot="icon-only" :icon="send"></ion-icon>
               </ion-button>
@@ -102,8 +101,9 @@ import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel
 import { chatbubbles, close, send, arrowBack, mailOutline, checkmark } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
 import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
-import { format, parse as dateParse } from 'date-fns';
+import { format } from 'date-fns';
 import { userInfoService } from '../services/UserInfoService';
+import { MAX_CHATMESSAGE_LENGTH, MAX_USERNAME_LENGTH } from "../util/constants"
 
 const isChatVisible = ref(true);
 const isChatOpen = ref(false);
@@ -136,7 +136,6 @@ onBeforeUnmount(() => { // unsubscribe when the component unmounts
   if (unsubscribeMessageListener) {
     unsubscribeMessageListener();
   }
-
 });
 
 const fetchConversations = async () => {
@@ -165,27 +164,22 @@ const fetchConversations = async () => {
       }
 
       // format the timestamp of the last message
-      let formattedTimestamp = formatTimestamp(conversation.lastMessageTimestamp);
+      // let formattedTimestamp = formatTimestamp(conversation.lastMessageTimestamp);
 
       return {
         ...conversation,
         recipientUsername: userData?.username,
         recipientAvatarUrl: userData?.avatarUrl,
         lastMessageContent: conversation.lastMessageContent || 'No messages',
-        lastMessageTimestamp: formattedTimestamp || '',
+        lastMessageTimestamp: conversation.lastMessageTimestamp || '',
         lastMessageSender: conversation.lastMessageSender || ''
       };
     });
-    
-    // sort conversations by timestamp in descending order
-    let fetchedConversations = await Promise.all(conversationsWithDetailsPromises);
-    fetchedConversations.sort((a, b) => {
-      const dateA = dateParse(a.lastMessageTimestamp, 'pp M/d/yy', new Date());
-      const dateB = dateParse(b.lastMessageTimestamp, 'pp M/d/yy', new Date());
-      return dateB.getTime() - dateA.getTime();
-    });
 
     // wait for all conversations and last messages to be fetched
+    let fetchedConversations = await Promise.all(conversationsWithDetailsPromises);
+    // sort conversations by timestamp in descending order
+    fetchedConversations.sort((a, b) => b.lastMessageTimestamp.toMillis() - a.lastMessageTimestamp.toMillis());
     conversations.value = fetchedConversations;
     isLoading.value = false;
   });
@@ -367,7 +361,7 @@ const sendMessage = async () => {
   try {
     await batch.commit();
     // start listening for messages
-    if (!unsubscribeMessageListener) { 
+    if (!unsubscribeMessageListener) {
       unsubscribeMessageListener = listenToMessages(activeConversation.value.id);
     }
   } catch (error: any) {
@@ -431,8 +425,12 @@ const activeConversationDisplay = computed(() => {
 const backToConversations = () => {
   searchQuery.value = '';
   searchResults.value = [];
-  currentView.value = 'search';
+  messages.value = [];
+  if (unsubscribeMessageListener) {
+    unsubscribeMessageListener();
+  }
   activeConversation.value = null; // clear the active conversation
+  currentView.value = 'search';
 };
 
 const formatTimestamp = (timestamp: Timestamp): string => {

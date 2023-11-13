@@ -53,8 +53,8 @@
             </ion-row>
             <ion-row class="ion-text-center">
               <ion-col>
-                <ion-chip color="primary" @click="showUsers('Followers')"> <ion-text> <b> {{ userData.followers.length - 1 }} </b> Followers </ion-text> </ion-chip>
-                <ion-chip color="primary" @click="showUsers('Following')"> <ion-text> <b> {{ userData.following.length - 1 }} </b> Following </ion-text> </ion-chip>
+                <ion-chip color="primary" @click="showUsers('Followers')"> <ion-text> <b> {{ userData.followers.length }} </b> Followers </ion-text> </ion-chip>
+                <ion-chip color="primary" @click="showUsers('Following')"> <ion-text> <b> {{ userData.following.length }} </b> Following </ion-text> </ion-chip>
               </ion-col>
             </ion-row>
             <ion-row class="ion-text-center">

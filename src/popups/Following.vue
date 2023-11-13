@@ -1,3 +1,4 @@
+<!-- FIX VALUE FOR ISFOLLOWING (SEE HOW ITS SET IN PROFILE) -->
 <template>
   <ion-content>
     <ion-header>
@@ -5,10 +6,9 @@
         <ion-buttons slot="start">
           <ion-button color="medium" @click="cancel"> X </ion-button>
         </ion-buttons>
-        <ion-title>Following</ion-title>
+        <ion-title>{{ type }}</ion-title>
       </ion-toolbar>
     </ion-header>
-
     <ion-list>
       <ion-item v-for="account in following?.value" :key="account.uid">
         <router-link
@@ -28,14 +28,36 @@
           </ion-avatar>
           <ion-label>{{ account.username }}</ion-label>
         </router-link>
-        <ion-button slot="end"> Unfollow </ion-button>
+        <ion-button
+          v-if="!isCurrentUser"
+          slot="end"
+          id="add-friend"
+          aria-label="Add Friend"
+          @click="handleFollow(account)"
+          size="default"
+          :fill="account.isFollowing ? 'outline' : 'solid'"
+        >
+          {{ account.isFollowing ? " Unfollow" : " Follow" }}
+          <ion-icon
+            slot="end"
+            size="medium"
+            :icon="account.isFollowing ? personRemoveSharp : personAddSharp"
+          ></ion-icon>
+        </ion-button>
       </ion-item>
     </ion-list>
+    <ion-toast
+      :is-open="toast.isOpen"
+      :message="toast.message"
+      :color="toast.color"
+      :duration="3000"
+      @didDismiss="toast.isOpen = false"
+    ></ion-toast>
   </ion-content>
 </template>
 
 <script lang="ts" setup>
-import { firebaseAuth } from "@/firebase-service";
+import { db, firebaseAuth } from "@/firebase-service";
 import {
   IonContent,
   IonHeader,
@@ -48,20 +70,82 @@ import {
   IonItem,
   IonLabel,
   IonAvatar,
-  alertController,
+  IonToast,
 } from "@ionic/vue";
-import { ref } from "vue";
-import { trash, pencil, checkmark, close } from "ionicons/icons";
+import { onMounted, ref } from "vue";
+import { personAddSharp, personRemoveSharp } from "ionicons/icons";
+import { doc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 
-// Define the expected 'part' prop
 const props = defineProps({
   following: Object,
+  type: String,
 });
 
-const user = firebaseAuth.currentUser;
-const editingPart = ref(false); // State to manage the caption editing mode
+const isCurrentUser = ref(false); // store whether the profile belongs to the authenticated user
+const toast = ref({ isOpen: false, message: "", color: "" });
+const currentUser = firebaseAuth.currentUser;
 
 const cancel = () => modalController.dismiss(null, "cancel");
+onMounted(() => {
+  if (currentUser) {
+    console.log(props.following);
 
-const toast = ref({ isOpen: false, message: "", color: "" });
+    props.following?.value.forEach((other_user: any) => {
+      other_user.isFollowing = other_user.followers.includes(currentUser.uid);
+      console.log(other_user.isFollowing);
+    });
+  }
+});
+const handleFollow = async (account: any) => {
+  console.log("STATUS OF FOLLOWING: ", account);
+
+  try {
+    if (currentUser && account.uid) {
+      const userDocRef = doc(db, "users", account.uid);
+      const currentUserDocRef = doc(db, "users", currentUser.uid);
+
+      if (account.isFollowing) {
+        // Unfollow logic
+        await updateDoc(userDocRef, {
+          followers: arrayRemove(currentUser.uid),
+        });
+        await updateDoc(currentUserDocRef, {
+          following: arrayRemove(account.uid),
+        });
+        toast.value = {
+          isOpen: true,
+          message: "Successfully unfollowed " + account.username,
+          color: "success",
+        };
+      } else {
+        // Follow logic
+        await updateDoc(userDocRef, {
+          followers: arrayUnion(currentUser.uid),
+        });
+        await updateDoc(currentUserDocRef, {
+          following: arrayUnion(account.uid),
+        });
+        toast.value = {
+          isOpen: true,
+          message: "Successfully followed " + account.username,
+          color: "success",
+        };
+      }
+
+      account.isFollowing = !account.isFollowing;
+    } else {
+      toast.value = {
+        isOpen: true,
+        message: "Failed to follow/unfollow. User data is missing.",
+        color: "danger",
+      };
+    }
+  } catch (error: any) {
+    toast.value = {
+      isOpen: true,
+      message: "An error occurred: " + error.message,
+      color: "danger",
+    };
+  }
+};
 </script>

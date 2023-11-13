@@ -1,3 +1,4 @@
+<!-- NEEDS TO HAVE REFRESH WHEN NAVIGATED TO FROM FOLLOWERS SCREEN -->
 <template>
   <ion-page id="main-content">
     <ion-header>
@@ -284,8 +285,8 @@ const showUsers = async (type: string) => {
         ? userData.value.followers
         : userData.value.following;
     userList.value = await getUserDetails(uids);
-    followingModal(userList); // Fetching user details
-    console.log("User List: ", userList.value);
+    followingModal(userList, type); // Fetching user details
+    // console.log("User List: ", userList.value);
   } catch (error: any) {
     toast.value = {
       isOpen: true,
@@ -297,12 +298,13 @@ const showUsers = async (type: string) => {
 
 import Following from "../popups/Following.vue";
 
-const followingModal = (following: any) => {
+const followingModal = (following: any, type: string) => {
   modalController
     .create({
       component: Following,
       componentProps: {
         following: following,
+        type: type,
       },
       cssClass: "your-modal-css-class", // TODO: Add a custom CSS class
     })

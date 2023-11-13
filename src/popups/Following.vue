@@ -29,7 +29,7 @@
           <ion-label>{{ account.username }}</ion-label>
         </router-link>
         <ion-button
-          v-if="!isCurrentUser"
+          v-if="!isCurrentUser && account.uid !== currentUser?.uid"
           slot="end"
           id="add-friend"
           aria-label="Add Friend"

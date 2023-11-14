@@ -60,7 +60,7 @@ import {
   IonItem,
   modalController,
 } from "@ionic/vue";
-import { ref, watchEffect } from "vue";
+import { ref } from "vue";
 
 const name = ref();
 const selectedOption = ref("");

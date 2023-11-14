@@ -1,15 +1,4 @@
-import {
-  collection,
-  query,
-  orderBy,
-  getDocs,
-  getDoc,
-  addDoc,
-  where,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
+import { deleteDoc, doc, updateDoc, } from "firebase/firestore";
 import { ref as storageRef, deleteObject } from "firebase/storage";
 import { firebaseAuth, db, storage } from "../firebase-service";
 

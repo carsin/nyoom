@@ -93,7 +93,7 @@ import {
   alertController,
 } from "@ionic/vue";
 import { ref } from "vue";
-import { trash, pencil, checkmark, close } from "ionicons/icons";
+import { trash, pencil, checkmark } from "ionicons/icons";
 
 // Define the expected 'part' prop
 const props = defineProps({

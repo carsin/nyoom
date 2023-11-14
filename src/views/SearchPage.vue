@@ -14,7 +14,7 @@
     </ion-header>
       <ion-content :fullscreen="true">
         <ion-grid>
-          <div align="center"> <!-- TODO: remove align="center", it adds a code smell -->
+          <div>
             <ion-row>
               <ion-col size="6">
                 <ion-card href="audiModels">

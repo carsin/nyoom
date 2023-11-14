@@ -209,9 +209,6 @@ onMounted(async () => {
 
 const fetchParts = async () => {
   let partsQuery = query(collection(db, "parts"));
-  // console.log(filterSelection.value);
-  // console.log(partsQuery);
-  let partsQuery1 = partsQuery;
 
   if (filterSelection.value === "My Listings") {
     console.log("inside mylistings");

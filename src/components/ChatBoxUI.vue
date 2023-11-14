@@ -38,7 +38,7 @@
                     <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{
                       conversation.unreadCounts[currentUser?.uid] }} unread) </span>
                   </h2>
-                  <p>{{ conversation.lastMessageContent || 'Cannot load message.' }}</p>
+                  <p>{{ conversation.lastMessageSender === currentUser.uid ? currentUsername : conversation.recipientUsername }}: {{ conversation.lastMessageContent || 'Cannot load message.' }}</p>
                   <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
                 </ion-label>
               </div>
@@ -111,7 +111,7 @@ import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase 
 import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { userInfoService } from '../services/UserInfoService';
-import { MAX_CHATMESSAGE_LENGTH, MAX_USERNAME_LENGTH } from "../util/constants"
+import { MAX_CHATMESSAGE_LENGTH } from "../util/constants"
 
 const isChatVisible = ref(true);
 const isChatOpen = ref(false);

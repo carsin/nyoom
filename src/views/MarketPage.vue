@@ -241,6 +241,7 @@ const fetchParts = async () => {
     noResults = true;
   } else {
     // parts exists
+    console.log("there are offers");
     isLoading.value = false;
 
     offerData.value = offerSnapshot.docs.map((doc) => ({

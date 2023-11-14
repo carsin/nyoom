@@ -98,7 +98,6 @@ import { useRouter } from "vue-router";
 const isUploading = ref(false);
 const uploadProgress = ref(0);
 const toast = ref({ isOpen: false, message: "", color: "" });
-const caption = ref("");
 const router = useRouter();
 let imageURL = "";
 
@@ -138,14 +137,12 @@ const uploadImage = async (event: any) => {
 };
 
 // sending post to posts firestore collection
-const seller = ref("");
-const sellerId = ref("");
+
 const itemName = ref("");
 const price = ref<number | null>(null);
 const description = ref("");
 const condition = ref("");
 const location = ref("");
-const images = ref([]);
 
 const createPart = async () => {
   const partsCollection = collection(db, "parts");

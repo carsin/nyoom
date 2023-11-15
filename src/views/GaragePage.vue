@@ -40,8 +40,8 @@
                     <ion-list>
                       <ion-item>
                         <router-link to="/add-vehicle">
-                            <ion-button>
-                                <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+                            <ion-button fill="clear">
+                                <ion-icon slot="icon-only" :icon="addCircleOutline"></ion-icon>
                             </ion-button>
                         </router-link>
                       </ion-item>
@@ -97,7 +97,7 @@
 <script setup lang="ts">
 import { userInfoService } from "@/services/UserInfoService";
 import { IonText, IonToast, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
-import { settingsSharp, carSportSharp, personAddSharp, personRemoveSharp } from 'ionicons/icons';
+import { settingsSharp, addCircleOutline, personAddSharp, personRemoveSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { doc, getDoc, getDocs, query, collection, where, onSnapshot, orderBy, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";

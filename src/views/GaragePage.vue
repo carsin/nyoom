@@ -5,7 +5,7 @@
           <ion-progress-bar type="indeterminate"></ion-progress-bar>
         </ion-toolbar>
         <ion-toolbar v-if="isCurrentUser">
-          <ion-title> Your Garage </ion-title>
+          <ion-title> My Garage </ion-title>
           <ion-button v-if="isCurrentUser" @click="handleLogout" class="ion-padding-end" slot="end" fill="outline">Log Out</ion-button>
         </ion-toolbar>
         <ion-toolbar v-else>
@@ -80,7 +80,12 @@
             </ion-grid>
           </div>
           <ion-text v-else class="ion-text-center">
-            <h3> <i> @{{ username }} has no vehicles </i></h3>
+            <div v-if="isCurrentUser">
+              <h3><i> You have no vehicles </i></h3>
+            </div>
+            <div v-else>
+              <h3><i> @{{ username }} has no vehicles </i></h3>
+            </div>
           </ion-text>
           <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
             @didDismiss="toast.isOpen = false"></ion-toast>
@@ -91,47 +96,17 @@
 
 <script setup lang="ts">
 import { userInfoService } from "@/services/UserInfoService";
-import {
-  IonHeader,
-  modalController,
-  IonSegment,
-  IonCardTitle,
-  IonCard,
-  IonSegmentButton,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonCardSubtitle,
-  IonPage,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonCardHeader,
-  IonSearchbar,
-  IonButton,
-  IonButtons,
-  IonLabel,
-  IonIcon,
-  IonText,
-  IonProgressBar, 
-  IonRefresher,
-  IonRefresherContent,
-} from "@ionic/vue";
-
-import { ref, onMounted, watch } from 'vue';
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { IonText, IonToast, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
+import { settingsSharp, carSportSharp, personAddSharp, personRemoveSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
-import ChatBoxUI from '@/components/ChatBoxUI.vue';
-import { db, firebaseAuth } from "../firebase-service";
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { doc, getDoc, getDocs, query, collection, where, onSnapshot, orderBy, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
+import { firebaseAuth, db } from "../firebase-service";
+import { signOut } from 'firebase/auth';
+import { useRouter, useRoute } from 'vue-router';
 
-// const route = useRoute();
-// const posts = ref([]); // Variable to hold the posts
-// const isLoading = ref(true); // Variable to manage loading state
-// const user = firebaseAuth.currentUser;
-// const vehicles = ref([]); // Variable to hold the vehicles
-// import PersonalHeader from '@/components/PersonalHeader.vue';
-// import VehicleComponent from '@/components/VehicleComponent.vue';
+const vehicles = ref([]); // Variable to hold the vehicles
+import VehicleComponent from '@/components/VehicleComponent.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -168,6 +143,19 @@ onMounted(async () => {
       isCurrentUser.value = true;
     }
   }
+
+  isLoading.value = false;
 });
+
+const handleLogout = async () => {
+  try {
+    await signOut(firebaseAuth);
+    toast.value = { isOpen: true, message: 'Logout successful!', color: 'success' }
+    router.push('/onboard')
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: 'An error occurred during logout: ' + error.message, color: 'danger' }
+    console.error(error.message);
+  }
+};
 
 </script>

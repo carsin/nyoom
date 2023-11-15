@@ -33,7 +33,7 @@
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
-                  <router-link to="/user/username/garage">
+                  <router-link :to="userGarageHREF">
                     <ion-button>
                       <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
                     </ion-button>
@@ -82,6 +82,7 @@
 </template>
 
 <script setup lang="ts">
+
 import { IonText, IonToast, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
 import { settingsSharp, carSportSharp, personAddSharp, personRemoveSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
@@ -103,6 +104,7 @@ const toast = ref({ isOpen: false, message: '', color: '' });
 const menuTitle = ref(''); // To dynamically set the menu title
 const userList = ref([]); // To store the list of users to display in the menu
 const user = firebaseAuth.currentUser;
+const userGarageHREF = ref("/user/" + username.value + "/garage");
 
 onMounted(async () => {
   // Fetch data for the user whose profile is being visited

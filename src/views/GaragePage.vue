@@ -90,7 +90,84 @@
   </template>
 
 <script setup lang="ts">
-const vehicles = ref([]); // Variable to hold the vehicles
-import PersonalHeader from '@/components/PersonalHeader.vue';
-import VehicleComponent from '@/components/VehicleComponent.vue';
+import { userInfoService } from "@/services/UserInfoService";
+import {
+  IonHeader,
+  modalController,
+  IonSegment,
+  IonCardTitle,
+  IonCard,
+  IonSegmentButton,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonCardSubtitle,
+  IonPage,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonCardHeader,
+  IonSearchbar,
+  IonButton,
+  IonButtons,
+  IonLabel,
+  IonIcon,
+  IonText,
+  IonProgressBar, 
+  IonRefresher,
+  IonRefresherContent,
+} from "@ionic/vue";
+
+import { ref, onMounted, watch } from 'vue';
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import PostCardComponent from '@/components/PostCardComponent.vue';
+import ChatBoxUI from '@/components/ChatBoxUI.vue';
+import { db, firebaseAuth } from "../firebase-service";
+import { useRoute, useRouter } from 'vue-router';
+
+// const route = useRoute();
+// const posts = ref([]); // Variable to hold the posts
+// const isLoading = ref(true); // Variable to manage loading state
+// const user = firebaseAuth.currentUser;
+// const vehicles = ref([]); // Variable to hold the vehicles
+// import PersonalHeader from '@/components/PersonalHeader.vue';
+// import VehicleComponent from '@/components/VehicleComponent.vue';
+
+const route = useRoute();
+const router = useRouter();
+const isCurrentUser = ref(false); // store whether the profile belongs to the authenticated user
+const isFollowing = ref(false); // Variable to check if the current user is following the profile user
+const isLoading = ref(true); // Variable to manage loading state
+const username = ref(route.params.username);
+const userData = ref({}); // Reactive variable to store user data
+const posts = ref([]); // Variable to hold the user's posts
+const toast = ref({ isOpen: false, message: '', color: '' });
+const menuTitle = ref(''); // To dynamically set the menu title
+const userList = ref([]); // To store the list of users to display in the menu
+const user = firebaseAuth.currentUser;
+
+onMounted(async () => {
+  // Fetch data for the user whose profile is being visited
+  const userQuery = query(collection(db, 'users'), where('username', '==', username.value));
+  const userSnapshot = await getDocs(userQuery);
+
+  if (userSnapshot.empty) {
+    router.push('/404'); // Redirect to 404 page if user doesn't exist
+    return;
+  }
+
+  // Set user data for the profile being viewed
+  userData.value = { uid: userSnapshot.docs[0].id, ...userSnapshot.docs[0].data() };
+
+  // Check if the viewed profile belongs to the currently authenticated user
+  if (user) {
+    const userDocRef = doc(db, 'users', user.uid);
+    const docSnap = await getDoc(userDocRef);
+
+    if (docSnap.exists() && docSnap.data().username === username.value) {
+      isCurrentUser.value = true;
+    }
+  }
+});
+
 </script>

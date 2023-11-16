@@ -1,7 +1,6 @@
 import { firebaseAuth, db } from "../firebase-service";
-import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
+import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment } from 'firebase/firestore';
 import { userInfoService } from '../services/UserInfoService';
-const defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
 
 class ChatService {
   user: any;
@@ -98,6 +97,9 @@ class ChatService {
         ...conversationOrUser,
         recipient: recipientInfo
       };
+      // reset unread count
+      this.resetUnreadCount(conversationOrUser.id);
+      // start listening to messages
       unsubscribe = this.listenToMessages(conversationOrUser.id, messages);
     } else {
       const conversationsRef = collection(db, 'conversations');
@@ -149,7 +151,7 @@ class ChatService {
       console.error("Error fetching messages: ", error);
     });
   }
-  
+
   async sendMessage(activeConversation, message) {
     if (message.trim() === '') return { success: false, message: 'Message is empty.' };
 
@@ -194,6 +196,36 @@ class ChatService {
     } catch (error: any) {
       return { success: false, message: error.message };
     }
+  }
+
+  async searchUsers(username: string) {
+    if (username.trim() === '') return [];
+
+    const usersRef = collection(db, 'users');
+    const userQuery = query(
+      usersRef,
+      where('username', '>=', username.toLocaleLowerCase()),
+      where('username', '<=', username.toLocaleLowerCase() + '\uf8ff'),
+      limit(5)
+    );
+
+    const querySnapshot = await getDocs(userQuery);
+    return querySnapshot.docs
+      .map(doc => ({ uid: doc.id, ...doc.data() }))
+      .filter(user => user.uid !== this.user.uid); // filter out the current user
+  }
+
+  async resetUnreadCount(conversationId: string) {
+    const conversationRef = doc(db, 'conversations', conversationId);
+    await updateDoc(conversationRef, {
+      [`unreadCounts.${this.user.uid}`]: 0 // Reset unread count for the current user
+    });
+  }
+
+  computeTotalUnreadCount(conversations: []) {
+    return conversations.reduce((total, conversation) => {
+      return total + (conversation.unreadCounts[this.user.uid] || 0);
+    }, 0);
   }
 }
 

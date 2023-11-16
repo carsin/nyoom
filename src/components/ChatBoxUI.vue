@@ -38,7 +38,8 @@
                     <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{
                       conversation.unreadCounts[currentUser?.uid] }} unread) </span>
                   </h2>
-                  <p>{{ conversation.lastMessageSender === currentUser.uid ? currentUsername : conversation.recipientUsername }}: {{ conversation.lastMessageContent || 'Cannot load message.' }}</p>
+                  <p>{{ conversation.lastMessageSender === currentUser.uid ? currentUsername :
+                    conversation.recipientUsername }}: {{ conversation.lastMessageContent || 'Cannot load message.' }}</p>
                   <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
                 </ion-label>
               </div>
@@ -100,15 +101,15 @@
       </div>
     </ion-fab-list>
     <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="3000" :color="toast.color"></ion-toast>
-  </ion-fab></template>
+  </ion-fab>
+</template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar, IonGrid, IonCol, IonRow } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack, mailOutline, checkmark } from 'ionicons/icons';
-import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
-import { writeBatch, collection, query, updateDoc, limit, doc, where, getDocs, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
+import { firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
 import { format } from 'date-fns';
 import { MAX_CHATMESSAGE_LENGTH } from "../util/constants"
 import { userInfoService } from '../services/UserInfoService';
@@ -151,9 +152,9 @@ const fetchConversations = async () => {
   isLoading.value = true;
   try {
     unsubscribeConvoListener = await chatService.fetchConversations(conversations, userCache);
-  } catch(error: any) {
+  } catch (error: any) {
     toast.value = { isOpen: true, message: "Error fetching conversation list: " + error.message, color: 'danger' };
-  } 
+  }
   isLoading.value = false;
 };
 
@@ -168,9 +169,9 @@ const prepareConversation = async (conversationOrUser) => {
       unsubscribeConvoListener = result.unsubscribe;
       currentView.value = 'conversation';
     }
-  } catch(error: any) {
+  } catch (error: any) {
     toast.value = { isOpen: true, message: "Error fetching conversation: " + error.message, color: 'danger' };
-  } 
+  }
   isLoading.value = false;
 };
 
@@ -188,15 +189,29 @@ const sendMessage = async () => {
     if (!result.success) {
       throw new Error(result.message);
     }
-    if (!unsubscribeMessageListener) {
+    if (!unsubscribeMessageListener) { // restart message listener if not already
       unsubscribeMessageListener = chatService.listenToMessages(activeConversation.value.id, messages);
     }
   } catch (error: any) {
     messageContent.value = message;
     toast.value = { isOpen: true, message: "Error sending message: " + error.message, color: 'danger' };
-  } 
+  }
   isLoading.value = false;
 };
+
+const searchUsers = async () => {
+  isLoading.value = true;
+  try {
+    searchResults.value = await chatService.searchUsers(searchQuery.value);
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error searching users: " + error.message, color: 'danger' };
+  }
+  isLoading.value = false;
+};
+
+const totalUnreadCount = computed(() => {
+  return chatService.computeTotalUnreadCount(conversations.value);
+});
 
 const toggleChat = async () => {
   isChatOpen.value = !isChatOpen.value;
@@ -209,38 +224,6 @@ const toggleChat = async () => {
     unsubscribeConvoListener = await fetchConversations();
   }
 };
-
-const searchUsers = async () => {
-  if (searchQuery.value.trim() === '') {
-    searchResults.value = [];
-    return;
-  }
-  isLoading.value = true;
-
-  const usersRef = collection(db, 'users');
-  const userQuery = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'), limit(5));
-  const querySnapshot = await getDocs(userQuery);
-  searchResults.value = querySnapshot.docs
-    .map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    }))
-    .filter(user => user.uid !== currentUser?.uid); // filter out the current user
-  isLoading.value = false;
-};
-
-const resetUnreadCount = async (conversationId) => {
-  const conversationRef = doc(db, 'conversations', conversationId);
-  await updateDoc(conversationRef, {
-    [`unreadCounts.${currentUser?.uid}`]: 0 // Reset unread count for the current user
-  });
-};
-
-const totalUnreadCount = computed(() => {
-  return conversations.value.reduce((total, conversation) => {
-    return total + (conversation.unreadCounts[currentUser?.uid] || 0);
-  }, 0);
-});
 
 const activeConversationDisplay = computed(() => {
   if (activeConversation.value) {

@@ -39,7 +39,11 @@ class ChatService {
         };
       }));
 
-      conversations.value = fetchedConversations.sort((a, b) => getTimestampMillis(b) - getTimestampMillis(a));
+      
+      const sortConversationsByTimestamp = (conversations) => {
+        return conversations.sort((a, b) => getTimestampMillis(b) - getTimestampMillis(a));
+      };
+        conversations.value = sortConversationsByTimestamp(fetchedConversations);
     });
 
     return unsubscribe;
@@ -227,5 +231,6 @@ async function fetchAndCacheUserData(userId, userCache) {
   }
   return userData;
 }
+
 
 export const chatService = new ChatService(firebaseAuth.currentUser);

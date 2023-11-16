@@ -38,8 +38,8 @@
                     <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{
                       conversation.unreadCounts[currentUser?.uid] }} unread) </span>
                   </h2>
-                  <p>{{ conversation.lastMessageSender === currentUser.uid ? currentUsername :
-                    conversation.recipientUsername }}: {{ conversation.lastMessageContent || 'Cannot load message.' }}</p>
+                  <p class="truncate-text">{{ conversation.lastMessageSender === currentUser.uid ? currentUsername :
+                    conversation.recipientUsername }}: {{ formattedMessage(conversation) || 'Cannot load message.' }}</p>
                   <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
                 </ion-label>
               </div>
@@ -62,7 +62,8 @@
               </ion-button>
             </ion-list-header>
             <!-- Messages  -->
-            <ion-item v-for="message in messages" :key="message.id" lines="inset">
+            <!-- <ion-item v-for="message in messages" :key="message.id" lines="inset" class="message-item"> -->
+            <div v-for="message in messages" :key="message.id" class="message-item">
               <ion-label>
                 <ion-grid class="ion-no-padding">
                   <ion-row class="ion-align-items-center" style="flex-grow: 1;">
@@ -81,12 +82,12 @@
                   </ion-row>
                   <ion-row>
                     <ion-col>
-                      <p>{{ message.content }}</p>
+                      <p class="message-content">{{ message.content }}</p>
                     </ion-col>
                   </ion-row>
                 </ion-grid>
               </ion-label>
-            </ion-item>
+            </div>>
           </ion-list>
           <div class="message-input-box">
             <ion-item lines="none">
@@ -117,7 +118,7 @@ import { chatService } from '../services/ChatService';
 
 const isChatVisible = ref(true);
 const isChatOpen = ref(false);
-const isLoading = ref(false);
+const isLoading = ref(true);
 const currentView = ref('search'); // 'search' or 'conversation'
 const searchQuery = ref('');
 const searchResults = ref([]);
@@ -154,13 +155,13 @@ const fetchConversations = async () => {
     unsubscribeConvoListener = await chatService.fetchConversations(conversations, userCache);
   } catch (error: any) {
     toast.value = { isOpen: true, message: "Error fetching conversation list: " + error.message, color: 'danger' };
+  } finally {
+    isLoading.value = false;
   }
-  isLoading.value = false;
 };
 
 const prepareConversation = async (conversationOrUser) => {
   isLoading.value = true;
-
   try {
     const result = await chatService.prepareConversation(conversationOrUser, activeConversation, messages);
     if (!result.success) {
@@ -257,6 +258,15 @@ const formatTimestamp = (timestamp: Timestamp): string => {
   }
   return '';
 };
+
+const formattedMessage = (conversation): string => {
+  const maxLength = 20; // Maximum characters to display
+  let message = conversation.lastMessageContent || 'Cannot load message.';
+  if (message.length > maxLength) {
+    return message.substring(0, maxLength) + '…'; // Truncate and add ellipsis
+  }
+  return message;
+};
 </script>
 
 <style scoped>
@@ -325,6 +335,36 @@ const formatTimestamp = (timestamp: Timestamp): string => {
   font-size: 90%;
 }
 
+.message-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.message-item {
+  border-bottom: 1px solid #111;
+  padding: 10px;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-item:last-child {
+  border-bottom: none; 
+  margin-bottom: 20px; /* Adjust as needed */
+}
+
+.message-content {
+  overflow-wrap: break-word;
+}
+
 .message-receipt {
   padding-right: 4px;
-}</style>
+}
+
+.truncate-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+</style>

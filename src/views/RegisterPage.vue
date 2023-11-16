@@ -103,7 +103,7 @@ const checkUsernameTaken = async (username: string) => {
 function validateEmail(email: string) {
   if (!email) {
     return 'Email is required';
-  } else if (!/\S+@\S+\.\S+/.test(email)) {
+  } else if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
     return 'Please enter a valid email address';
   }
   return '';

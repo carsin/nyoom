@@ -108,7 +108,7 @@ import { useRouter } from 'vue-router';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar, IonGrid, IonCol, IonRow } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack, mailOutline, checkmark } from 'ionicons/icons';
 import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
-import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
+import { writeBatch, collection, query, updateDoc, limit, doc, where, getDocs, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { MAX_CHATMESSAGE_LENGTH } from "../util/constants"
 import { userInfoService } from '../services/UserInfoService';
@@ -134,7 +134,6 @@ let unsubscribeConvoListener: Function;
 let unsubscribeMessageListener: Function;
 
 onMounted(async () => {
-  unsubscribeConvoListener = await fetchConversations();
   let fetchUsername = await userInfoService.getCurrentUserUsername();
   if (fetchUsername) currentUsername.value = fetchUsername;
 });
@@ -150,51 +149,12 @@ onBeforeUnmount(() => { // unsubscribe when the component unmounts
 
 const fetchConversations = async () => {
   isLoading.value = true;
-
-  const conversationsRef = collection(db, 'conversations');
-  const q = query(conversationsRef, where('participants', 'array-contains', currentUser?.uid));
-
-  // real-time listener for conversations
-  const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-    const conversationsWithDetailsPromises = querySnapshot.docs.map(async (doc) => {
-      const conversation = {
-        id: doc.id,
-        ...doc.data(),
-      };
-
-      const otherUserId = conversation.participants.find(uid => uid !== currentUser?.uid);
-      let userData = userCache.get(otherUserId);
-
-      // fetch user data if not in cache
-      if (!userData) {
-        userData = await userInfoService.fetchUserData(otherUserId);
-        if (userData) {
-          userCache.set(otherUserId, userData);
-        }
-      }
-
-      // format the timestamp of the last message
-      // let formattedTimestamp = formatTimestamp(conversation.lastMessageTimestamp);
-
-      return {
-        ...conversation,
-        recipientUsername: userData?.username,
-        recipientAvatarUrl: userData?.avatarUrl,
-        lastMessageContent: conversation.lastMessageContent || 'No messages',
-        lastMessageTimestamp: conversation.lastMessageTimestamp || '',
-        lastMessageSender: conversation.lastMessageSender || ''
-      };
-    });
-
-    // wait for all conversations and last messages to be fetched
-    let fetchedConversations = await Promise.all(conversationsWithDetailsPromises);
-    // sort conversations by timestamp in descending order
-    fetchedConversations.sort((a, b) => b.lastMessageTimestamp.toMillis() - a.lastMessageTimestamp.toMillis());
-    conversations.value = fetchedConversations;
-  });
-
+  try {
+    unsubscribeConvoListener = await chatService.fetchConversations(conversations, userCache);
+  } catch(error: any) {
+    toast.value = { isOpen: true, message: "Error fetching conversation list: " + error.message, color: 'danger' };
+  } 
   isLoading.value = false;
-  return unsubscribe; // return the unsubscribe function to call when the component unmounts
 };
 
 const prepareConversation = async (conversationOrUser) => {
@@ -210,9 +170,8 @@ const prepareConversation = async (conversationOrUser) => {
     }
   } catch(error: any) {
     toast.value = { isOpen: true, message: "Error fetching conversation: " + error.message, color: 'danger' };
-  } finally {
-    isLoading.value = false;
-  }
+  } 
+  isLoading.value = false;
 };
 
 const sendMessage = async () => {
@@ -276,12 +235,15 @@ const sendMessage = async () => {
   isLoading.value = false;
 };
 
-const toggleChat = () => {
+const toggleChat = async () => {
   isChatOpen.value = !isChatOpen.value;
   if (!isChatOpen.value) {
     // Reset views when closing the chat
     searchQuery.value = '';
     searchResults.value = [];
+  }
+  if (!unsubscribeConvoListener) {
+    unsubscribeConvoListener = await fetchConversations();
   }
 };
 

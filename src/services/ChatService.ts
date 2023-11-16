@@ -14,7 +14,7 @@ class ChatService {
   }
 
   async fetchConversations(conversations, userCache) {
-    if (!this.user || !this.user.uid) {
+    if (!this.user?.uid) {
       throw new Error("User is not authenticated");
     }
 
@@ -22,21 +22,12 @@ class ChatService {
     const q = query(conversationsRef, where('participants', 'array-contains', this.user?.uid));
 
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      const conversationsWithDetailsPromises = querySnapshot.docs.map(async (doc) => {
-        const conversation = {
-          id: doc.id,
-          ...doc.data(),
-        };
-
+      const fetchedConversations = await Promise.all(querySnapshot.docs.map(async (doc) => {
+        const conversation = { id: doc.id, ...doc.data() };
         const otherUserId = conversation.participants.find(uid => uid !== this.user?.uid);
-        let userData = userCache.get(otherUserId);
 
-        if (!userData) {
-          userData = await userInfoService.fetchUserData(otherUserId);
-          if (userData) {
-            userCache.set(otherUserId, userData);
-          }
-        }
+        // Use cached data if available
+        let userData = userCache.get(otherUserId) || await fetchAndCacheUserData(otherUserId, userCache);
 
         return {
           ...conversation,
@@ -46,22 +37,14 @@ class ChatService {
           lastMessageTimestamp: conversation.lastMessageTimestamp || '',
           lastMessageSender: conversation.lastMessageSender || ''
         };
-      });
+      }));
 
-      let fetchedConversations = await Promise.all(conversationsWithDetailsPromises);
-      // sort conversations by timestamp in descending order
-      fetchedConversations.sort((a, b) => {
-        // convert Firestore Timestamp to milliseconds, or use 0 if undefined
-        const timestampA = a.lastMessageTimestamp ? a.lastMessageTimestamp.toMillis ? a.lastMessageTimestamp.toMillis() : a.lastMessageTimestamp : 0;
-        const timestampB = b.lastMessageTimestamp ? b.lastMessageTimestamp.toMillis ? b.lastMessageTimestamp.toMillis() : b.lastMessageTimestamp : 0;
-
-        return timestampB - timestampA;
-      });
-
-      conversations.value = fetchedConversations;
+      conversations.value = fetchedConversations.sort((a, b) => getTimestampMillis(b) - getTimestampMillis(a));
     });
+
     return unsubscribe;
   }
+
 
   async prepareConversation(conversationOrUser, activeConversation, messages) {
     if (!this.user) {
@@ -227,6 +210,22 @@ class ChatService {
       return total + (conversation.unreadCounts[this.user.uid] || 0);
     }, 0);
   }
+}
+
+// helper functions to reduce complexity of conversation fetching
+function getTimestampMillis(conversation) {
+  if (!conversation.lastMessageTimestamp) {
+    return 0;
+  }
+  return conversation.lastMessageTimestamp.toMillis ? conversation.lastMessageTimestamp.toMillis() : conversation.lastMessageTimestamp;
+}
+
+async function fetchAndCacheUserData(userId, userCache) {
+  let userData = await userInfoService.fetchUserData(userId);
+  if (userData) {
+    userCache.set(userId, userData);
+  }
+  return userData;
 }
 
 export const chatService = new ChatService(firebaseAuth.currentUser);

@@ -175,7 +175,6 @@ const prepareConversation = async (conversationOrUser) => {
 };
 
 const sendMessage = async () => {
-  if (messageContent.value.trim() === '') return;
   if (isLoading.value) {
     toast.value = { isOpen: true, message: "Already sending message!", color: 'danger' };
     return;
@@ -184,54 +183,18 @@ const sendMessage = async () => {
   let message = messageContent.value;
   messageContent.value = '';
 
-  const batch = writeBatch(db);
-
-  // if it's a new conversation, create it in Firestore
-  let conversationRef;
-  let timestamp = serverTimestamp();
-  if (!activeConversation.value.id) {
-    conversationRef = doc(collection(db, 'conversations'));
-    batch.set(conversationRef, {
-      participants: activeConversation.value.participants,
-      createdAt: timestamp,
-      unreadCounts: activeConversation.value.unreadCounts,
-      lastMessageSender: currentUser?.uid,
-      lastMessageContent: message,
-      lastMessageTimestamp: timestamp,
-    });
-    activeConversation.value.id = conversationRef.id; // set the newly created conversation ID
-  } else {
-    conversationRef = doc(db, 'conversations', activeConversation.value.id);
-    const recipientId = activeConversation.value.participants.find(uid => uid !== currentUser?.uid);
-    batch.update(conversationRef, { // update the conversation with the last message details
-      lastMessageSender: currentUser?.uid,
-      lastMessageContent: message,
-      lastMessageTimestamp: timestamp,
-      [`unreadCounts.${recipientId}`]: increment(1) // Increment unread count for recipient
-    });
-  }
-
-  const messagesRef = collection(db, 'conversations', activeConversation.value.id, 'messages');
-  // add a new message to the messages subcollection
-  const messageDocRef = doc(messagesRef);
-  batch.set(messageDocRef, {
-    senderId: currentUser?.uid,
-    content: message,
-    timestamp: timestamp,
-    readStatus: false,
-  });
-
-  // send the message and update conversation in a single batched write
   try {
-    await batch.commit();
-    // start listening for messages
+    const result = await chatService.sendMessage(activeConversation.value, message);
+    if (!result.success) {
+      throw new Error(result.message);
+    }
     if (!unsubscribeMessageListener) {
-      unsubscribeMessageListener = listenToMessages(activeConversation.value.id);
+      unsubscribeMessageListener = chatService.listenToMessages(activeConversation.value.id, messages);
     }
   } catch (error: any) {
     messageContent.value = message;
     toast.value = { isOpen: true, message: "Error sending message: " + error.message, color: 'danger' };
-  }
+  } 
   isLoading.value = false;
 };
 

@@ -38,7 +38,8 @@
                     <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{
                       conversation.unreadCounts[currentUser?.uid] }} unread) </span>
                   </h2>
-                  <p>{{ conversation.lastMessageSender === currentUser.uid ? currentUsername : conversation.recipientUsername }}: {{ conversation.lastMessageContent || 'Cannot load message.' }}</p>
+                  <p>{{ conversation.lastMessageSender === currentUser.uid ? currentUsername :
+                    conversation.recipientUsername }}: {{ conversation.lastMessageContent || 'Cannot load message.' }}</p>
                   <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
                 </ion-label>
               </div>
@@ -100,18 +101,19 @@
       </div>
     </ion-fab-list>
     <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="3000" :color="toast.color"></ion-toast>
-  </ion-fab></template>
+  </ion-fab>
+</template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar, IonGrid, IonCol, IonRow } from '@ionic/vue';
 import { chatbubbles, close, send, arrowBack, mailOutline, checkmark } from 'ionicons/icons';
-import { db, firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
-import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
+import { firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
 import { format } from 'date-fns';
-import { userInfoService } from '../services/UserInfoService';
 import { MAX_CHATMESSAGE_LENGTH } from "../util/constants"
+import { userInfoService } from '../services/UserInfoService';
+import { chatService } from '../services/ChatService';
 
 const isChatVisible = ref(true);
 const isChatOpen = ref(false);
@@ -122,7 +124,7 @@ const searchResults = ref([]);
 const messageContent = ref('');
 const messages = ref([]);
 const conversations = ref([]);
-const activeConversation = ref(); // Store active conversation details here
+const activeConversation = ref();
 const defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
 const userCache = new Map(); // cache to store fetched user data
 const toast = ref({ isOpen: false, message: '', color: '' });
@@ -133,7 +135,6 @@ let unsubscribeConvoListener: Function;
 let unsubscribeMessageListener: Function;
 
 onMounted(async () => {
-  unsubscribeConvoListener = await fetchConversations();
   let fetchUsername = await userInfoService.getCurrentUserUsername();
   if (fetchUsername) currentUsername.value = fetchUsername;
 });
@@ -149,177 +150,32 @@ onBeforeUnmount(() => { // unsubscribe when the component unmounts
 
 const fetchConversations = async () => {
   isLoading.value = true;
-
-  const conversationsRef = collection(db, 'conversations');
-  const q = query(conversationsRef, where('participants', 'array-contains', currentUser?.uid));
-
-  // real-time listener for conversations
-  const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-    const conversationsWithDetailsPromises = querySnapshot.docs.map(async (doc) => {
-      const conversation = {
-        id: doc.id,
-        ...doc.data(),
-      };
-
-      const otherUserId = conversation.participants.find(uid => uid !== currentUser?.uid);
-      let userData = userCache.get(otherUserId);
-
-      // fetch user data if not in cache
-      if (!userData) {
-        userData = await userInfoService.fetchUserData(otherUserId);
-        if (userData) {
-          userCache.set(otherUserId, userData);
-        }
-      }
-
-      // format the timestamp of the last message
-      // let formattedTimestamp = formatTimestamp(conversation.lastMessageTimestamp);
-
-      return {
-        ...conversation,
-        recipientUsername: userData?.username,
-        recipientAvatarUrl: userData?.avatarUrl,
-        lastMessageContent: conversation.lastMessageContent || 'No messages',
-        lastMessageTimestamp: conversation.lastMessageTimestamp || '',
-        lastMessageSender: conversation.lastMessageSender || ''
-      };
-    });
-
-    // wait for all conversations and last messages to be fetched
-    let fetchedConversations = await Promise.all(conversationsWithDetailsPromises);
-    // sort conversations by timestamp in descending order
-    fetchedConversations.sort((a, b) => b.lastMessageTimestamp.toMillis() - a.lastMessageTimestamp.toMillis());
-    conversations.value = fetchedConversations;
-    isLoading.value = false;
-  });
-
-  return unsubscribe; // return the unsubscribe function to call when the component unmounts
+  try {
+    unsubscribeConvoListener = await chatService.fetchConversations(conversations, userCache);
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error fetching conversation list: " + error.message, color: 'danger' };
+  }
+  isLoading.value = false;
 };
 
 const prepareConversation = async (conversationOrUser) => {
   isLoading.value = true;
 
-  if (!currentUser) {
-    toast.value = { isOpen: true, message: "You are not logged in!", color: 'danger' };
-    isLoading.value = false;
-    return;
-  }
-
-  const currentUserUid = currentUser.uid;
-  let recipientUid;
-  let recipientData;
-
-  // distinguish between an existing conversation and a new one based on the presence of an 'id' property
-  const isExistingConversation = conversationOrUser.id !== undefined;
-
-  if (isExistingConversation) {
-    // existing conversation - get the other participant's UID
-    recipientUid = conversationOrUser.participants.find(uid => uid !== currentUserUid);
-  } else {
-    // New conversation - the parameter is a user object, so get the UID directly
-    recipientUid = conversationOrUser.uid;
-  }
-
-  // fetch recipient data
   try {
-    recipientData = await userInfoService.fetchUserData(recipientUid);
+    const result = await chatService.prepareConversation(conversationOrUser, activeConversation, messages);
+    if (!result.success) {
+      throw new Error(result.message);
+    } else {
+      unsubscribeConvoListener = result.unsubscribe;
+      currentView.value = 'conversation';
+    }
   } catch (error: any) {
-    toast.value = { isOpen: true, message: "Error fetching recipient data: " + error.message, color: 'danger' };
-    isLoading.value = false;
-    return;
+    toast.value = { isOpen: true, message: "Error fetching conversation: " + error.message, color: 'danger' };
   }
-
-  // prepare the recipient data for the activeConversation
-  const recipientInfo = {
-    avatarUrl: recipientData?.avatarUrl || defaultAvatar, // Replace with your default avatar URL
-    username: recipientData?.username || 'Unknown'
-  };
-
-  if (isExistingConversation) {
-    // set the active conversation with recipient data
-    activeConversation.value = {
-      ...conversationOrUser,
-      recipient: recipientInfo
-    };
-    // reset unread count
-    resetUnreadCount(conversationOrUser.id);
-    // start listening to messages
-    unsubscribeConvoListener = listenToMessages(conversationOrUser.id);
-  } else {
-    // new conversation: Check if a conversation already exists with the recipient
-    let conversationExists = false;
-    const conversationsRef = collection(db, 'conversations');
-    const conversationQuery = query(
-      conversationsRef,
-      where('participants', 'array-contains', currentUserUid)
-    );
-
-    const querySnapshot = await getDocs(conversationQuery);
-    for (const conversationDoc of querySnapshot.docs) {
-      const data = conversationDoc.data();
-      if (data.participants.includes(recipientUid)) {
-        // Conversation found
-        activeConversation.value = {
-          id: conversationDoc.id,
-          recipient: recipientInfo,
-          ...data
-        };
-        conversationExists = true;
-        break;
-      }
-    }
-
-    // If no conversation exists, prepare a new one without an ID
-    if (!conversationExists) {
-      activeConversation.value = {
-        participants: [currentUserUid, recipientUid],
-        recipient: recipientInfo,
-        messages: [],
-        unreadCounts: {
-          [currentUserUid]: 0,
-          [recipientUid]: 0
-        }
-      };
-    }
-  }
-
   isLoading.value = false;
-  currentView.value = 'conversation'; // Switch to conversation view
-};
-
-const listenToMessages = (conversationId) => {
-  isLoading.value = true;
-  const messagesRef = collection(db, 'conversations', conversationId, 'messages');
-
-  // Optionally, you can use query and orderBy to sort the messages
-  const messagesQuery = query(messagesRef, orderBy('timestamp', 'desc'));
-
-  // Using onSnapshot to listen for real-time updates
-  const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-    isLoading.value = false;
-    messages.value = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    // Update read status
-    snapshot.docs.forEach(doc => {
-      if (doc.data().senderId !== currentUser?.uid && !doc.data().readStatus) {
-        const messageRef = doc.ref;
-        updateDoc(messageRef, { readStatus: true });
-      }
-    });
-  }, (error) => {
-    // Handle the error case
-    console.error("Error fetching messages: ", error);
-    isLoading.value = false;
-  });
-
-  // Return the unsubscribe function in case you need to stop listening to updates
-  return unsubscribe;
 };
 
 const sendMessage = async () => {
-  if (messageContent.value.trim() === '') return;
   if (isLoading.value) {
     toast.value = { isOpen: true, message: "Already sending message!", color: 'danger' };
     return;
@@ -328,49 +184,13 @@ const sendMessage = async () => {
   let message = messageContent.value;
   messageContent.value = '';
 
-  const batch = writeBatch(db);
-
-  // if it's a new conversation, create it in Firestore
-  let conversationRef;
-  let timestamp = serverTimestamp();
-  if (!activeConversation.value.id) {
-    conversationRef = doc(collection(db, 'conversations'));
-    batch.set(conversationRef, {
-      participants: activeConversation.value.participants,
-      createdAt: timestamp,
-      unreadCounts: activeConversation.value.unreadCounts,
-      lastMessageSender: currentUser?.uid,
-      lastMessageContent: message,
-      lastMessageTimestamp: timestamp,
-    });
-    activeConversation.value.id = conversationRef.id; // set the newly created conversation ID
-  } else {
-    conversationRef = doc(db, 'conversations', activeConversation.value.id);
-    const recipientId = activeConversation.value.participants.find(uid => uid !== currentUser?.uid);
-    batch.update(conversationRef, { // update the conversation with the last message details
-      lastMessageSender: currentUser?.uid,
-      lastMessageContent: message,
-      lastMessageTimestamp: timestamp,
-      [`unreadCounts.${recipientId}`]: increment(1) // Increment unread count for recipient
-    });
-  }
-
-  const messagesRef = collection(db, 'conversations', activeConversation.value.id, 'messages');
-  // add a new message to the messages subcollection
-  const messageDocRef = doc(messagesRef);
-  batch.set(messageDocRef, {
-    senderId: currentUser?.uid,
-    content: message,
-    timestamp: timestamp,
-    readStatus: false,
-  });
-
-  // send the message and update conversation in a single batched write
   try {
-    await batch.commit();
-    // start listening for messages
-    if (!unsubscribeMessageListener) {
-      unsubscribeMessageListener = listenToMessages(activeConversation.value.id);
+    const result = await chatService.sendMessage(activeConversation.value, message);
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    if (!unsubscribeMessageListener) { // restart message listener if not already
+      unsubscribeMessageListener = chatService.listenToMessages(activeConversation.value.id, messages);
     }
   } catch (error: any) {
     messageContent.value = message;
@@ -379,46 +199,31 @@ const sendMessage = async () => {
   isLoading.value = false;
 };
 
-const toggleChat = () => {
+const searchUsers = async () => {
+  isLoading.value = true;
+  try {
+    searchResults.value = await chatService.searchUsers(searchQuery.value);
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error searching users: " + error.message, color: 'danger' };
+  }
+  isLoading.value = false;
+};
+
+const totalUnreadCount = computed(() => {
+  return chatService.computeTotalUnreadCount(conversations.value);
+});
+
+const toggleChat = async () => {
   isChatOpen.value = !isChatOpen.value;
   if (!isChatOpen.value) {
     // Reset views when closing the chat
     searchQuery.value = '';
     searchResults.value = [];
   }
-};
-
-const searchUsers = async () => {
-  if (searchQuery.value.trim() === '') {
-    searchResults.value = [];
-    return;
+  if (!unsubscribeConvoListener) {
+    unsubscribeConvoListener = await fetchConversations();
   }
-  isLoading.value = true;
-
-  const usersRef = collection(db, 'users');
-  const userQuery = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'), limit(5));
-  const querySnapshot = await getDocs(userQuery);
-  searchResults.value = querySnapshot.docs
-    .map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    }))
-    .filter(user => user.uid !== currentUser?.uid); // filter out the current user
-  isLoading.value = false;
 };
-
-const resetUnreadCount = async (conversationId) => {
-  const conversationRef = doc(db, 'conversations', conversationId);
-  await updateDoc(conversationRef, {
-    [`unreadCounts.${currentUser?.uid}`]: 0 // Reset unread count for the current user
-  });
-};
-
-const totalUnreadCount = computed(() => {
-  return conversations.value.reduce((total, conversation) => {
-    return total + (conversation.unreadCounts[currentUser?.uid] || 0);
-  }, 0);
-});
 
 const activeConversationDisplay = computed(() => {
   if (activeConversation.value) {

@@ -11,8 +11,16 @@ import ChatBoxUI from '@/components/ChatBoxUI.vue';
 import { watch, ref } from 'vue';
 import { firebaseAuth } from "./firebase-service";
 import { useRoute } from 'vue-router';
+import { authHandler } from './services/AuthHandler';
+import { chatService } from './services/ChatService';
 
 document.title = 'Nyoom';
+
+// initialize auth for services
+authHandler.addService(chatService); 
+// TODO: integrate authHandler into all services
+
+authHandler.initialize();
 
 const route = useRoute();
 const showChatbox = ref(false);
@@ -31,5 +39,6 @@ updateChatboxVisibility();
 watch([isAuthenticated, route], () => {
   updateChatboxVisibility();
 });
+
 
 </script>

@@ -22,6 +22,8 @@
       <ion-grid>
         <ion-row>
           <ion-col size-md="6" offset-md="3">
+
+            <!-- Segmented control for selecting vehicle type -->
             <ion-item>
               <ion-segment @ionChange="selectOption($event.detail.value)">
                 <ion-segment-button value="Car">
@@ -32,22 +34,48 @@
                 </ion-segment-button>
               </ion-segment>
             </ion-item>
+
             <div v-if="selectedVehicleType === 'Car'">
-              <div v-for="mod in carMods" :key="mod.category">
-                <h3>{{ mod.category }}</h3>
-                <ul>
-                  <li v-for="option in mod.options" :key="option">{{ option }}</li>
-                </ul>
+              <div v-for="(modCategory, index) in carMods" :key="index">
+                <ion-item @click="toggleCategory(index, 'car')">
+                  <ion-label>{{ modCategory.category }}</ion-label>
+                </ion-item>
+                <div v-show="carModExpanded[index]">
+                  <div v-for="option in modCategory.options" :key="option">
+                    <ion-item>
+                      <ion-label>{{ option }}</ion-label>
+                      <ion-input 
+                        type="text" 
+                        placeholder="Enter details" 
+                        v-model="carModDetails[option]"
+                      />
+                    </ion-item>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!-- Display motorcycle modifications if 'Motorcycle' is selected -->
             <div v-if="selectedVehicleType === 'Motorcycle'">
-              <div v-for="mod in motorcycleMods" :key="mod.category">
-                <h3>{{ mod.category }}</h3>
-                <ul>
-                  <li v-for="option in mod.options" :key="option">{{ option }}</li>
-                </ul>
+              <div v-for="(modCategory, index) in motorcycleMods" :key="index">
+                <ion-item @click="toggleCategory(index, 'motorcycle')">
+                  <ion-label>{{ modCategory.category }}</ion-label>
+                </ion-item>
+                <div v-show="motorcycleModExpanded[index]">
+                  <div v-for="option in modCategory.options" :key="option">
+                    <ion-item>
+                      <ion-label>{{ option }}</ion-label>
+                      <ion-input 
+                        type="text" 
+                        placeholder="Enter details" 
+                        v-model="motorcycleModDetails[option]"
+                      />
+                    </ion-item>
+                  </div>
+                </div>
               </div>
             </div>
+
             <ion-item>
               <ion-label position="floating">Make: </ion-label>
               <ion-input v-model="make" />
@@ -86,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import {
   IonPage,
   IonHeader,
@@ -102,6 +130,7 @@ import {
   IonInput,
   IonButton,
   IonToast,
+  IonSegment,
 } from "@ionic/vue";
 
 import { firebaseAuth, db, storage } from "../firebase-service";
@@ -113,7 +142,8 @@ import {
 } from "firebase/storage";
 import { useRouter } from "vue-router";
 
-const selectedVehicleType = ref("");
+const selectedVehicleType = ref('');
+const selectedMods = ref({});
 const selectOption = (vehicleType: string) => {
   selectedVehicleType.value = vehicleType;
 };
@@ -145,6 +175,19 @@ const motorcycleMods = ref([
   { category: "Instrumentation", options: ["Instrument Clusters", "Gauges"] },
   { category: "Engine Guards", options: ["Engine Guards"] }
 ]);
+
+const carModExpanded = reactive(carMods.value.map(() => false));
+const motorcycleModExpanded = reactive(motorcycleMods.value.map(() => false));
+const carModDetails = reactive({});
+const motorcycleModDetails = reactive({});
+
+const toggleCategory = (index: number, type: 'car' | 'motorcycle') => {
+  if (type === 'car') {
+    carModExpanded[index] = !carModExpanded[index];
+  } else {
+    motorcycleModExpanded[index] = !motorcycleModExpanded[index];
+  }
+};
 
 const isUploading = ref(false);
 const uploadProgress = ref(0);
@@ -254,7 +297,6 @@ const addVehicle = async () => {
           message: "Vehicle added successfully!",
           color: "success",
         };
-        //  router.push("/add-vehicle"); fix this
       } else {
         throw new Error("User data does not exist.");
       }

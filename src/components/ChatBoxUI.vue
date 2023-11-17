@@ -1,47 +1,104 @@
 <template>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="isChatVisible">
-    <ion-fab-button @click="toggleChat">
-      <ion-icon :icon="isChatOpen ? close: chatbubbles"></ion-icon>
+    <ion-fab-button class="enter-chat-button" @click="toggleChat">
+      <ion-icon :icon="isChatOpen ? close : chatbubbles"></ion-icon>
+      <span v-if="totalUnreadCount > 0"> {{ totalUnreadCount }}</span>
     </ion-fab-button>
     <ion-fab-list side="top" v-show="isChatOpen">
       <div class="chat-container">
-        <div>
-          <!-- Search results to start new conversations -->
+        <!-- Search View -->
+        <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
+        <div class="search-view" v-if="currentView === 'search'">
+          <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers" placeholder="Search users to message..."
+            class="ion-no-padding"></ion-searchbar>
           <ion-list v-if="searchResults.length > 0">
             <ion-list-header lines="full">
               <ion-label>User Search Results:</ion-label>
             </ion-list-header>
-            <ion-item v-for="user in searchResults" class="searchuser-result-item" :key="user.uid" @click="startConversationWithUser(user)">
+            <ion-item class="searchuser-result-item" v-for="user in searchResults" :key="user.uid"
+              @click="prepareConversation(user)">
               <ion-avatar slot="start">
-                <img :src="user.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'">
+                <img :src="user.avatarUrl || defaultAvatar" alt="Search result avatar">
               </ion-avatar>
               <ion-label>{{ user.username }}</ion-label>
             </ion-item>
           </ion-list>
-          <!-- List of current conversations -->
-          <ion-list v-if="conversations.length > 0">
+          <ion-list v-if="conversations.length > 0" class="ion-no-padding">
             <ion-list-header lines="full">
-              <ion-label>Conversations</ion-label>
+              <ion-label>Active Conversations</ion-label>
             </ion-list-header>
-            <ion-item v-for="conversation in conversations" :key="conversation.id" @click="enterConversation(conversation)">
-              <ion-avatar slot="start">
-                <img :src="conversation.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'">
+            <ion-item v-for="conversation in conversations" :key="conversation.id"
+              @click="prepareConversation(conversation)">
+              <ion-avatar class="recipient-avatar">
+                <img :src="conversation.recipientAvatarUrl || defaultAvatar" alt="Recipient avatar">
               </ion-avatar>
-              <ion-label>{{ conversation.title }}</ion-label>
+              <div class="conversation-details">
+                <ion-label>
+                  <h2>{{ conversation.recipientUsername }}
+                    <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{
+                      conversation.unreadCounts[currentUser?.uid] }} unread) </span>
+                  </h2>
+                  <p class="truncate-text">{{ conversation.lastMessageSender === currentUser.uid ? currentUsername :
+                    conversation.recipientUsername }}: {{ formattedMessage(conversation) || 'Cannot load message.' }}</p>
+                  <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
+                </ion-label>
+              </div>
             </ion-item>
           </ion-list>
         </div>
-        <!-- Chat content goes here -->
-        <div class="messages">
-          <!-- This will contain messages -->
+        <!-- Conversation View -->
+        <div class="conversation-view" v-if="currentView === 'conversation'">
+          <ion-list class="message-list ion-no-padding">
+            <!-- Conversation header -->
+            <ion-list-header class="conversation-header" lines="full" v-if="activeConversationDisplay">
+              <ion-avatar @click="router.push('/user/' + activeConversationDisplay.username)" class="recipient-avatar">
+                <img :src="activeConversationDisplay.avatarUrl || defaultAvatar" alt="Recipient avatar">
+              </ion-avatar>
+              <ion-label class="conversation-username"
+                @click="router.push('/user/' + activeConversationDisplay.username)">{{ activeConversationDisplay.username
+                }}</ion-label>
+              <ion-button class="" size="large" fill="clear" @click="backToConversations">
+                <ion-icon :icon="arrowBack"></ion-icon>
+              </ion-button>
+            </ion-list-header>
+            <!-- Messages  -->
+            <!-- <ion-item v-for="message in messages" :key="message.id" lines="inset" class="message-item"> -->
+            <div v-for="message in messages" :key="message.id" class="message-item">
+              <ion-label>
+                <ion-grid class="ion-no-padding">
+                  <ion-row class="ion-align-items-center" style="flex-grow: 1;">
+                    <ion-col size="auto"> <!-- sender username -->
+                      <b class="message-username conversation-username" @click="navigateToUserProfile(message)">
+                        {{ currentUser.uid === message.senderId ? currentUsername : activeConversationDisplay.username }}
+                      </b>
+                    </ion-col>
+                    <ion-col suze="auto"> <!-- timestamp -->
+                      <p v-if="message.timestamp" class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</p>
+                    </ion-col>
+                    <ion-col v-if="message.timestamp" size="auto" class="ion-text-end" style="flex-shrink: 0;">
+                      <!-- read receipt icon -->
+                      <ion-icon class="message-receipt" :icon="message.readStatus ? checkmark : mailOutline"></ion-icon>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col>
+                      <p class="message-content">{{ message.content }}</p>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-label>
+            </div>>
+          </ion-list>
+          <div class="message-input-box">
+            <ion-item lines="none">
+              <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage"
+                :maxlength="MAX_CHATMESSAGE_LENGTH"></ion-input>
+              <ion-button fill="clear" @click="sendMessage">
+                <ion-icon slot="icon-only" :icon="send"></ion-icon>
+              </ion-button>
+            </ion-item>
+          </div>
         </div>
-        <ion-searchbar v-model="searchQuery" @ionChange="searchUsers" @keyup.enter="searchUsers" placeholder="Search users to message..."></ion-searchbar>
-        <ion-item lines="none">
-          <ion-input placeholder="Type a message..." v-model="message" @keyup.enter="sendMessage"></ion-input>
-          <ion-button fill="clear" @click="sendMessage">
-            <ion-icon slot="icon-only" :icon="send"></ion-icon>
-          </ion-button>
-        </ion-item>
       </div>
     </ion-fab-list>
     <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="3000" :color="toast.color"></ion-toast>
@@ -49,108 +106,200 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { IonFab, IonToast, IonFabButton, IonFabList, IonListHeader, IonIcon, IonItem, IonInput, IonSearchbar, IonAvatar, IonLabel, IonButton, IonList } from '@ionic/vue';
-import { chatbubbles, close, send} from 'ionicons/icons';
-import { limit, collection, query, where, getDocs } from 'firebase/firestore';
-import { db, firebaseAuth } from "../firebase-service";
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
+import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar, IonGrid, IonCol, IonRow } from '@ionic/vue';
+import { chatbubbles, close, send, arrowBack, mailOutline, checkmark } from 'ionicons/icons';
+import { firebaseAuth } from '../firebase-service'; // Import your Firebase configuration
+import { format } from 'date-fns';
+import { MAX_CHATMESSAGE_LENGTH } from "../util/constants"
+import { userInfoService } from '../services/UserInfoService';
+import { chatService } from '../services/ChatService';
 
-const isChatVisible = ref(true); // You can toggle this based on route if needed
+const isChatVisible = ref(true);
 const isChatOpen = ref(false);
-const message = ref("");
+const isLoading = ref(true);
+const currentView = ref('search'); // 'search' or 'conversation'
 const searchQuery = ref('');
 const searchResults = ref([]);
+const messageContent = ref('');
+const messages = ref([]);
 const conversations = ref([]);
+const activeConversation = ref();
+const defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+const userCache = new Map(); // cache to store fetched user data
 const toast = ref({ isOpen: false, message: '', color: '' });
-const preparedConversation = ref('');
-const user = firebaseAuth.currentUser;
+const currentUser = firebaseAuth.currentUser;
+const currentUsername = ref('');
+const router = useRouter();
+let unsubscribeConvoListener: Function;
+let unsubscribeMessageListener: Function;
 
-const toggleChat = () => {
-  isChatOpen.value = !isChatOpen.value;
+onMounted(async () => {
+  let fetchUsername = await userInfoService.getCurrentUserUsername();
+  if (fetchUsername) currentUsername.value = fetchUsername;
+});
+
+onBeforeUnmount(() => { // unsubscribe when the component unmounts
+  if (unsubscribeConvoListener) {
+    unsubscribeConvoListener();
+  }
+  if (unsubscribeMessageListener) {
+    unsubscribeMessageListener();
+  }
+});
+
+const fetchConversations = async () => {
+  isLoading.value = true;
+  try {
+    unsubscribeConvoListener = await chatService.fetchConversations(conversations, userCache);
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error fetching conversation list: " + error.message, color: 'danger' };
+  } finally {
+    isLoading.value = false;
+  }
 };
 
-const sendMessage = () => {
-  if (message.value.trim() !== "") {
-    // Handle sending message
-    console.log(message.value);
-    message.value = ""; // Reset input after sending
+const prepareConversation = async (conversationOrUser) => {
+  isLoading.value = true;
+  try {
+    const result = await chatService.prepareConversation(conversationOrUser, activeConversation, messages);
+    if (!result.success) {
+      throw new Error(result.message);
+    } else {
+      unsubscribeConvoListener = result.unsubscribe;
+      currentView.value = 'conversation';
+    }
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error fetching conversation: " + error.message, color: 'danger' };
   }
+  isLoading.value = false;
+};
+
+const sendMessage = async () => {
+  if (isLoading.value) {
+    toast.value = { isOpen: true, message: "Already sending message!", color: 'danger' };
+    return;
+  }
+  isLoading.value = true;
+  let message = messageContent.value;
+  messageContent.value = '';
+
+  try {
+    const result = await chatService.sendMessage(activeConversation.value, message);
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    if (!unsubscribeMessageListener) { // restart message listener if not already
+      unsubscribeMessageListener = chatService.listenToMessages(activeConversation.value.id, messages);
+    }
+  } catch (error: any) {
+    messageContent.value = message;
+    toast.value = { isOpen: true, message: "Error sending message: " + error.message, color: 'danger' };
+  }
+  isLoading.value = false;
 };
 
 const searchUsers = async () => {
-  if (searchQuery.value.trim() === '') {
+  isLoading.value = true;
+  try {
+    searchResults.value = await chatService.searchUsers(searchQuery.value);
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error searching users: " + error.message, color: 'danger' };
+  }
+  isLoading.value = false;
+};
+
+const totalUnreadCount = computed(() => {
+  return chatService.computeTotalUnreadCount(conversations.value);
+});
+
+const toggleChat = async () => {
+  isChatOpen.value = !isChatOpen.value;
+  if (!isChatOpen.value) {
+    // Reset views when closing the chat
+    searchQuery.value = '';
     searchResults.value = [];
-    return;
   }
-  console.log("searching for: " + searchQuery.value);
-
-  const usersRef = collection(db, 'users');
-  const q = query(usersRef, where('username', '>=', searchQuery.value.toLocaleLowerCase()), where('username', '<=', searchQuery.value.toLocaleLowerCase() + '\uf8ff'), limit(10));
-  const querySnapshot = await getDocs(q);
-  searchResults.value = querySnapshot.docs.map(doc => ({
-    uid: doc.id,
-    ...doc.data()
-  }));
-  if (searchResults.value.length == 0) {
-    toast.value = { isOpen: true, message: "No users found!", color: 'danger' };
+  if (!unsubscribeConvoListener) {
+    unsubscribeConvoListener = await fetchConversations();
   }
-  console.log("results: " + searchResults.value);
 };
 
-const startConversationWithUser = async (selectedUser) => {
-  // clear results and searchbox
+const activeConversationDisplay = computed(() => {
+  if (activeConversation.value) {
+    return {
+      avatarUrl: activeConversation.value.recipient.avatarUrl || defaultAvatar,
+      username: activeConversation.value.recipient.username
+    };
+  }
+  return null;
+});
+
+function navigateToUserProfile(message) {
+  const username = message.senderId === currentUser?.uid ? currentUsername.value : activeConversationDisplay.value.username;
+  router.push('/user/' + username);
+}
+
+const backToConversations = () => {
+  searchQuery.value = '';
   searchResults.value = [];
-  searchQuery.value = "";
-  conversations.value.push({
-    title: selectedUser.username,
-    avatar: selectedUser.avatarUrl,
-  })
-  // Check if a conversation already exists between the current user and the selected user
-  // If it exists, navigate to that conversation instead of creating a new one
-  
-  // Prepare the conversation object in memory with the user's information
-  const newConversation = {
-    participants: {
-      [user.uid]: true, // current user
-      [selectedUser.uid]: true // selected user
-    },
-    messages: [], // Start with an empty array, will be populated with the first message
-    // Add other initial fields as necessary
-  };
-
-  // Store the prepared conversation object in a ref or a reactive state
-  // to be used when the first message is sent
-  preparedConversation.value = newConversation;
-
-  // Optionally navigate to a "new message" view where the user can type their first message
-  // You might want to pass the preparedConversation object or ID to that view
+  messages.value = [];
+  if (unsubscribeMessageListener) {
+    unsubscribeMessageListener();
+  }
+  activeConversation.value = null; // clear the active conversation
+  currentView.value = 'search';
 };
 
-const enterConversation = (conversation) => {
-  // Logic to open the existing conversation
-  console.log('Entering conversation:', conversation.title);
+const formatTimestamp = (timestamp: Timestamp): string => {
+  if (timestamp) {
+    return format(timestamp.toDate(), 'pp M/d/yy'); // use date-fns to format the date
+  }
+  return '';
+};
+
+const formattedMessage = (conversation): string => {
+  const maxLength = 20; // Maximum characters to display
+  let message = conversation.lastMessageContent || 'Cannot load message.';
+  if (message.length > maxLength) {
+    return message.substring(0, maxLength) + '…'; // Truncate and add ellipsis
+  }
+  return message;
 };
 </script>
 
 <style scoped>
 .chat-container {
-  position: absolute;
-  bottom: 55px;
-  right: 0;
+  bottom: 105px;
+  right: 55px;
   width: 300px;
-  height: 400px;
+  height: 500px;
   background-color: var(--ion-background-color);
-  border: 1px solid #ccc;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  position: absolute;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
-.messages {
-  padding: 10px;
+.enter-chat-button {
+  position: absolute;
+  bottom: 55px;
+  right: 3px;
+}
+
+.search-view,
+.conversation-view {
+  background-color: var(--ion-background-color);
   overflow-y: auto;
   flex-grow: 1;
+}
+
+.conversation-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--ion-background-color);
 }
 
 .searchuser-result-item:hover {
@@ -158,4 +307,64 @@ const enterConversation = (conversation) => {
   color: var(--ion-color-step-650);
 }
 
+.message-input-box {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: inherit;
+}
+
+.recipient-avatar {
+  margin: 8px 16px 8px 0;
+  height: 3.2rem;
+  width: 3.2rem;
+}
+
+.recipient-avatar:hover, .conversation-username:hover {
+  cursor: pointer;
+  color: var(--ion-color-step-650);
+}
+
+.message-username {
+  padding-right: 4px;
+}
+
+.message-timestamp {
+  font-style: italic;
+  font-size: 90%;
+}
+
+.message-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.message-item {
+  border-bottom: 1px solid #111;
+  padding: 10px;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-item:last-child {
+  border-bottom: none; 
+  margin-bottom: 20px; /* Adjust as needed */
+}
+
+.message-content {
+  overflow-wrap: break-word;
+}
+
+.message-receipt {
+  padding-right: 4px;
+}
+
+.truncate-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 </style>

@@ -12,11 +12,38 @@
   </ion-header>
   <ion-content class="ion-padding">
     <ion-list>
-      <ion-item :class="{ 'selected-option': selectedOption === 'Featured' }" @click="selectOption('Featured')">Featured</ion-item>
-      <ion-item :class="{ 'selected-option': selectedOption === 'Price: Low to High' }" @click="selectOption('Price: Low to High')">Price: Low to High</ion-item>
-      <ion-item :class="{ 'selected-option': selectedOption === 'Price: High to Low' }" @click="selectOption('Price: High to Low')">Price: High to Low</ion-item>
-      <ion-item :class="{ 'selected-option': selectedOption === 'Distance: Closest to Furthest' }" @click="selectOption('Distance: Closest to Furthest')">Distance: Closest to Furthest</ion-item>
-      <ion-item :class="{ 'selected-option': selectedOption === 'Newest Arrivals' }" @click="selectOption('Newest Arrivals')">Newest Arrivals</ion-item>
+      <ion-item
+        :class="{ 'selected-option': selectedOption === 'Featured' }"
+        @click="selectOption('Featured')"
+        >Featured</ion-item
+      >
+      <ion-item
+        :class="{ 'selected-option': selectedOption === 'Price: Low to High' }"
+        @click="selectOption('Price: Low to High')"
+        >Price: Low to High</ion-item
+      >
+      <ion-item
+        :class="{ 'selected-option': selectedOption === 'Price: High to Low' }"
+        @click="selectOption('Price: High to Low')"
+        >Price: High to Low</ion-item
+      >
+      <ion-item
+        :class="{
+          'selected-option': selectedOption === 'Distance: Closest to Furthest',
+        }"
+        @click="selectOption('Distance: Closest to Furthest')"
+        >Distance: Closest to Furthest</ion-item
+      >
+      <ion-item
+        :class="{ 'selected-option': selectedOption === 'Newest Arrivals' }"
+        @click="selectOption('Newest Arrivals')"
+        >Newest Arrivals</ion-item
+      >
+      <ion-item
+        :class="{ 'selected-option': selectedOption === 'My Listings' }"
+        @click="selectOption('My Listings')"
+        >My Listings</ion-item
+      >
     </ion-list>
   </ion-content>
 </template>
@@ -32,16 +59,17 @@ import {
   IonList,
   IonItem,
   modalController,
-} from '@ionic/vue';
-import { ref } from 'vue';
+} from "@ionic/vue";
+import { ref } from "vue";
 
 const name = ref();
-const selectedOption = ref('');
+const selectedOption = ref("");
+const props = defineProps(["userId"]);
 
-const cancel = () => modalController.dismiss(null, 'cancel');
-const confirm = () => modalController.dismiss(selectedOption.value, 'confirm');
+const cancel = () => modalController.dismiss(null, "cancel");
+const confirm = () => modalController.dismiss(selectedOption.value, "confirm");
 
-const selectOption = (option) => {
+const selectOption = (option: any) => {
   selectedOption.value = option;
 };
 </script>

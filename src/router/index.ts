@@ -83,6 +83,11 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true },
       },
       {
+        path: "/create-event",
+        component: () => import("@/views/CreateEvent.vue"),
+        meta: { requiresAuth: true },
+      },
+      {
         path: "/audiModels",
         component: () => import("@/views/AudiModelsPage.vue"),
         meta: { requiresAuth: true },

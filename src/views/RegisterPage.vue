@@ -172,6 +172,7 @@ const handleRegister = async () => {
       biography: "",
       followers: [],
       following: [],
+      subscribedEvents: [],
     });
 
     toast.value = { isOpen: true, message: 'Account created successfully! Please verify your email in the link sent to ' + formData.value.email, color: 'success' }

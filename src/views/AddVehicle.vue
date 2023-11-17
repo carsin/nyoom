@@ -23,9 +23,31 @@
         <ion-row>
           <ion-col size-md="6" offset-md="3">
             <ion-item>
-              <ion-button expand="block" @click="selectOption('Car')">Car</ion-button>
-              <ion-button expand="block" @click="selectOption('Motorcycle')">Motorcycle</ion-button>
+              <ion-segment @ionChange="selectOption($event.detail.value)">
+                <ion-segment-button value="Car">
+                  <ion-label>Car</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="Motorcycle">
+                  <ion-label>Motorcycle</ion-label>
+                </ion-segment-button>
+              </ion-segment>
             </ion-item>
+            <div v-if="selectedVehicleType === 'Car'">
+              <div v-for="mod in carMods" :key="mod.category">
+                <h3>{{ mod.category }}</h3>
+                <ul>
+                  <li v-for="option in mod.options" :key="option">{{ option }}</li>
+                </ul>
+              </div>
+            </div>
+            <div v-if="selectedVehicleType === 'Motorcycle'">
+              <div v-for="mod in motorcycleMods" :key="mod.category">
+                <h3>{{ mod.category }}</h3>
+                <ul>
+                  <li v-for="option in mod.options" :key="option">{{ option }}</li>
+                </ul>
+              </div>
+            </div>
             <ion-item>
               <ion-label position="floating">Make: </ion-label>
               <ion-input v-model="make" />
@@ -45,14 +67,10 @@
             <ion-item v-if="imageURL">
               <img :src="imageURL" alt="Uploaded Image" />
             </ion-item>
-
             <ion-item>
               <input type="file" accept="image/*" @change="uploadImage" />
             </ion-item>
-
-            <ion-button expand="block" @click="addVehicle"
-              >Add Vehicle</ion-button
-            >
+            <ion-button expand="block" @click="addVehicle">Add Vehicle</ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -95,7 +113,11 @@ import {
 } from "firebase/storage";
 import { useRouter } from "vue-router";
 
-const modifications = ref([
+const selectedVehicleType = ref("");
+const selectOption = (vehicleType: string) => {
+  selectedVehicleType.value = vehicleType;
+};
+const carMods = ref([
   { category: "Engine Builds", options: ["Cold Air Intakes", "Cooling", "ECU Tunes", "Forced Induction", "Fuel Systems", "Injectors", "Pumps"] },
   { category: "Engine Internals", options: ["Pistons", "Rods", "Cams", "Cranks", "Valves", "Heads", "Bearings"] },
   { category: "Transmission Upgrades", options: ["Clutch", "Coolers", "Flywheel", "Gear Ratio", "Gearbox Type", "Shifter"] },
@@ -105,8 +127,23 @@ const modifications = ref([
   { category: "Brake systems", options: ["Brake pads", "Calipers", "Disks", "Master Cylinders"] },
   { category: "Bodywork", options: ["Bumpers", "Fenders", "Grilles", "Hoods", "Mirrors", "Mudflaps", "Roll-cage", "Skirts", "Spoilers", "Tint"] },
   { category: "Wheels and Tires", options: ["Rims", "Spacers", "Tires"] },
-  { category: "Electrical", options: [] },
-  { category: "Interior Details", options: [] }
+  { category: "Electrical", options: ["Accessory Lights", "Alternator", "Battery", "Fuses and Relays", "Headlights", "Tail Lights", "Wiring"] },
+  { category: "Interior Details", options: ["Audio Systems", "Harnesses", "Instrument Clusters", "Gauges", "Mats", "Pedals", "Seats", "Shifter", "Software", "Steering Wheel", "Weight Reduction"] }
+]);
+
+const motorcycleMods = ref([
+  { category: "Engine Builds", options: ["Air Filters", "Cooling Systems", "ECU Tunes", "Forced Induction", "Fuel Systems", "Throttle Bodies"] },
+  { category: "Engine Internals", options: ["Cams", "Cranks", "Heads", "Pistons", "Rods", "Valves", "Bearings"] },
+  { category: "Transmission Upgrades", options: ["Chain and Sprockets", "Clutch", "Quick Shifters"] },
+  { category: "Exhaust Systems", options: ["Baffles", "Full Exhaust Systems", "Headers", "Mufflers"] },
+  { category: "Suspension", options: ["Forks", "Rear Shocks", "Springs", "Steering Dampers", "Swingarms"] },
+  { category: "Brake Systems", options: ["Brake Lines", "Brake Pads", "Calipers", "Discs", "Master Cylinders"] },
+  { category: "Bodywork", options: ["Crash Bars", "Fairings", "Fenders", "Footpegs", "Frame Sliders", "Grips", "Hand Guards", "Handlebars", "Levers", "Seats", "Tank Pads/Grips", "Windshields"] },
+  { category: "Wheels & Tires", options: ["Rims", "Tires"] },
+  { category: "Lighting & Electrical", options: ["Alternators", "Batteries", "Headlights", "Taillights", "Turn Signals", "Wiring Harnesses"] },
+  { category: "Accessories", options: ["GPS & Phone Mounts", "Luggage Racks", "Saddlebags", "Tank Bags"] },
+  { category: "Instrumentation", options: ["Instrument Clusters", "Gauges"] },
+  { category: "Engine Guards", options: ["Engine Guards"] }
 ]);
 
 const isUploading = ref(false);
@@ -154,14 +191,10 @@ const uploadImage = async (event: any) => {
 const owner = ref("");
 const ownerID = ref("");
 const type = ref(""); // This will store the user's choice ('Car' or 'Motorcycle')
-const selectOption = (selectedType: string) => {
-  type.value = selectedType;
-};
 const make = ref("");
 const model = ref("");
 const year = ref<number | null>(null);
 const description = ref("");
-const modifications = ref("");
 const images = ref([]);
 
 const addVehicle = async () => {
@@ -212,7 +245,8 @@ const addVehicle = async () => {
           model: model.value,
           year: year.value,
           description: description.value,
-          modifications: modifications.value,
+          carMods: carMods.value,
+          motorcycleMods: motorcycleMods.value,
           images: imageURL,
         });
         toast.value = {
@@ -220,7 +254,7 @@ const addVehicle = async () => {
           message: "Vehicle added successfully!",
           color: "success",
         };
-        // router.push("/market");
+        //  router.push("/add-vehicle"); fix this
       } else {
         throw new Error("User data does not exist.");
       }

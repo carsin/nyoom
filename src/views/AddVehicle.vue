@@ -98,7 +98,15 @@ import { useRouter } from "vue-router";
 const modifications = ref([
   { category: "Engine Builds", options: ["Cold Air Intakes", "Cooling", "ECU Tunes", "Forced Induction", "Fuel Systems", "Injectors", "Pumps"] },
   { category: "Engine Internals", options: ["Pistons", "Rods", "Cams", "Cranks", "Valves", "Heads", "Bearings"] },
-  { category: "Transmission Upgrades", options: ["Clutch", "Shifter", "Flywheel", "Gearbox Type", "Gear Ratio", "Coolers"] },
+  { category: "Transmission Upgrades", options: ["Clutch", "Coolers", "Flywheel", "Gear Ratio", "Gearbox Type", "Shifter"] },
+  { category: "Differential upgrades", options: ["Drive ratio", "Limited slip differential"] },
+  { category: "Exhaust systems", options: ["Cat-back", "Downpipes", "Headers", "Muffler", "Resonators"] },
+  { category: "Suspension", options: ["Camber Kits", "Coilovers", "Control Arms", "Shock Dampers", "Springs", "Strut Bars", "Sway Bars"] },
+  { category: "Brake systems", options: ["Brake pads", "Calipers", "Disks", "Master Cylinders"] },
+  { category: "Bodywork", options: ["Bumpers", "Fenders", "Grilles", "Hoods", "Mirrors", "Mudflaps", "Roll-cage", "Skirts", "Spoilers", "Tint"] },
+  { category: "Wheels and Tires", options: ["Rims", "Spacers", "Tires"] },
+  { category: "Electrical", options: [] },
+  { category: "Interior Details", options: [] }
 ]);
 
 const isUploading = ref(false);

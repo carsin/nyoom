@@ -2,6 +2,8 @@ import { firebaseAuth, db } from "../firebase-service";
 import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment } from 'firebase/firestore';
 import { userInfoService } from '../services/UserInfoService';
 
+const defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+
 class ChatService {
   user: any;
 
@@ -26,7 +28,7 @@ class ChatService {
         const conversation = { id: doc.id, ...doc.data() };
         const otherUserId = conversation.participants.find(uid => uid !== this.user?.uid);
 
-        // Use cached data if available
+        // use cached data if available
         let userData = userCache.get(otherUserId) || await fetchAndCacheUserData(otherUserId, userCache);
 
         return {
@@ -39,7 +41,7 @@ class ChatService {
         };
       }));
 
-      
+
       const sortConversationsByTimestamp = (conversations) => {
         return conversations.sort((a, b) => getTimestampMillis(b) - getTimestampMillis(a));
       };
@@ -48,7 +50,6 @@ class ChatService {
 
     return unsubscribe;
   }
-
 
   async prepareConversation(conversationOrUser, activeConversation, messages) {
     if (!this.user) {
@@ -62,6 +63,7 @@ class ChatService {
 
     if (isExistingConversation) {
       recipientUid = conversationOrUser.participants.find(uid => uid !== currentUserUid);
+      console.log(conversationOrUser.participants);
     } else {
       recipientUid = conversationOrUser.uid;
     }
@@ -73,7 +75,7 @@ class ChatService {
     }
 
     const recipientInfo = {
-      avatarUrl: recipientData?.avatarUrl || 'default-avatar-url',
+      avatarUrl: recipientData?.avatarUrl || defaultAvatar,
       username: recipientData?.username || 'Unknown'
     };
 
@@ -102,7 +104,6 @@ class ChatService {
             ...data
           };
           conversationExists = true;
-          unsubscribe = this.listenToMessages(conversationDoc.id, messages);
           break;
         }
       }
@@ -111,12 +112,77 @@ class ChatService {
         activeConversation.value = {
           participants: [currentUserUid, recipientUid],
           recipient: recipientInfo,
-          messages: []
+          messages: [],
+          unreadCounts: {
+            [currentUserUid]: 0,
+            [recipientUid]: 0
+          }
         };
       }
     }
 
     return { success: true, unsubscribe };
+  }
+
+  async sendMessage(activeConversation, message) {
+    if (message.trim() === '') return { success: false, message: 'Message is empty.' };
+
+    const batch = writeBatch(db);
+    const timestamp = serverTimestamp();
+    const recipientId = activeConversation.value.participants.find(uid => uid !== this.user.uid);
+    let conversationRef;
+
+    if (!activeConversation.value.id) {
+      // ensure that participants array is defined and contains expected user IDs
+      let participants = activeConversation.value.participants;
+      if (!participants || participants.length === 0) {
+        return { success: false, message: 'Invalid participants data.' };
+      }
+
+      let unreadCounts = activeConversation.value.unreadCounts || {};
+      participants.forEach(uid => {
+        if (uid === recipientId) {
+          unreadCounts[uid] = 1;
+        } else {
+          unreadCounts[uid] = unreadCounts[uid] || 0;
+        }
+      });
+
+      conversationRef = doc(collection(db, 'conversations'));
+      batch.set(conversationRef, {
+        participants: participants,
+        createdAt: timestamp,
+        unreadCounts: unreadCounts,
+        lastMessageSender: this.user.uid,
+        lastMessageContent: message,
+        lastMessageTimestamp: timestamp,
+      });
+      activeConversation.value.id = conversationRef.id;
+    } else {
+      conversationRef = doc(db, 'conversations', activeConversation.value.id);
+      batch.update(conversationRef, {
+        lastMessageSender: this.user.uid,
+        lastMessageContent: message,
+        lastMessageTimestamp: timestamp,
+        [`unreadCounts.${recipientId}`]: increment(1)
+      });
+    }
+
+    const messagesRef = collection(db, 'conversations', activeConversation.value.id, 'messages');
+    const messageDocRef = doc(messagesRef);
+    batch.set(messageDocRef, {
+      senderId: this.user.uid,
+      content: message,
+      timestamp: timestamp,
+      readStatus: false,
+    });
+
+    try {
+      await batch.commit();
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, message: error.message };
+    }
   }
 
   listenToMessages(conversationId: string, messages) {
@@ -139,51 +205,6 @@ class ChatService {
     });
   }
 
-  async sendMessage(activeConversation, message) {
-    if (message.trim() === '') return { success: false, message: 'Message is empty.' };
-
-    const batch = writeBatch(db);
-    let conversationRef;
-    let timestamp = serverTimestamp();
-
-    if (!activeConversation.id) {
-      conversationRef = doc(collection(db, 'conversations'));
-      batch.set(conversationRef, {
-        participants: activeConversation.participants,
-        createdAt: timestamp,
-        unreadCounts: activeConversation.unreadCounts,
-        lastMessageSender: this.user.uid,
-        lastMessageContent: message,
-        lastMessageTimestamp: timestamp,
-      });
-      activeConversation.id = conversationRef.id;
-    } else {
-      conversationRef = doc(db, 'conversations', activeConversation.id);
-      const recipientId = activeConversation.participants.find(uid => uid !== this.user.uid);
-      batch.update(conversationRef, {
-        lastMessageSender: this.user.uid,
-        lastMessageContent: message,
-        lastMessageTimestamp: timestamp,
-        [`unreadCounts.${recipientId}`]: increment(1)
-      });
-    }
-
-    const messagesRef = collection(db, 'conversations', activeConversation.id, 'messages');
-    const messageDocRef = doc(messagesRef);
-    batch.set(messageDocRef, {
-      senderId: this.user.uid,
-      content: message,
-      timestamp: timestamp,
-      readStatus: false,
-    });
-
-    try {
-      await batch.commit();
-      return { success: true };
-    } catch (error: any) {
-      return { success: false, message: error.message };
-    }
-  }
 
   async searchUsers(username: string) {
     if (username.trim() === '') return [];

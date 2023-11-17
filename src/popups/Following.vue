@@ -67,6 +67,7 @@ import {
   IonButton,
   modalController,
   IonList,
+  IonIcon,
   IonItem,
   IonLabel,
   IonAvatar,

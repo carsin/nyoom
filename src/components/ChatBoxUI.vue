@@ -87,7 +87,7 @@
                   </ion-row>
                 </ion-grid>
               </ion-label>
-            </div>>
+            </div>
           </ion-list>
           <div class="message-input-box">
             <ion-item lines="none">
@@ -132,12 +132,16 @@ const toast = ref({ isOpen: false, message: '', color: '' });
 const currentUser = firebaseAuth.currentUser;
 const currentUsername = ref('');
 const router = useRouter();
-let unsubscribeConvoListener: Function;
-let unsubscribeMessageListener: Function;
+let unsubscribeConvoListener: Function | null;
+let unsubscribeMessageListener: Function | null;
 
 onMounted(async () => {
   let fetchUsername = await userInfoService.getCurrentUserUsername();
   if (fetchUsername) currentUsername.value = fetchUsername;
+  
+  if (!unsubscribeConvoListener) {
+    unsubscribeConvoListener = await fetchConversations();
+  }
 });
 
 onBeforeUnmount(() => { // unsubscribe when the component unmounts
@@ -186,12 +190,13 @@ const sendMessage = async () => {
   messageContent.value = '';
 
   try {
-    const result = await chatService.sendMessage(activeConversation.value, message);
+    const result = await chatService.sendMessage(activeConversation, message);
     if (!result.success) {
       throw new Error(result.message);
-    }
-    if (!unsubscribeMessageListener) { // restart message listener if not already
-      unsubscribeMessageListener = chatService.listenToMessages(activeConversation.value.id, messages);
+    } else {
+      if (!unsubscribeMessageListener) { // restart message listener if not already
+        unsubscribeMessageListener = chatService.listenToMessages(activeConversation.value.id, messages);
+      }
     }
   } catch (error: any) {
     messageContent.value = message;
@@ -221,9 +226,6 @@ const toggleChat = async () => {
     searchQuery.value = '';
     searchResults.value = [];
   }
-  if (!unsubscribeConvoListener) {
-    unsubscribeConvoListener = await fetchConversations();
-  }
 };
 
 const activeConversationDisplay = computed(() => {
@@ -247,6 +249,7 @@ const backToConversations = () => {
   messages.value = [];
   if (unsubscribeMessageListener) {
     unsubscribeMessageListener();
+    unsubscribeMessageListener = null;
   }
   activeConversation.value = null; // clear the active conversation
   currentView.value = 'search';
@@ -342,7 +345,7 @@ const formattedMessage = (conversation): string => {
 }
 
 .message-item {
-  border-bottom: 1px solid #111;
+  border-bottom: 1px solid #343434;
   padding: 10px;
   word-wrap: break-word;
   display: flex;
@@ -351,7 +354,6 @@ const formattedMessage = (conversation): string => {
 
 .message-item:last-child {
   border-bottom: none; 
-  margin-bottom: 20px; /* Adjust as needed */
 }
 
 .message-content {

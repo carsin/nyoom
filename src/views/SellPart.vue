@@ -94,6 +94,7 @@ import {
   ref as storageRef,
 } from "firebase/storage";
 import { useRouter } from "vue-router";
+import { pawSharp } from "ionicons/icons";
 
 const isUploading = ref(false);
 const uploadProgress = ref(0);
@@ -173,6 +174,8 @@ const createPart = async () => {
     if (itemName.value === null || itemName.value === "") {
       throw new Error("Item name cannot be empty.");
     }
+    const parsedPrice = parseFloat(price.value);
+    console.log("parsedPrice: ", parsedPrice);
 
     if (user) {
       // get user data
@@ -183,7 +186,7 @@ const createPart = async () => {
           userId: user.uid,
           seller: docSnap.data().username,
           itemName: itemName.value,
-          price: price.value,
+          price: parsedPrice,
           condition: condition.value,
           description: description.value,
           location: location.value,

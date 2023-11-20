@@ -55,7 +55,7 @@
                 <ion-content>
                   <ion-searchbar v-model="makeSearchQuery"></ion-searchbar>
                   <ion-list>
-                    <ion-item class="search-item" v-for="make in filteredMakes" :key="make" @click="selectMake(make)">
+                    <ion-item class="hover-item" v-for="make in filteredMakes" :key="make" @click="selectMake(make)">
                       {{ make }}
                     </ion-item>
                   </ion-list>
@@ -266,9 +266,3 @@ const loadVehicleMakes = () => {
 onMounted(loadVehicleMakes);
 
 </script>
-
-<style scoped>
-.search-item:hover {
-  cursor: pointer;
-}
-</style>

@@ -12,7 +12,7 @@
       <ion-grid>
         <ion-row>
           <ion-col size="6" v-for="model in modelsWithPosts" :key="model.name">
-            <ion-card @click="navigateToModelPosts(model.name)">
+            <ion-card class="hover-item" @click="navigateToModelPosts(model.name)">
               <img :src="model.thumbnail" alt="Thumbnail" />
               <ion-card-header>
                 <ion-card-title> {{make }} {{ model.name }}</ion-card-title>
@@ -42,7 +42,7 @@ const modelsWithPosts = ref([]);
 const router = useRouter();
 const isLoading = ref(false);
 
-const navigateToModelPosts = (modelName) => {
+const navigateToModelPosts = (modelName: string) => {
   router.push({ name: 'ModelPosts', params: { make: make, model: modelName } });
 };
 

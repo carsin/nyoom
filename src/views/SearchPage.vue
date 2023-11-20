@@ -5,12 +5,14 @@
         <ion-title>Search</ion-title>
       </ion-toolbar>
       <ion-toolbar>
-        <ion-searchbar v-model="searchQuery" show-clear-button="focus" placeholder="Search profiles or makes"></ion-searchbar>
+        <ion-searchbar v-model="searchQuery" show-clear-button="focus"
+          placeholder="Search profiles or makes"></ion-searchbar>
         <div v-if="userSearchResults.length > 0" class="search-results">
           <ion-list>
-            <ion-item v-for="user in userSearchResults" :key="user.uid" @click="navigateToUser(user.username)">
+            <ion-item v-for="user in userSearchResults" class="hover-item" :key="user.uid"
+              @click="navigateToUser(user.username)">
               <ion-avatar slot="start">
-                <img :src="user.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="User avatar"/>
+                <img :src="user.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="User avatar" />
               </ion-avatar>
               <ion-label>{{ user.username }}</ion-label>
             </ion-item>
@@ -26,7 +28,7 @@
         <div>
           <ion-row>
             <ion-col size="6" v-for="make in vehicleSearchResults" :key="make">
-              <ion-card @click="navigateToModels(make)">
+              <ion-card class="hover-item" @click="navigateToModels(make)">
                 <img :alt="`${make} logo`" :src="getMakeLogo(make)" height='100' max-width='100' />
                 <ion-card-header>
                   <ion-card-subtitle>{{ make }}</ion-card-subtitle>
@@ -41,18 +43,17 @@
 </template>
 
 <style>
-.back{
+.back {
   padding-right: 15px;
 }
 
-.center-align{
+.center-align {
   padding-top: 25px;
 }
 
-.wider{
+.wider {
   padding-inline: 0;
 }
-
 </style>
 
 <script setup lang="ts">
@@ -63,12 +64,12 @@ import { collection, query, getDocs, where, limit } from 'firebase/firestore';
 import { db } from "../firebase-service";
 
 const postedMakes = ref([]);
-const searchQuery = ref('');
+const searchQuery = ref<String>('');
 const router = useRouter();
 const userSearchResults = ref([]);
 const vehicleSearchResults = ref([]);
 
-const getMakeLogo = (make) => {
+const getMakeLogo = (make: string) => {
   return `../src/assets/logos/${make.toLowerCase()}.png`;
 };
 

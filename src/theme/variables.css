@@ -264,3 +264,7 @@ a.router-link-active, a.router-link-exact-active, router-link {
     display: flex;
     align-items: center;
 }
+
+.hover-item:hover {
+    cursor: pointer;
+}

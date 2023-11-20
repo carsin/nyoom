@@ -2,10 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar collapse="condense">
-        <ion-progress-bar
-          v-if="isLoading"
-          type="indeterminate"
-        ></ion-progress-bar>
+        <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
         <ion-title>Market</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -14,10 +11,7 @@
         <ion-segment-button @click="selectTab('parts')" value="Parts" checked>
           <ion-label>Parts</ion-label>
         </ion-segment-button>
-        <ion-segment-button
-          @click="selectTab('auto-shop')"
-          value="Autoshop Offers"
-        >
+        <ion-segment-button @click="selectTab('auto-shop')" value="Autoshop Offers">
           <ion-label>Autoshop Offers</ion-label>
         </ion-segment-button>
       </ion-segment>
@@ -31,11 +25,8 @@
           </ion-button>
         </ion-toolbar>
         <ion-toolbar>
-          <ion-searchbar
-            show-clear-button="focus"
-            placeholder="Search parts"
-            class="ion-padding-start ion-padding-end"
-          ></ion-searchbar>
+          <ion-searchbar v-model="searchQuery" show-clear-button="focus" placeholder="Search parts"
+            class="ion-padding-start ion-padding-end"></ion-searchbar>
           <ion-buttons slot="end">
             <ion-button expand="block" @click="filterModal(user.uid)">
               <ion-icon :icon="funnel" />
@@ -44,28 +35,19 @@
           <p>{{ message }}</p>
         </ion-toolbar>
         <ion-refresher slot="fixed" @ionRefresh="refreshParts($event)">
-          <ion-refresher-content
-            pulling-text="Pull to fetch new parts"
-            refreshing-spinner="circles"
-            refreshing-text="Fetching new parts..."
-          >
+          <ion-refresher-content pulling-text="Pull to fetch new parts" refreshing-spinner="circles"
+            refreshing-text="Fetching new parts...">
           </ion-refresher-content>
         </ion-refresher>
         <div v-if="isPartsTab && parts.length > 0">
           <ion-grid>
             <ion-row>
-              <ion-col v-for="part in parts" :key="part.id" size="6">
+              <ion-col v-for="part in filteredParts" :key="part.id" size="6">
                 <ion-card @click="partModal(part)" class="card-dimensions">
-                  <img
-                    alt="Part image"
-                    :src="part.images"
-                    class="custom-image"
-                  />
+                  <img alt="Part image" :src="part.images" class="custom-image" />
                   <ion-card-header>
                     <ion-card-subtitle>{{ part.condition }}</ion-card-subtitle>
-                    <ion-card-subtitle class="card-price"
-                      >${{ part.price }}</ion-card-subtitle
-                    >
+                    <ion-card-subtitle class="card-price">${{ part.price }}</ion-card-subtitle>
                     <ion-card-subtitle class="card-title">
                       {{ part.itemName ? truncateText(part.itemName, 18) : "" }}
                     </ion-card-subtitle>
@@ -86,21 +68,14 @@
           <ion-title class="ion-text-center">Autoshop Offers</ion-title>
         </ion-toolbar>
         <ion-toolbar>
-          <ion-searchbar
-            show-clear-button="focus"
-            placeholder="Search deals"
-          ></ion-searchbar>
+          <ion-searchbar show-clear-button="focus" placeholder="Search deals"></ion-searchbar>
         </ion-toolbar>
 
         <ion-grid>
           <ion-row>
             <ion-col v-for="offer in offers" :key="offer.id" size="6">
               <ion-card @click="offerModal(offer)">
-                <img
-                  alt="Offer image"
-                  :src="offer.images"
-                  class="custom-image"
-                />
+                <img alt="Offer image" :src="offer.images" class="custom-image" />
                 <ion-card-header>
                   <ion-card-subtitle>{{ offer.deal }}</ion-card-subtitle>
                   <ion-card-title class="card-title">{{
@@ -142,6 +117,7 @@
   max-width: 200px;
   overflow: hidden;
 }
+
 .card-dimensions {
   color: green;
   font-weight: bold;
@@ -153,32 +129,7 @@
 <script setup lang="ts">
 import { useStore } from "vuex";
 import { computed, ref, onMounted, watch } from "vue";
-import {
-  IonHeader,
-  modalController,
-  IonSegment,
-  IonCardTitle,
-  IonCard,
-  IonSegmentButton,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonCardSubtitle,
-  IonPage,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonCardHeader,
-  IonSearchbar,
-  IonButton,
-  IonButtons,
-  IonLabel,
-  IonIcon,
-  IonText,
-  IonProgressBar,
-  IonRefresher,
-  IonRefresherContent,
-} from "@ionic/vue";
+import { IonHeader, modalController, IonSegment, IonCardTitle, IonCard, IonSegmentButton, IonGrid, IonRow, IonCol, IonCardSubtitle, IonPage, IonToolbar, IonTitle, IonContent, IonCardHeader, IonSearchbar, IonButton, IonButtons, IonLabel, IonIcon, IonText, IonProgressBar, IonRefresher, IonRefresherContent, } from "@ionic/vue";
 import { funnel } from "ionicons/icons";
 import { collection, query, getDocs, where, orderBy } from "firebase/firestore";
 import { db, firebaseAuth } from "../firebase-service";
@@ -193,6 +144,7 @@ const route = useRoute();
 const router = useRouter();
 const partData = ref([{}]); // Reactive variable to store user data
 const offerData = ref([{}]); // Reactive variable to store user data
+const searchQuery = ref('');  // Reactive variable to store search query
 let noResults = false;
 const filterSelection = ref("Featured");
 
@@ -290,6 +242,15 @@ watch(
     isLoading.value = false;
   }
 );
+
+const filteredParts = computed(() => {
+  if (!searchQuery.value) {
+    return parts.value;
+  }
+  return parts.value.filter(part => {
+    return part.itemName.toLowerCase().includes(searchQuery.value.toLowerCase());
+  });
+});
 
 const truncateText = (text: string, maxLength: number) => {
   if (text.length > maxLength) {

@@ -14,46 +14,22 @@
       <ion-button fill="clear" v-if="!editingPart" @click="startEditing">
         <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
       </ion-button>
-      <ion-button
-        v-if="editingPart"
-        color="danger"
-        @click="editingPart = false"
-      >
+      <ion-button v-if="editingPart" color="danger" @click="editingPart = false">
         X
       </ion-button>
       <ion-button fill="clear" @click="handlePartDelete">
-        <ion-icon
-          aria-hidden="true"
-          color="danger"
-          slot="icon-only"
-          :icon="trash"
-        />
+        <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
       </ion-button>
       <!-- Conditional part editing menu -->
       <ion-row v-if="editingPart">
         <ion-col size="11">
-          <ion-label position="stacked" color="primary"
-            ><b>Edit Part Info</b></ion-label
-          >
+          <ion-label position="stacked" color="primary"><b>Edit Part Info</b></ion-label>
           <ion-input v-model="newPrice" placeholder="Edit price"></ion-input>
-          <ion-input
-            v-model="newCondition"
-            placeholder="Edit condition"
-          ></ion-input>
-          <ion-input
-            v-model="newDescription"
-            placeholder="Edit description"
-          ></ion-input>
-          <ion-input
-            v-model="newLocation"
-            placeholder="Edit location"
-          ></ion-input>
+          <ion-input v-model="newCondition" placeholder="Edit condition"></ion-input>
+          <ion-input v-model="newDescription" placeholder="Edit description"></ion-input>
+          <ion-input v-model="newLocation" placeholder="Edit location"></ion-input>
         </ion-col>
-        <ion-button
-          v-if="editingPart"
-          color="success"
-          @click="handlePartUpdate"
-        >
+        <ion-button v-if="editingPart" color="success" @click="handlePartUpdate">
           <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
         </ion-button>
       </ion-row>
@@ -62,18 +38,19 @@
     <div v-if="editingPart === false">
       <img alt="Part image" :src="selectedPart?.images" class="custom-image" />
       <br />
-      <ion-subtitle>{{ selectedPart?.itemName }}</ion-subtitle>
+      <ion-card-subtitle>{{ selectedPart?.itemName }}</ion-card-subtitle>
       <br />
-      <ion-subtitle class="card-price">${{ selectedPart?.price }}</ion-subtitle>
+      <ion-card-subtitle class="card-price">${{ selectedPart?.price }}</ion-card-subtitle>
       <br />
-      <ion-subtitle>{{ selectedPart?.condition }}</ion-subtitle>
+      <ion-card-subtitle>{{ selectedPart?.condition }}</ion-card-subtitle>
       <br />
-      <ion-subtitle>{{ selectedPart?.description }}</ion-subtitle>
+      <ion-card-subtitle>{{ selectedPart?.description }}</ion-card-subtitle>
       <div v-if="selectedPart?.userId !== user?.uid">
-        <ion-button @click="BuyNow">Buy Now</ion-button>
-        <ion-button @click="MessageSeller">Message Seller</ion-button>
+        <ion-button @click="buyNow()">Buy Now</ion-button>
+        <ion-button @click="messageSeller()">Message Seller</ion-button>
       </div>
     </div>
+    <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000" @didDismiss="toast.isOpen = false" ></ion-toast>
   </ion-content>
 </template>
 
@@ -87,7 +64,13 @@ import {
   IonTitle,
   IonToolbar,
   IonButtons,
+  IonInput,
+  IonCardSubtitle,
+  IonCol,
+  IonRow,
+  IonLabel,
   IonButton,
+  IonToast,
   modalController,
   IonIcon,
   alertController,
@@ -155,6 +138,7 @@ const startEditing = () => {
   editingPart.value = true;
   newPrice.value = selectedPart.value.price; // Display current price when editing starts
 };
+
 const handlePartUpdate = async () => {
   const result = await partManager.updateListing(selectedPart.value.id, {
     price: newPrice.value, // Replace with the new price
@@ -165,6 +149,7 @@ const handlePartUpdate = async () => {
 
   if (result.success) {
     toast.value = { isOpen: true, color: "success", message: result.message };
+    router.go(0);
     editingPart.value = false;
   } else {
     toast.value = { isOpen: true, color: "danger", message: result.message };

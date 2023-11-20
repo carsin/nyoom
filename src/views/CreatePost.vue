@@ -30,11 +30,15 @@
                   :counter="true"></ion-textarea>
               </ion-item>
               <ion-item @click="openMakeModal">
-                <ion-label>Vehicle Make</ion-label>
+                <ion-button>
+                  <ion-label>Select Vehicle Make</ion-label>
+                </ion-button>
                 <ion-text>{{ selectedMake }}</ion-text>
               </ion-item>
               <ion-item v-if="selectedMake" @click="openModelModal">
-                <ion-label>Vehicle Model</ion-label>
+                <ion-button>
+                  <ion-label>Select Vehicle Model</ion-label>
+                </ion-button>
                 <ion-text>{{ selectedModel }}</ion-text>
               </ion-item>
 
@@ -51,7 +55,7 @@
                 <ion-content>
                   <ion-searchbar v-model="makeSearchQuery"></ion-searchbar>
                   <ion-list>
-                    <ion-item v-for="make in filteredMakes" :key="make" @click="selectMake(make)">
+                    <ion-item class="search-item" v-for="make in filteredMakes" :key="make" @click="selectMake(make)">
                       {{ make }}
                     </ion-item>
                   </ion-list>
@@ -74,7 +78,14 @@
                     <ion-item v-for="model in filteredModels" :key="model" @click="selectModel(model)">
                       {{ model }}
                     </ion-item>
+                    <ion-item v-if="!isCustomModel" @click="enableCustomModelEntry">
+                      <ion-label><i>Can't find your model? Enter custom model</i></ion-label>
+                    </ion-item>
                   </ion-list>
+                  <ion-item v-if="isCustomModel">
+                    <ion-label position="floating">Enter Custom Model</ion-label>
+                    <ion-input v-model="customModel" placeholder="Type your model" @keyup.enter="closeModelModal"></ion-input>
+                  </ion-item>
                 </ion-content>
               </ion-modal>
             </ion-list>
@@ -91,7 +102,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { IonPage, IonSearchbar, IonModal, IonList, IonHeader, IonText, IonButtons, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonTextarea, IonButton, IonToast } from '@ionic/vue';
+import { IonPage, IonSearchbar, IonModal, IonList, IonHeader, IonText, IonButtons, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonTextarea, IonButton, IonToast, IonInput } from '@ionic/vue';
 import { firebaseAuth, db } from "../firebase-service";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
 import { useRouter } from 'vue-router';
@@ -112,6 +123,8 @@ const makeSearchQuery = ref('');
 const modelSearchQuery = ref('');
 const isMakeModalOpen = ref(false);
 const isModelModalOpen = ref(false);
+const isCustomModel = ref(false);
+const customModel = ref('');
 let imageUrl = '';
 let imagePath = '';
 const imageFile = ref<File | null>(null);
@@ -222,26 +235,27 @@ const openModelModal = () => {
   modelSearchQuery.value = '';
 };
 
+
+const enableCustomModelEntry = () => {
+  isCustomModel.value = true;
+};
+
 const selectModel = (model) => {
-  selectedModel.value = model;
-  isModelModalOpen.value = false;
+  if (!isCustomModel.value) {
+    selectedModel.value = model;
+    isModelModalOpen.value = false;
+  }
 };
 
 const closeModelModal = () => {
   isModelModalOpen.value = false;
-  // Optional: Reset the model search query if desired
   modelSearchQuery.value = '';
-};
-
-// Update models based on selected make
-const updateModels = () => {
-  if (selectedMake.value) {
-    models.value = getModels(selectedMake.value);
-    modelSearchQuery.value = ''; // Reset model search query
-  } else {
-    models.value = [];
+  if (isCustomModel.value && customModel.value) {
+    selectedModel.value = customModel.value;
   }
-  selectedModel.value = ''; // Reset selected model
+  // Reset custom model entry
+  isCustomModel.value = false;
+  customModel.value = '';
 };
 
 // load vehicle makes
@@ -252,3 +266,9 @@ const loadVehicleMakes = () => {
 onMounted(loadVehicleMakes);
 
 </script>
+
+<style scoped>
+.search-item:hover {
+  cursor: pointer;
+}
+</style>

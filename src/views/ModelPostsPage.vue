@@ -1,0 +1,46 @@
+<template>
+  <ion-page>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Posts of {{ make }} {{ model }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content :fullscreen="true">
+      <div>
+        <ion-grid>
+          <ion-row>
+            <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="post in posts" :key="post.id">
+              <PostCardComponent :imageId="post.id" :username="post.username" :caption="post.caption"
+                :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl"
+                :imagePath="post.imagePath" :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted"
+                :isDownvoted="post.isDownvoted" showAvatar />
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+    </ion-content>
+  </ion-page></template>
+
+<script setup>
+import { IonPage, IonHeader, IonContent, IonToolbar, IonGrid, IonRow, IonCol, IonTitle } from '@ionic/vue';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import PostCardComponent from '@/components/PostCardComponent.vue';
+
+const route = useRoute();
+const db = getFirestore();
+const make = route.params.make;
+const model = route.params.model;
+const posts = ref([]);
+
+const fetchPosts = async () => {
+  const postsCollectionRef = collection(db, 'posts'); // 
+  const q = query(postsCollectionRef, where('vehicleMake', '==', make), where('vehicleModel', '==', model));
+  const querySnapshot = await getDocs(q);
+
+  posts.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+onMounted(fetchPosts);
+</script>

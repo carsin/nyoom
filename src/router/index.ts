@@ -88,15 +88,20 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true },
       },
       {
-        path: "/audiModels",
-        component: () => import("@/views/AudiModelsPage.vue"),
-        meta: { requiresAuth: true },
+        path: '/models/:make',
+        name: 'ModelList',
+        component: () => import("@/views/SearchModelPage.vue"),
+      },
+      {
+        path: '/posts/:make/:model',
+        name: 'ModelPosts',
+        component: () => import("@/views/ModelPostsPage.vue"),
       },
       {
         path: "/404",
         component: () => import("@/views/404Page.vue"),
         meta: { hideChatbox: true }
-      },
+     },
       {
         path: "/:catchAll(.*)",
         component: () => import("@/views/404Page.vue"),

@@ -64,7 +64,7 @@
       <br />
       <ion-subtitle>{{ selectedPart?.itemName }}</ion-subtitle>
       <br />
-      <ion-subtitle class="card-price">{{ selectedPart?.price }}</ion-subtitle>
+      <ion-subtitle class="card-price">${{ selectedPart?.price }}</ion-subtitle>
       <br />
       <ion-subtitle>{{ selectedPart?.condition }}</ion-subtitle>
       <br />
@@ -122,7 +122,9 @@ const handlePartDelete = async () => {
         text: "Delete",
         handler: async () => {
           // handle the deletion of the post
+          console.log("clicked delete");
           const result = await partManager.deletePart(selectedPart?.value.id);
+          console.log("result: ", result);
           if (result.success) {
             toast.value = {
               isOpen: true,

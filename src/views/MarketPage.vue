@@ -63,9 +63,9 @@
                   />
                   <ion-card-header>
                     <ion-card-subtitle>{{ part.condition }}</ion-card-subtitle>
-                    <ion-card-subtitle class="card-price">{{
-                      part.price
-                    }}</ion-card-subtitle>
+                    <ion-card-subtitle class="card-price"
+                      >${{ part.price }}</ion-card-subtitle
+                    >
                     <ion-card-subtitle class="card-title">
                       {{ part.itemName ? truncateText(part.itemName, 18) : "" }}
                     </ion-card-subtitle>
@@ -90,12 +90,6 @@
             show-clear-button="focus"
             placeholder="Search deals"
           ></ion-searchbar>
-          <ion-buttons slot="end">
-            <ion-button expand="block" @click="filterModal">
-              <ion-icon :icon="funnel" />
-            </ion-button>
-          </ion-buttons>
-          <p>{{ message }}</p>
         </ion-toolbar>
 
         <ion-grid>
@@ -186,7 +180,7 @@ import {
   IonRefresherContent,
 } from "@ionic/vue";
 import { funnel } from "ionicons/icons";
-import { collection, query, getDocs, where } from "firebase/firestore";
+import { collection, query, getDocs, where, orderBy } from "firebase/firestore";
 import { db, firebaseAuth } from "../firebase-service";
 import { useRouter, useRoute } from "vue-router";
 import MarketFilter from "../popups/MarketFilter.vue";
@@ -216,6 +210,24 @@ const fetchParts = async () => {
       collection(db, "parts"),
       where("userId", "==", user?.uid)
     );
+    console.log(partsQuery);
+  }
+
+  if (filterSelection.value === "Price: High to Low") {
+    console.log("inside price sort");
+    partsQuery = query(collection(db, "parts"), orderBy("price", "desc"));
+    console.log(partsQuery);
+  }
+
+  if (filterSelection.value === "Price: Low to High") {
+    console.log("inside price sort");
+    partsQuery = query(collection(db, "parts"), orderBy("price"));
+    console.log(partsQuery);
+  }
+
+  if (filterSelection.value === "Newest Arrivals") {
+    console.log("inside newest arrivals sort");
+    partsQuery = query(collection(db, "parts"), orderBy("timeStamp", "desc"));
     console.log(partsQuery);
   }
 

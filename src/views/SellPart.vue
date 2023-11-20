@@ -94,11 +94,11 @@ import {
   ref as storageRef,
 } from "firebase/storage";
 import { useRouter } from "vue-router";
+import { pawSharp } from "ionicons/icons";
 
 const isUploading = ref(false);
 const uploadProgress = ref(0);
 const toast = ref({ isOpen: false, message: "", color: "" });
-const caption = ref("");
 const router = useRouter();
 let imageURL = "";
 
@@ -138,14 +138,14 @@ const uploadImage = async (event: any) => {
 };
 
 // sending post to posts firestore collection
-const seller = ref("");
-const sellerId = ref("");
+
 const itemName = ref("");
 const price = ref<number | null>(null);
 const description = ref("");
 const condition = ref("");
 const location = ref("");
-const images = ref([]);
+const date = new Date();
+console.log("date: ", date);
 
 const createPart = async () => {
   const partsCollection = collection(db, "parts");
@@ -174,6 +174,8 @@ const createPart = async () => {
     if (itemName.value === null || itemName.value === "") {
       throw new Error("Item name cannot be empty.");
     }
+    const parsedPrice = parseFloat(price.value);
+    console.log("parsedPrice: ", parsedPrice);
 
     if (user) {
       // get user data
@@ -184,11 +186,12 @@ const createPart = async () => {
           userId: user.uid,
           seller: docSnap.data().username,
           itemName: itemName.value,
-          price: price.value,
+          price: parsedPrice,
           condition: condition.value,
           description: description.value,
           location: location.value,
           images: imageURL,
+          timeStamp: date,
         });
         toast.value = {
           isOpen: true,

@@ -2,7 +2,10 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Models of {{ make }}</ion-title>
+        <ion-title>Search: Choose {{ make }} Model</ion-title>
+      </ion-toolbar>
+      <ion-toolbar v-if="isLoading">
+        <ion-progress-bar type="indeterminate"></ion-progress-bar>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -18,15 +21,15 @@
           </ion-col>
         </ion-row>
       </ion-grid>
-      <ion-row v-if="modelsWithPosts.length <= 0">
-        <h3>No posts of {{ make }}s yet :(</h3>
+      <ion-row v-if="modelsWithPosts.length <= 0 && !isLoading">
+        <h3>No {{ make }} posts yet :(</h3>
       </ion-row>
     </ion-content>
   </ion-page>
 </template>
 
-<script setup>
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar, IonCardTitle } from '@ionic/vue';
+<script setup lang="ts">
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonProgressBar } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
@@ -37,12 +40,14 @@ const db = getFirestore();
 const make = route.params.make;
 const modelsWithPosts = ref([]);
 const router = useRouter();
+const isLoading = ref(false);
 
 const navigateToModelPosts = (modelName) => {
   router.push({ name: 'ModelPosts', params: { make: make, model: modelName } });
 };
 
 const fetchModelsWithPosts = async () => {
+  isLoading.value = true;
   const postsCollectionRef = collection(db, 'posts');
   const q = query(postsCollectionRef, where('vehicleMake', '==', make));
   const querySnapshot = await getDocs(q);
@@ -53,13 +58,14 @@ const fetchModelsWithPosts = async () => {
     if (!posts[postData.vehicleModel]) {
       posts[postData.vehicleModel] = [];
     }
-    posts[postData.vehicleModel].push(postData.imageUrl); // Assume each post has an 'imageUrl'
+    posts[postData.vehicleModel].push(postData.imageUrl);
   });
 
   modelsWithPosts.value = Object.keys(posts).map(model => ({
     name: model,
-    thumbnail: posts[model][Math.floor(Math.random() * posts[model].length)] // Random thumbnail
+    thumbnail: posts[model][Math.floor(Math.random() * posts[model].length)] // random thumbnail
   }));
+  isLoading.value = false;
 };
 
 onMounted(fetchModelsWithPosts);

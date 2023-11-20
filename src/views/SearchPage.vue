@@ -5,26 +5,35 @@
         <ion-title>Search</ion-title>
       </ion-toolbar>
       <ion-toolbar>
-        <ion-searchbar v-model="searchQuery" show-clear-button="focus" placeholder="Search vehicles by make, model, or owner"></ion-searchbar>
+        <ion-searchbar v-model="searchQuery" show-clear-button="focus" placeholder="Search profiles or makes"></ion-searchbar>
+        <div v-if="userSearchResults.length > 0" class="search-results">
+          <ion-list>
+            <ion-item v-for="user in userSearchResults" :key="user.uid" @click="navigateToUser(user.username)">
+              <ion-avatar slot="start">
+                <img :src="user.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="User avatar"/>
+              </ion-avatar>
+              <ion-label>{{ user.username }}</ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
       </ion-toolbar>
       <ion-toolbar>
-        <ion-title size="large">Select Make</ion-title>
+        <ion-title size="large">Search By Make</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-grid>
-        <div> 
+        <div>
           <ion-row>
-            <ion-col size="6" v-for="make in filteredMakes" :key="make">
+            <ion-col size="6" v-for="make in vehicleSearchResults" :key="make">
               <ion-card @click="navigateToModels(make)">
-                <img :alt="`${make} logo`" :src="getMakeLogo(make)" height='100' max-width='100'/>
+                <img :alt="`${make} logo`" :src="getMakeLogo(make)" height='100' max-width='100' />
                 <ion-card-header>
                   <ion-card-subtitle>{{ make }}</ion-card-subtitle>
                 </ion-card-header>
               </ion-card>
             </ion-col>
           </ion-row>
-          <!-- ... all other makes in list ... -->
         </div>
       </ion-grid>
     </ion-content>
@@ -43,34 +52,83 @@
 .wider{
   padding-inline: 0;
 }
+
 </style>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar } from '@ionic/vue';
-import { ref, computed } from 'vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar, IonItem, IonList, IonAvatar, IonLabel } from '@ionic/vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { getMakes } from 'car-info';
+import { collection, query, getDocs, where, limit } from 'firebase/firestore';
+import { db } from "../firebase-service";
 
-const makes = ref(getMakes());
+const postedMakes = ref([]);
 const searchQuery = ref('');
 const router = useRouter();
+const userSearchResults = ref([]);
+const vehicleSearchResults = ref([]);
 
-// Function to get the logo URL for each make (you need to implement this)
-const getMakeLogo = (make: string) => {
-  return `../assets/logos/${make.toLowerCase()}.png`; // Example path, adjust as needed
+const getMakeLogo = (make) => {
+  return `../src/assets/logos/${make.toLowerCase()}.png`;
 };
 
-// Computed property to filter makes based on the search query
-const filteredMakes = computed(() => {
-  return searchQuery.value ? 
-         makes.value.filter(make => make.toLowerCase().includes(searchQuery.value.toLowerCase())) :
-         makes.value;
-});
+// Fetching vehicle makes
+const fetchPostedMakes = async () => {
+  const makesSet = new Set();
+  const postsCollectionRef = collection(db, 'posts');
+  const q = query(postsCollectionRef);
+  const querySnapshot = await getDocs(q);
 
+  querySnapshot.forEach((doc) => {
+    const postData = doc.data();
+    if (postData.vehicleMake) {
+      makesSet.add(postData.vehicleMake);
+    }
+  });
+
+  return Array.from(makesSet); // Returns an array of unique makes
+};
+
+// Searching users
+const searchUsers = async (username) => {
+  if (username.trim() === '') return [];
+
+  const usersRef = collection(db, 'users');
+  const userQuery = query(
+    usersRef,
+    where('username', '>=', username.toLowerCase()),
+    where('username', '<=', username.toLowerCase() + '\uf8ff'),
+    limit(10)
+  );
+
+  const querySnapshot = await getDocs(userQuery);
+  return querySnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+};
+
+// Combined search function for users and vehicles
+const performSearch = async () => {
+  if (searchQuery.value.trim() === '') {
+    userSearchResults.value = [];
+    vehicleSearchResults.value = postedMakes.value;
+    return;
+  }
+
+  userSearchResults.value = await searchUsers(searchQuery.value);
+  vehicleSearchResults.value = postedMakes.value.filter(make => make.toLowerCase().includes(searchQuery.value.toLowerCase()));
+};
+
+watch(searchQuery, performSearch);
 
 const navigateToModels = (make) => {
-  router.push({ name: 'ModelList', params: { make: make } });
+  router.push({ name: 'ModelList', params: { make } });
 };
 
+const navigateToUser = (username) => {
+  router.push({ name: 'UserProfile', params: { username } });
+};
 
+onMounted(async () => {
+  postedMakes.value = await fetchPostedMakes();
+  vehicleSearchResults.value = postedMakes.value; // Initialize vehicle search results
+});
 </script>

@@ -41,7 +41,7 @@
                 <ion-col size-sm="12" size-md="12" size-lg="6" v-for="event in events" :key="event.id">
                   <EventCardComponent :eventId="event.id" :username="event.username" :eventDescription="event.eventDescription"
                     :image_src="event.imageUrl" :imagePath="event.imagePath" :userId="event.userId" :timestamp="event.timestamp"
-                    :eventName="event.eventName" :eventType="event.eventType" :datetime="event.datetime" :isSubscribed="events.isSubscribed" showAvatar />
+                    :eventName="event.eventName" :eventType="event.eventType" :datetime="event.datetime" showAvatar />
                 </ion-col>
               </ion-row>
             </ion-grid>
@@ -159,7 +159,14 @@ const fetchSubscribedEvents = async () => {
     } catch (error: any) {
       toast.value = { isOpen: true, message: 'An error occurred: ' + error.message, color: 'danger' };
     }
-  };
+  }
+}
+
+const isSubscribed = (id: String) => {
+  if(userData.value.subscribedEvents.includes(id)) {
+    return true;
+  }
+  return false;
 }
 
 const refreshEvents = async (event: CustomEvent) => {

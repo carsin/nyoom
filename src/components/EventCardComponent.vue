@@ -27,17 +27,17 @@
           </ion-col>
           <ion-col>
             <div class="ion-float-right">
-              <ion-button fill="clear" size="large" @click="setOpen(true)">
+              <ion-button fill="clear" size="large" @click="setOpen(true); setDismiss(false)">
                 <ion-icon slot="icon-only" :icon="informationCircleOutline" />
               </ion-button>
             </div>
 
-            <ion-modal :is-open="isOpen">
+            <ion-modal :is-open="isOpen" :can-dismiss="onDismiss">
               <ion-header>
                 <ion-toolbar>
                   <ion-title color="primary" class=""> <b>Event Info</b> </ion-title>
                   <ion-buttons slot="end">
-                    <ion-button color="primary" @click="setOpen(false)">Close</ion-button>
+                    <ion-button color="primary" @click="setDismiss(true); setOpen(false)">Close</ion-button>
                   </ion-buttons>
                 </ion-toolbar>
               </ion-header>
@@ -69,7 +69,7 @@
               </ion-content>
             </ion-modal>
             
-\          </ion-col>
+          </ion-col>
           <!-- <ion-col class="ion-justify-content-center ion-align-items-bottom ion-text-end">
             <div v-if="isPostOwner">
               <ion-button fill="clear" v-if="!editingCaption" @click="editingCaption = true">
@@ -91,16 +91,20 @@
             <img class="post-image" :src="image_src" alt="Event image content" />
           </div>
         </ion-row>
-        <ion-row>
+        <ion-row class="ion-align-items-center">
           <ion-col>
               <ion-card-subtitle>{{ datetime }}</ion-card-subtitle>
               <ion-card-title>{{ eventName }}</ion-card-title>
           </ion-col>
-          <ion-col class="vert-center">
-            <ion-buttons class="ion-float-right">
-              <ion-button v-if="isSubscribed" fill="outline" color="primary" @click="handleSubscribe">Unsubscribe</ion-button>
-              <ion-button v-else fill="outline" color="primary" @click="handleSubscribe">Subscribe</ion-button>
-            </ion-buttons>
+          <ion-col>
+            <div class="ion-float-right">
+              <ion-button v-if="isSubscribed" size="large" fill="clear" color="primary" @click="handleSubscribe()">
+                <ion-icon slot="icon-only" :icon="checkmarkCircle"></ion-icon>
+              </ion-button>
+              <ion-button v-else size="large" fill="clear" color="primary" @click="handleSubscribe()">
+                <ion-icon slot="icon-only" :icon="addCircle"></ion-icon>
+              </ion-button>
+            </div>
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -123,10 +127,6 @@
   max-height: 35rem;
   display: block; /* remove bottom space */
   max-width: 100%; /* ensure the image does not overflow the padding */
-}
-
-.vert-center{
-  vertical-align: center;
 }
 
 .no-border{
@@ -167,7 +167,7 @@
   import { doc, getDoc, getDocs, query, collection, where, onSnapshot, orderBy, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
   import { useRouter } from 'vue-router';
   import { postManager } from '../services/ManagePostService';
-  import { trash, pencil, close, informationCircleOutline } from 'ionicons/icons';
+  import { trash, pencil, close, informationCircleOutline, checkmarkCircle, addCircle } from 'ionicons/icons';
 
   // vue props
   const props = defineProps({
@@ -202,8 +202,10 @@
   const toast = ref({ isOpen: false, message: '', color: '' });
   const user = firebaseAuth.currentUser;
   const isOpen = ref(false);
+  const onDismiss = ref(false);
 
 const setOpen = (open: boolean) => (isOpen.value = open);
+const setDismiss = (dismiss: boolean) => (onDismiss.value = dismiss);
 
 onMounted(async () => {
   // Query Firestore based on the username to get avatar URL
@@ -219,7 +221,11 @@ onMounted(async () => {
   if (!querySnapshot.empty) {
     const userData = querySnapshot.docs[0].data();
     avatarUrl.value = userData.avatarUrl || ''; // Set avatar URL
+    if(userData.subscribedEvents.includes(eventId.value)) {
+      isSubscribed.value = true;
+    }
   }
+  
 
   // Calling the function to handle real-time updates
   isLoading.value = false;
@@ -249,31 +255,31 @@ const handleRealtimeUpdates = () => {
 };
 
 // show a confirmation dialog before deletion of post
-const handleEventDelete = async () => {
-  const alert = await alertController.create({
-    header: 'Confirm Delete',
-    message: 'Are you sure you want to delete this post?',
-    buttons: [
-      {
-        text: 'Cancel',
-        role: 'cancel'
-      },
-      {
-        text: 'Delete',
-        handler: async () => { // handle the deletion of the post
-          const result = await postManager.deletePost(props.eventId);
-          if (result.success) {
-            toast.value = { isOpen: true, color: 'success', message: result.message };
-            router.go(0);
-          } else {
-            toast.value = { isOpen: true, color: 'danger', message: result.message };
-          }
-        }
-      }
-    ]
-  });
-  await alert.present();
-};
+// const handleEventDelete = async () => {
+//   const alert = await alertController.create({
+//     header: 'Confirm Delete',
+//     message: 'Are you sure you want to delete this post?',
+//     buttons: [
+//       {
+//         text: 'Cancel',
+//         role: 'cancel'
+//       },
+//       {
+//         text: 'Delete',
+//         handler: async () => { // handle the deletion of the post
+//           const result = await postManager.deletePost(props.eventId);
+//           if (result.success) {
+//             toast.value = { isOpen: true, color: 'success', message: result.message };
+//             router.go(0);
+//           } else {
+//             toast.value = { isOpen: true, color: 'danger', message: result.message };
+//           }
+//         }
+//       }
+//     ]
+//   });
+//   await alert.present();
+// };
 
 const handleSubscribe = async () => {
   const currentUser = firebaseAuth.currentUser;

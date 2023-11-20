@@ -27,13 +27,13 @@
         @click="selectOption('Price: High to Low')"
         >Price: High to Low</ion-item
       >
-      <ion-item
+      <!-- <ion-item
         :class="{
           'selected-option': selectedOption === 'Distance: Closest to Furthest',
         }"
         @click="selectOption('Distance: Closest to Furthest')"
         >Distance: Closest to Furthest</ion-item
-      >
+      > -->
       <ion-item
         :class="{ 'selected-option': selectedOption === 'Newest Arrivals' }"
         @click="selectOption('Newest Arrivals')"

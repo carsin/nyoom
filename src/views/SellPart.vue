@@ -143,6 +143,8 @@ const price = ref<number | null>(null);
 const description = ref("");
 const condition = ref("");
 const location = ref("");
+const date = new Date();
+console.log("date: ", date);
 
 const createPart = async () => {
   const partsCollection = collection(db, "parts");
@@ -186,6 +188,7 @@ const createPart = async () => {
           description: description.value,
           location: location.value,
           images: imageURL,
+          timeStamp: date,
         });
         toast.value = {
           isOpen: true,

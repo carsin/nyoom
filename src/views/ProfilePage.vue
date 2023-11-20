@@ -7,14 +7,8 @@
       </ion-toolbar>
       <ion-toolbar v-else>
         <ion-title> @{{ username }}'s Profile </ion-title>
-        <ion-button
-          v-if="isCurrentUser"
-          @click="handleLogout"
-          class="ion-padding-end"
-          slot="end"
-          fill="outline"
-          >Log Out</ion-button
-        >
+        <ion-button v-if="isCurrentUser" @click="handleLogout" class="ion-padding-end" slot="end" fill="outline">Log
+          Out</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -26,10 +20,7 @@
                 <ion-buttons v-if="isCurrentUser">
                   <router-link to="/settings">
                     <ion-button>
-                      <ion-icon
-                        slot="icon-only"
-                        :icon="settingsSharp"
-                      ></ion-icon>
+                      <ion-icon slot="icon-only" :icon="settingsSharp"></ion-icon>
                     </ion-button>
                   </router-link>
                 </ion-buttons>
@@ -38,28 +29,16 @@
                 <ion-text color="primary">
                   <h1 class="ion-margin-vertical">@{{ username }}</h1>
                 </ion-text>
-                <img
-                  v-if="userData.avatarUrl"
-                  class="profile-avatar"
-                  :src="userData.avatarUrl"
-                  alt="Avatar image"
-                />
-                <img
-                  v-else
-                  class="profile-avatar"
-                  src="https://ionicframework.com/docs/img/demos/avatar.svg"
-                  alt="Default avatar"
-                />
+                <img v-if="userData.avatarUrl" class="profile-avatar" :src="userData.avatarUrl" alt="Avatar image" />
+                <img v-else class="profile-avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg"
+                  alt="Default avatar" />
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
                   <ion-list>
                     <ion-item>
                       <ion-button>
-                        <ion-icon
-                          slot="icon-only"
-                          :icon="carSportSharp"
-                        ></ion-icon>
+                        <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
                       </ion-button>
                     </ion-item>
                   </ion-list>
@@ -67,20 +46,10 @@
               </ion-col>
             </ion-row>
             <ion-row class="ion-justify-content-center ion-text-center">
-              <ion-button
-                v-if="!isCurrentUser"
-                id="add-friend"
-                aria-label="Add Friend"
-                @click="handleFollow"
-                size="default"
-                :fill="isFollowing ? 'outline' : 'solid'"
-              >
+              <ion-button v-if="!isCurrentUser" id="add-friend" aria-label="Add Friend" @click="handleFollow"
+                size="default" :fill="isFollowing ? 'outline' : 'solid'">
                 {{ isFollowing ? " Unfollow" : " Follow" }}
-                <ion-icon
-                  slot="end"
-                  size="medium"
-                  :icon="isFollowing ? personRemoveSharp : personAddSharp"
-                ></ion-icon>
+                <ion-icon slot="end" size="medium" :icon="isFollowing ? personRemoveSharp : personAddSharp"></ion-icon>
               </ion-button>
             </ion-row>
             <ion-row class="ion-text-center">
@@ -107,26 +76,11 @@
         <div v-if="posts.length > 0">
           <ion-grid>
             <ion-row>
-              <ion-col
-                size-sm="12"
-                size-md="12"
-                size-lg="6"
-                size-xl="4"
-                v-for="post in posts"
-                :key="post.id"
-              >
-                <PostCardComponent
-                  :imageId="post.id"
-                  :username="post.username"
-                  :caption="post.caption"
-                  :upvotes="post.upvoteCount"
-                  :downvotes="post.downvoteCount"
-                  :image_src="post.imageUrl"
-                  :userId="post.userId"
-                  :timestamp="post.timestamp"
-                  :isUpvoted="post.isUpvoted"
-                  :isDownvoted="post.isDownvoted"
-                />
+              <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="post in posts" :key="post.id">
+                <PostCardComponent :imageId="post.id" :username="post.username" :caption="post.caption"
+                  :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl"
+                  :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted"
+                  :isDownvoted="post.isDownvoted" />
               </ion-col>
             </ion-row>
           </ion-grid>
@@ -136,13 +90,8 @@
             <i> @{{ username }} has no posts :( </i>
           </h3>
         </ion-text>
-        <ion-toast
-          :is-open="toast.isOpen"
-          :message="toast.message"
-          :color="toast.color"
-          :duration="3000"
-          @didDismiss="toast.isOpen = false"
-        ></ion-toast>
+        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
+          @didDismiss="toast.isOpen = false"></ion-toast>
       </div>
     </ion-content>
   </ion-page>

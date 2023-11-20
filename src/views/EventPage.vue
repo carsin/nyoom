@@ -91,11 +91,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { doc, getDoc, getDocs, query, collection, where, FieldPath, orderBy} from "firebase/firestore";
+import { doc, getDoc, getDocs, query, collection, orderBy} from "firebase/firestore";
 import { useStore } from "vuex";
 import { computed } from "vue";
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSearchbar, 
-         IonButton, IonSegment, IonSegmentButton, IonLabel, IonButtons, IonIcon, IonCard } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSearchbar, IonButton, IonSegment, IonSegmentButton, IonLabel, IonButtons, IonIcon, IonText } from '@ionic/vue';
 import { funnel } from "ionicons/icons";
 import { db, firebaseAuth } from "../firebase-service";
 import { useRoute } from 'vue-router';
@@ -109,7 +108,6 @@ const userData = ref(); // Variable to store users data
 const store = useStore();
 const selectedTab = computed(() => store.state.eventTabs.selectedTab);
 const isLoading = ref(true); // Variable to manage loading state
-const user = firebaseAuth.currentUser;
 const route = useRoute();
 const toast = ref({ isOpen: false, message: '', color: '' });
 

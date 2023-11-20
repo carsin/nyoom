@@ -35,6 +35,7 @@
               </ion-segment>
             </ion-item>
 
+            <!-- Display car modifications if 'Car' is selected -->
             <div v-if="selectedVehicleType === 'Car'">
               <div v-for="(modCategory, index) in carMods" :key="index">
                 <ion-item @click="toggleCategory(index, 'car')">
@@ -114,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, Ref } from "vue";
 import {
   IonPage,
   IonHeader,
@@ -143,7 +144,6 @@ import {
 import { useRouter } from "vue-router";
 
 const selectedVehicleType = ref('');
-const selectedMods = ref({});
 const selectOption = (vehicleType: string) => {
   selectedVehicleType.value = vehicleType;
 };
@@ -176,16 +176,17 @@ const motorcycleMods = ref([
   { category: "Engine Guards", options: ["Engine Guards"] }
 ]);
 
-const carModExpanded = reactive(carMods.value.map(() => false));
-const motorcycleModExpanded = reactive(motorcycleMods.value.map(() => false));
-const carModDetails = reactive({});
-const motorcycleModDetails = reactive({});
+const carModExpanded: Ref<boolean[]> = ref(carMods.value.map(() => false));
+const motorcycleModExpanded: Ref<boolean[]> = ref(motorcycleMods.value.map(() => false));
+type ModDetails = Record<string, string>;
+const carModDetails: Ref<ModDetails> = ref({});
+const motorcycleModDetails: Ref<ModDetails> = ref({});
 
 const toggleCategory = (index: number, type: 'car' | 'motorcycle') => {
   if (type === 'car') {
-    carModExpanded[index] = !carModExpanded[index];
+    carModExpanded.value[index] = !carModExpanded.value[index];
   } else {
-    motorcycleModExpanded[index] = !motorcycleModExpanded[index];
+    motorcycleModExpanded.value[index] = !motorcycleModExpanded.value[index];
   }
 };
 

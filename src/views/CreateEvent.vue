@@ -165,7 +165,7 @@
             timestamp: new Date()
           });
         }
-        toast.value = { isOpen: true, message: 'Post created successfully!', color: "success" };
+        toast.value = { isOpen: true, message: 'Event created successfully!', color: "success" };
         router.push("/events");
       }
     } catch (error: any) {

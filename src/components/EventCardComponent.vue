@@ -25,8 +25,25 @@
           <ion-col v-if="!showAvatar" class="ion-text-center ion-align-self-center ion-justify-content-center">
             <ion-card-subtitle> {{ formattedTimestamp }} </ion-card-subtitle>
           </ion-col>
-          <ion-col>
-            <div class="ion-float-right">
+          <ion-col class="ion-justify-content-center ion-align-items-bottom ion-text-end">
+            <!-- <div class="ion-float-right">
+              
+            </div> -->
+            <div v-if="isPostOwner">
+              <!-- <ion-button fill="clear" v-if="!editingCaption" @click="editingCaption = true">
+                <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
+              </ion-button>
+              <ion-button v-if="editingCaption" color="danger" fill="clear" @click="editingCaption = false">
+                <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
+              </ion-button> -->
+              <ion-button fill="clear" size="large" @click="setOpen(true); setDismiss(false)">
+                <ion-icon slot="icon-only" :icon="informationCircleOutline" />
+              </ion-button>
+              <ion-button fill="clear" @click="handleEventDelete">
+                <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
+              </ion-button>
+            </div>
+            <div v-else>
               <ion-button fill="clear" size="large" @click="setOpen(true); setDismiss(false)">
                 <ion-icon slot="icon-only" :icon="informationCircleOutline" />
               </ion-button>
@@ -71,17 +88,7 @@
             
           </ion-col>
           <!-- <ion-col class="ion-justify-content-center ion-align-items-bottom ion-text-end">
-            <div v-if="isPostOwner">
-              <ion-button fill="clear" v-if="!editingCaption" @click="editingCaption = true">
-                <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
-              </ion-button>
-              <ion-button v-if="editingCaption" color="danger" fill="clear" @click="editingCaption = false">
-                <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
-              </ion-button>
-              <ion-button fill="clear" @click="handleEventDelete">
-                <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
-              </ion-button>
-            </div>
+            
           </ion-col> -->
           <!-- <ion-card-title>@{{ username }}</ion-card-title> -->
         </ion-row>
@@ -166,7 +173,7 @@
   import { onMounted, onUnmounted, computed, ref } from 'vue';
   import { doc, getDoc, getDocs, query, collection, where, onSnapshot, orderBy, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
   import { useRouter } from 'vue-router';
-  import { postManager } from '../services/ManagePostService';
+  import { eventManager } from '@/services/ManageEventService';
   import { trash, pencil, close, informationCircleOutline, checkmarkCircle, addCircle } from 'ionicons/icons';
 
   // vue props
@@ -185,8 +192,6 @@
   isSubscribed: { type: Boolean, default: false},
   timestamp: Object,
 });
-  
-  import { image, personRemoveSharp } from 'ionicons/icons';
 
   const router = useRouter();
   const eventId = ref(props.eventId)
@@ -255,35 +260,34 @@ const handleRealtimeUpdates = () => {
 };
 
 // show a confirmation dialog before deletion of post
-// const handleEventDelete = async () => {
-//   const alert = await alertController.create({
-//     header: 'Confirm Delete',
-//     message: 'Are you sure you want to delete this post?',
-//     buttons: [
-//       {
-//         text: 'Cancel',
-//         role: 'cancel'
-//       },
-//       {
-//         text: 'Delete',
-//         handler: async () => { // handle the deletion of the post
-//           const result = await postManager.deletePost(props.eventId);
-//           if (result.success) {
-//             toast.value = { isOpen: true, color: 'success', message: result.message };
-//             router.go(0);
-//           } else {
-//             toast.value = { isOpen: true, color: 'danger', message: result.message };
-//           }
-//         }
-//       }
-//     ]
-//   });
-//   await alert.present();
-// };
+const handleEventDelete = async () => {
+  const alert = await alertController.create({
+    header: 'Confirm Delete',
+    message: 'Are you sure you want to delete this event?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      },
+      {
+        text: 'Delete',
+        handler: async () => { // handle the deletion of the post
+          const result = await eventManager.deleteEvent(props.eventId);
+          if (result.success) {
+            toast.value = { isOpen: true, color: 'success', message: result.message };
+            router.go(0);
+          } else {
+            toast.value = { isOpen: true, color: 'danger', message: result.message };
+          }
+        }
+      }
+    ]
+  });
+  await alert.present();
+};
 
 const handleSubscribe = async () => {
   const currentUser = firebaseAuth.currentUser;
-
   try {
     if (currentUser && eventId.value) {
       // const eventDocRef = doc(db, 'events', eventData.value.uid);

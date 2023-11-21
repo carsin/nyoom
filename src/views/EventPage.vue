@@ -7,12 +7,13 @@
           <ion-button fill="outline" class="ion-padding-end">Create Event</ion-button>
         </router-link>
       </ion-toolbar>
-      <!-- <ion-toolbar>
-        <ion-searchbar show-clear-button="focus" placeholder="Search events"></ion-searchbar>
-      </ion-toolbar> -->
-      
     </ion-header>
       <ion-content :fullscreen="true">
+        <ion-refresher slot="fixed" @ionRefresh="refreshEvents($event)">
+          <ion-refresher-content pulling-text="Pull to fetch events" refreshing-spinner="circles"
+            refreshing-text="Fetching events...">
+          </ion-refresher-content>
+        </ion-refresher>
         <ion-segment v-model="selectedTab"> 
           <ion-segment-button @click="selectTab('recommended'); fetchRecommendedEvents()" value="Recommended Events" checked> 
             <ion-label>Recommended</ion-label> 
@@ -94,7 +95,8 @@ import { ref, onMounted, watch } from 'vue';
 import { doc, getDoc, getDocs, query, collection, orderBy} from "firebase/firestore";
 import { useStore } from "vuex";
 import { computed } from "vue";
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSearchbar, IonButton, IonSegment, IonSegmentButton, IonLabel, IonButtons, IonIcon, IonText } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSearchbar, IonButton, 
+        IonSegment, IonSegmentButton, IonLabel, IonButtons, IonIcon, IonText, IonRefresher, IonRefresherContent } from '@ionic/vue';
 import { funnel } from "ionicons/icons";
 import { db, firebaseAuth } from "../firebase-service";
 import { useRoute } from 'vue-router';
@@ -103,7 +105,6 @@ import EventCardComponent from '@/components/EventCardComponent.vue';
 
 const events = ref([]); // Variable to hold the events
 const subEvents = ref([]); // Variable to hold the subscribed events
-// const isSubscribed = ref(false); // Variable to check if the current user is subscribed to the event
 const userData = ref(); // Variable to store users data
 const store = useStore();
 const selectedTab = computed(() => store.state.eventTabs.selectedTab);
@@ -162,16 +163,10 @@ const fetchSubscribedEvents = async () => {
   }
 }
 
-const isSubscribed = (id: String) => {
-  if(userData.value.subscribedEvents.includes(id)) {
-    return true;
-  }
-  return false;
-}
-
 const refreshEvents = async (event: CustomEvent) => {
   isLoading.value = true;
   await fetchRecommendedEvents();
+  await fetchSubscribedEvents();
   isLoading.value = false;
   event.target.complete();
 }

@@ -10,7 +10,6 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <!-- TODO: Make this look good (center) -->
       <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100"></ion-progress-bar>
       <ion-grid>
         <ion-row class="ion-justify-content-center">
@@ -34,17 +33,6 @@
           </ion-col>
         </ion-row>
       </ion-grid>
-      <!-- TODO: Implement this functionality -->
-      <!-- <ion-item> -->
-      <!--   <ion-input label="Change Username:" placeholder="Enter new username"></ion-input> -->
-      <!--   <ion-button id="change-username" fill="outline">Confirm</ion-button> -->
-      <!-- </ion-item> -->
-      <!-- <ion-item> -->
-      <!--   <ion-input label="Change Email:" type="email" placeholder="Enter new email"></ion-input> -->
-      <!--   <ion-button id="change-email" fill="outline">Confirm</ion-button> -->
-      <!-- </ion-item> -->
-      <!-- <ion-button id="change-password" expand="block" fill="outline"> Send Password Change to Email </ion-button> -->
-      <!---->
       <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000" @didDismiss="toast.isOpen = false"></ion-toast>
     </ion-content>
   </ion-page>

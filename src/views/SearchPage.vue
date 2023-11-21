@@ -64,7 +64,7 @@ import { collection, query, getDocs, where, limit } from 'firebase/firestore';
 import { db } from "../firebase-service";
 
 const postedMakes = ref([]);
-const searchQuery = ref<String>('');
+const searchQuery = ref<string>('');
 const router = useRouter();
 const userSearchResults = ref([]);
 const vehicleSearchResults = ref([]);

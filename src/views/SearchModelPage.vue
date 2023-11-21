@@ -31,9 +31,8 @@
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonProgressBar } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter  } from 'vue-router';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
-import { useRouter } from 'vue-router';
 
 const route = useRoute();
 const db = getFirestore();

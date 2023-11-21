@@ -62,7 +62,6 @@
               </ion-button>
             </ion-list-header>
             <!-- Messages  -->
-            <!-- <ion-item v-for="message in messages" :key="message.id" lines="inset" class="message-item"> -->
             <div v-for="message in messages" :key="message.id" class="message-item">
               <ion-label>
                 <ion-grid class="ion-no-padding">
@@ -193,10 +192,8 @@ const sendMessage = async () => {
     const result = await chatService.sendMessage(activeConversation, message);
     if (!result.success) {
       throw new Error(result.message);
-    } else {
-      if (!unsubscribeMessageListener) { // restart message listener if not already
-        unsubscribeMessageListener = chatService.listenToMessages(activeConversation.value.id, messages);
-      }
+    } else if (!unsubscribeMessageListener) {
+      unsubscribeMessageListener = chatService.listenToMessages(activeConversation.value.id, messages);
     }
   } catch (error: any) {
     messageContent.value = message;

@@ -77,7 +77,9 @@
                         </ion-item>
                         <ion-item class="no-border">
                           <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Where</b>: </ion-label>
-                          <ion-text>{{ address }}</ion-text>
+                          <ion-button @click="googleMapsLink" fill="clear" color="dark" size="default">
+                            <ion-text>{{ address }}</ion-text>
+                          </ion-button>
                         </ion-item>
                       </ion-list>
                     </ion-col>
@@ -209,6 +211,8 @@
   const isOpen = ref(false);
   const onDismiss = ref(false);
 
+  // address.value = `https://www.google.com/maps/dir/${encodeURIComponent(startingAddress)}/${encodeURIComponent(this.destinationAddress)}`
+
 const setOpen = (open: boolean) => (isOpen.value = open);
 const setDismiss = (dismiss: boolean) => (onDismiss.value = dismiss);
 
@@ -249,7 +253,7 @@ const handleRealtimeUpdates = () => {
       eventDescription.value = data.description; // Updating eventDescription
       datetime.value = data.datetime; // Updating datetime
       eventType.value = data.eventType; // Updating eventType
-      address.value = data.address;
+      address.value = data.address; // Updating address
     }
   });
 
@@ -323,4 +327,14 @@ const formattedTimestamp = computed(() => {
   }
   return '';
 });
+
+const googleMapsLink = () => {
+      // Use the Geolocation API to get the current user's location
+      // Note: Geolocation may not work on insecure origins (non-HTTPS)
+      const startingAddress = "current location"; // Replace with actual geolocation logic
+
+      // Construct the Google Maps URL with the starting and destination addresses
+      const googleMapsLink =  `https://www.google.com/maps?q=${encodeURIComponent(address.value)}`;
+      window.open(googleMapsLink, "_blank");
+    }
 </script>

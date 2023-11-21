@@ -161,7 +161,6 @@
             description: description.value,
             address: address.value,
             datetime: datetime.value,
-            subscribers: [],
             timestamp: new Date()
           });
         }
@@ -169,7 +168,7 @@
         router.push("/events");
       }
     } catch (error: any) {
-      toast.value = { isOpen: true, message: 'Error while posting: ' + error.message, color: "danger" };
+      toast.value = { isOpen: true, message: 'Error while posting event: ' + error.message, color: "danger" };
       console.error(error.message);
     }
   };

@@ -57,14 +57,16 @@
         </ion-col>
       </ion-row>
 
-      <!-- Modifications -->
+      <!-- Editable Modifications -->
       <ion-row>
         <ion-col>
           <ion-list>
             <ion-item v-for="(value, key) in carMods" :key="key">
-              <ion-label>{{ key }}: {{ value }}</ion-label>
+              <ion-label>{{ key }}:</ion-label>
+              <ion-input v-model="editableMods[key]" type="text"></ion-input>
             </ion-item>
           </ion-list>
+          <ion-button @click="handleModsUpdate">Update Modifications</ion-button>
         </ion-col>
       </ion-row>
 
@@ -136,7 +138,14 @@ const newDescription = ref(props.description || ""); // Reactive variable to sto
 const toast = ref({ isOpen: false, message: '', color: '' });
 const user = firebaseAuth.currentUser;
 
+// Convert the carMods prop to a reactive object for editing
+const editableMods = ref({});
+
+// Method to handle modifications update
+
 onMounted(async () => {
+  editableMods.value = { ...props.carMods };
+
   // Query Firestore based on the username to get avatar URL
   const userQuery = query(collection(db, 'users'), where('username', '==', props.username));
   const querySnapshot = await getDocs(userQuery);
@@ -208,10 +217,11 @@ const handleDescriptionUpdate = async () => {
 };
 
 const handleModsUpdate = async () => {
-  const result = await garageManager.updateMods(props.userId, props.vehicleId, newMods.value, props.carMods);
+  const result = await garageManager.updateMods(props.userId, props.vehicleId, editableMods.value, props.carMods);
   if (result.success) {
     toast.value = { isOpen: true, color: 'success', message: result.message };
-    editingMods.value = false;
+    // Update the original carMods prop to reflect the changes
+    props.carMods = { ...editableMods.value };
   } else {
     toast.value = { isOpen: true, color: 'danger', message: result.message };
   }

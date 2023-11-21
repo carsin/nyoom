@@ -17,7 +17,7 @@
     <ion-content :fullscreen="true">
       <ion-progress-bar
         v-if="isUploading"
-        :value="uploadProgress"
+        :value="uploadProgress / 100"
       ></ion-progress-bar>
       <ion-grid>
         <ion-row>
@@ -242,7 +242,6 @@ const description = ref("");
 const images = ref([]);
 
 const addVehicle = async () => {
-  const vehicleCollection = collection(db, "vehicles");
   const user = firebaseAuth.currentUser;
 
   try {
@@ -273,31 +272,35 @@ const addVehicle = async () => {
     }
 
     if (year.value === null || year.value === "") {
-      throw new Error("Price cannot be empty.");
+      throw new Error("Year cannot be empty.");
     }
 
     if (user) {
       // get user data
       const userDocRef = doc(db, "users", user.uid);
+      const vehiclesSubcollectionRef = collection(userDocRef, "vehicles");
       const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists()) {
-        await addDoc(vehicleCollection, {
+      let carModsWithDetails = validateAndMapDetails(carModDetails.value);
+      let motorcycleModsWithDetails = validateAndMapDetails(motorcycleModDetails.value);
+
+      if  (docSnap.exists()) {
+        await addDoc(vehiclesSubcollectionRef, {
           userId: user.uid,
-          owner: docSnap.data().username,
-          type: type.value,
+          type: selectedVehicleType.value.toLocaleLowerCase(),
           make: make.value,
           model: model.value,
           year: year.value,
           description: description.value,
-          carMods: carMods.value,
-          motorcycleMods: motorcycleMods.value,
-          images: imageURL,
+          carMods: Object.fromEntries(carModsWithDetails),
+          motorcycleMods: Object.fromEntries(motorcycleModsWithDetails),
+          imageUrl: imageURL,
         });
         toast.value = {
           isOpen: true,
           message: "Vehicle added successfully!",
           color: "success",
         };
+        router.push("/user/" + docSnap.data().username + "/garage");
       } else {
         throw new Error("User data does not exist.");
       }
@@ -312,6 +315,16 @@ const addVehicle = async () => {
       color: "danger",
     };
   }
+};
+
+const validateAndMapDetails = (details) => {
+  let validDetailsMap = new Map();
+  for (const [key, value] of Object.entries(details)) {
+    if (value) { // Check if the input is not empty
+      validDetailsMap.set(key, value);
+    }
+  }
+  return validDetailsMap;
 };
 
 const goBack = () => {

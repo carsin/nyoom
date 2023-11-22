@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Login</ion-title>
-        <ion-button class="ion-margin-end" slot="end" fill="outline" href="/">Back</ion-button>
+        <ion-button class="ion-margin-end" slot="end" href="/">Back</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -21,7 +21,7 @@
           <ion-item class="form-error-note" v-if="showErrors && passwordError">
             <ion-note color="danger">{{ passwordError }}</ion-note>
           </ion-item>
-          <ion-button :disabled="loginRequested" type="submit" @click="handleLogin" expand="block" fill="outline" class="ion-margin-top"> Login </ion-button>
+          <ion-button :disabled="loginRequested" type="submit" @click="handleLogin" expand="block" class="ion-margin-top"> Login </ion-button>
         </ion-list>
       </form>
       <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000"

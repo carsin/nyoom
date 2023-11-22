@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Profile Settings</ion-title>
-        <ion-button class="ion-padding-end" slot="end" fill="outline"
+        <ion-button class="ion-padding-end" slot="end"
           @click="router.go(-1)">
           Back to Profile
         </ion-button>
@@ -26,7 +26,7 @@
                 <ion-label position="stacked" color="primary"> <b>Edit Bio</b> </ion-label>
                 <div class="bio-container ion-align-items-center">
                   <ion-textarea placeholder="Enter new biography" v-model="newBiography" :maxlength="MAX_BIO_LENGTH" aria-label="Edit Bio" class="bio-textarea" :autoGrow="true" :counter="true"/>
-                  <ion-button :disabled="newBiography.length > MAX_BIO_LENGTH" @click="handleBioUpdate" fill="outline" size="default" class="bio-button">Update</ion-button>
+                  <ion-button :disabled="newBiography.length > MAX_BIO_LENGTH" @click="handleBioUpdate" size="default" class="bio-button">Update</ion-button>
                 </div>
               </ion-item>
             </ion-list>

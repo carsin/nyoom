@@ -4,7 +4,7 @@
         <ion-toolbar>
           <ion-title>Create Event</ion-title>
           <router-link slot="end" to="/events">
-            <ion-button fill="outline" class="ion-padding-end">Back</ion-button>
+            <ion-button class="ion-padding-end">Back</ion-button>
           </router-link>
         </ion-toolbar>
       </ion-header>
@@ -20,7 +20,7 @@
                 <ion-item class="no-border">
                   <ion-label color="primary" position="stacked"> <b>Upload a photo</b>: </ion-label>
                   <input type="file" accept="image/*" @change="handleImagePreview" class="ion-margin-top" />
-                  <ion-button @click="handleImageUpload" size="default" fill="outline">Upload Image</ion-button>
+                  <ion-button @click="handleImageUpload" size="default">Upload Image</ion-button>
                 </ion-item>
                 <ion-item class="no-border">
                   <ion-label position="stacked" color="primary" class="ion-margin-bottom"> <b>Enter Event Name</b>: </ion-label>
@@ -48,7 +48,7 @@
                   </ion-modal>
                 </ion-item>
               </ion-list>
-              <ion-button :disabled="description.length > MAX_CAPTION_LENGTH || !imageUrl" expand="block" @click="handleCreateEvent" fill="outline">Create Event</ion-button>
+              <ion-button :disabled="description.length > MAX_CAPTION_LENGTH || !imageUrl" expand="block" @click="handleCreateEvent">Create Event</ion-button>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -85,9 +85,7 @@
   import { doc, getDoc, collection, addDoc } from "firebase/firestore";
   import { useRouter } from 'vue-router';
   import { uploadImageToFirebase } from '@/util/uploadImage';
-  import { MAX_CAPTION_LENGTH} from "../util/constants"
-
-  const MAX_EVENT_NAME_LENGTH = 50;
+  import { MAX_CAPTION_LENGTH, MAX_EVENT_NAME_LENGTH } from "../util/constants"
   
   const isUploading = ref(false);
   const uploadProgress = ref(0);

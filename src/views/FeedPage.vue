@@ -5,7 +5,7 @@
         <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
         <ion-title>Feed</ion-title>
         <router-link slot="end" to="/create-post">
-          <ion-button fill="outline" class="ion-padding-end"> Create Post </ion-button>
+          <ion-button class="ion-padding-end"> Create Post </ion-button>
         </router-link>
       </ion-toolbar>
     </ion-header>

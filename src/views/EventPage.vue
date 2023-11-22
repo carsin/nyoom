@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-title>Events</ion-title>
         <router-link slot="end" to="/create-event">
-          <ion-button fill="outline" class="ion-padding-end">Create Event</ion-button>
+          <ion-button class="ion-padding-end">Create Event</ion-button>
         </router-link>
       </ion-toolbar>
     </ion-header>

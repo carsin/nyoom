@@ -4,17 +4,13 @@
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button @click="goBack" class="back-button">
-            <ion-icon
-              slot="icon-only"
-              :icon="arrowBack"
-              class="icon-color"
-            ></ion-icon>
+            <ion-icon slot="icon-only" :icon="arrowBack" class="icon-color"></ion-icon>
           </ion-button>
         </ion-buttons>
         <ion-title>Add Vehicle</ion-title>
       </ion-toolbar>
       <ion-toolbar>
-        <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100" ></ion-progress-bar>
+        <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100"></ion-progress-bar>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -44,11 +40,7 @@
                   <div v-for="option in modCategory.options" :key="option">
                     <ion-item>
                       <ion-label>{{ option }}</ion-label>
-                      <ion-input 
-                        type="text" 
-                        placeholder="Enter details" 
-                        v-model="carModDetails[option]"
-                      />
+                      <ion-input type="text" placeholder="Enter details" v-model="carModDetails[option]" />
                     </ion-item>
                   </div>
                 </div>
@@ -65,11 +57,7 @@
                   <div v-for="option in modCategory.options" :key="option">
                     <ion-item>
                       <ion-label>{{ option }}</ion-label>
-                      <ion-input 
-                        type="text" 
-                        placeholder="Enter details" 
-                        v-model="motorcycleModDetails[option]"
-                      />
+                      <ion-input type="text" placeholder="Enter details" v-model="motorcycleModDetails[option]" />
                     </ion-item>
                   </div>
                 </div>
@@ -102,49 +90,21 @@
           </ion-col>
         </ion-row>
       </ion-grid>
-      <ion-toast
-        :is-open="toast.isOpen"
-        :message="toast.message"
-        :color="toast.color"
-        :duration="2000"
-        @didDismiss="toast.isOpen = false"
-      ></ion-toast>
+      <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="2000"
+        @didDismiss="toast.isOpen = false"></ion-toast>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
 import { ref, Ref } from "vue";
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonProgressBar,
-  IonContent,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonButton,
-  IonToast,
-  IonSegment,
-  IonIcon,
-  IonButtons,
-  IonSegmentButton,
-} from "@ionic/vue";
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonButton, IonToast, IonSegment, IonIcon, IonButtons, IonSegmentButton, } from "@ionic/vue";
 import { firebaseAuth, db } from "../firebase-service";
-import { doc, getDoc, collection, addDoc } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { arrowBack } from 'ionicons/icons';
 import { uploadImageToFirebase } from '@/util/uploadImage';
 import { useRouter } from "vue-router";
 
-const selectedVehicleType = ref('');
-const selectOption = (vehicleType: string) => {
-  selectedVehicleType.value = vehicleType;
-};
 const carMods = ref([
   { category: "Engine Builds", options: ["Cold Air Intakes", "Cooling", "ECU Tunes", "Forced Induction", "Fuel Systems", "Injectors", "Pumps"] },
   { category: "Engine Internals", options: ["Pistons", "Rods", "Cams", "Cranks", "Valves", "Heads", "Bearings"] },
@@ -173,12 +133,26 @@ const motorcycleMods = ref([
   { category: "Instrumentation", options: ["Instrument Clusters", "Gauges"] },
   { category: "Engine Guards", options: ["Engine Guards"] }
 ]);
-
+const selectedVehicleType = ref('');
 const carModExpanded: Ref<boolean[]> = ref(carMods.value.map(() => false));
 const motorcycleModExpanded: Ref<boolean[]> = ref(motorcycleMods.value.map(() => false));
 type ModDetails = Record<string, string>;
 const carModDetails: Ref<ModDetails> = ref({});
 const motorcycleModDetails: Ref<ModDetails> = ref({});
+const isUploading = ref(false);
+const uploadProgress = ref(0);
+const toast = ref({ isOpen: false, message: "", color: "" });
+const router = useRouter();
+let imageURL = "";
+const type = ref(""); // This will store the user's choice ('Car' or 'Motorcycle')
+const make = ref("");
+const model = ref("");
+const year = ref<number | null>(null);
+const description = ref("");
+
+const selectOption = (vehicleType: string) => {
+  selectedVehicleType.value = vehicleType;
+};
 
 const toggleCategory = (index: number, type: 'car' | 'motorcycle') => {
   if (type === 'car') {
@@ -187,13 +161,6 @@ const toggleCategory = (index: number, type: 'car' | 'motorcycle') => {
     motorcycleModExpanded.value[index] = !motorcycleModExpanded.value[index];
   }
 };
-
-const isUploading = ref(false);
-const uploadProgress = ref(0);
-const toast = ref({ isOpen: false, message: "", color: "" });
-const router = useRouter();
-let imageURL = "";
-
 
 const uploadImage = async (event: any) => {
   const imageFile = event.target.files[0];
@@ -215,13 +182,6 @@ const uploadImage = async (event: any) => {
     isUploading.value = false;
   }
 };
-
-// sending post to posts firestore collection
-const type = ref(""); // This will store the user's choice ('Car' or 'Motorcycle')
-const make = ref("");
-const model = ref("");
-const year = ref<number | null>(null);
-const description = ref("");
 
 const addVehicle = async () => {
   const user = firebaseAuth.currentUser;
@@ -276,6 +236,7 @@ const addVehicle = async () => {
           carMods: Object.fromEntries(carModsWithDetails),
           motorcycleMods: Object.fromEntries(motorcycleModsWithDetails),
           imageUrl: imageURL,
+          timestamp: serverTimestamp(),
         });
         toast.value = {
           isOpen: true,

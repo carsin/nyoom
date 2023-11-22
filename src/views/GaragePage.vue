@@ -101,8 +101,8 @@
 <script setup lang="ts">
 import { IonText, IonToast, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem, modalController } from '@ionic/vue';
 import { settingsSharp, addCircleOutline, personAddSharp, personRemoveSharp } from 'ionicons/icons';
-import { ref, onMounted, onUnmounted } from 'vue';
-import { doc, getDoc, getDocs, query, collection, where, updateDoc, arrayRemove, arrayUnion, onSnapshot } from "firebase/firestore";
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { doc, getDoc, getDocs, query, collection, where, updateDoc, arrayRemove, arrayUnion, onSnapshot, orderBy } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
 import { signOut } from 'firebase/auth';
 import { useRouter, useRoute } from 'vue-router';
@@ -151,14 +151,29 @@ onMounted(async () => {
   }
 
   // Fetch vehicles
+  await fetchVehicles();
+  isLoading.value = false;
+});
+
+const fetchVehicles = async () => {
+  isLoading.value = true;
   if (userData.value.uid) {
-    const vehiclesQuery = query(collection(db, 'users', userData.value.uid, 'vehicles'));
+    const vehiclesQuery = query(collection(db, 'users', userData.value.uid, 'vehicles'), orderBy('timestamp', 'desc'));
     const querySnapshot = await getDocs(vehiclesQuery);
 
     vehicles.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
-
   isLoading.value = false;
+}
+
+// refresh vehicles after add new vehicle
+watch(() => route.path, async (newPath, oldPath) => {
+  if (oldPath === '/add-vehicle' && newPath === '/user/' + username.value + '/garage') {
+    console.log("new vehicle posted");
+    isLoading.value = true;
+    await fetchVehicles();
+    isLoading.value = false;
+  }
 });
 
 const handleLogout = async () => {

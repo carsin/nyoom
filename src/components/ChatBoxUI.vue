@@ -5,104 +5,108 @@
       <span v-if="totalUnreadCount > 0"> {{ totalUnreadCount }}</span>
     </ion-fab-button>
     <ion-fab-list class="chat-fab-list" side="top" v-show="isChatOpen">
-      <div class="chat-container">
-        <!-- Search View -->
-        <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
-        <div class="search-view" v-if="currentView === 'search'">
-          <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers" placeholder="Search users to message..."
-            class="ion-no-padding"></ion-searchbar>
-          <ion-list v-if="searchResults.length > 0">
-            <ion-list-header lines="full">
-              <ion-label>User Search Results:</ion-label>
-            </ion-list-header>
-            <ion-item class="searchuser-result-item" v-for="user in searchResults" :key="user.uid"
-              @click="prepareConversation(user)">
-              <ion-avatar slot="start">
-                <img :src="user.avatarUrl || defaultAvatar" alt="Search result avatar">
-              </ion-avatar>
-              <ion-label>{{ user.username }}</ion-label>
-            </ion-item>
-          </ion-list>
-          <ion-list v-if="conversations.length > 0" class="ion-no-padding">
-            <ion-list-header lines="full">
-              <ion-label>Active Conversations</ion-label>
-            </ion-list-header>
-            <ion-item v-for="conversation in conversations" :key="conversation.id"
-              @click="prepareConversation(conversation)">
-              <ion-avatar class="recipient-avatar">
-                <img :src="conversation.recipientAvatarUrl || defaultAvatar" alt="Recipient avatar">
-              </ion-avatar>
-              <div class="conversation-details">
+      <div class="background-color">
+        <div class="chat-container">
+          <!-- Search View -->
+          <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
+          <div class="search-view" v-if="currentView === 'search'">
+            <ion-searchbar v-model="searchQuery" @keyup.enter="searchUsers" placeholder="Search users to message..."
+              class="ion-no-padding"></ion-searchbar>
+            <ion-list v-if="searchResults.length > 0">
+              <ion-list-header lines="full">
+                <ion-label>User Search Results:</ion-label>
+              </ion-list-header>
+              <ion-item class="searchuser-result-item" v-for="user in searchResults" :key="user.uid"
+                @click="prepareConversation(user)">
+                <ion-avatar slot="start">
+                  <img :src="user.avatarUrl || defaultAvatar" alt="Search result avatar">
+                </ion-avatar>
+                <ion-label>{{ user.username }}</ion-label>
+              </ion-item>
+            </ion-list>
+            <ion-list v-if="conversations.length > 0" class="ion-no-padding">
+              <ion-list-header lines="full">
+                <ion-label>Active Conversations</ion-label>
+              </ion-list-header>
+              <ion-item v-for="conversation in conversations" :key="conversation.id"
+                @click="prepareConversation(conversation)">
+                <ion-avatar class="recipient-avatar">
+                  <img :src="conversation.recipientAvatarUrl || defaultAvatar" alt="Recipient avatar">
+                </ion-avatar>
+                <div class="conversation-details">
+                  <ion-label>
+                    <h2>{{ conversation.recipientUsername }}
+                      <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{
+                        conversation.unreadCounts[currentUser?.uid] }} unread) </span>
+                    </h2>
+                    <p class="truncate-text">{{ conversation.lastMessageSender === currentUser.uid ? currentUsername :
+                      conversation.recipientUsername }}: {{ formattedMessage(conversation) || 'Cannot load message.' }}
+                    </p>
+                    <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
+                  </ion-label>
+                </div>
+              </ion-item>
+            </ion-list>
+          </div>
+          <!-- Conversation View -->
+          <div class="conversation-view" v-if="currentView === 'conversation'">
+            <ion-list class="message-list ion-no-padding">
+              <!-- Conversation header -->
+              <ion-list-header class="conversation-header" lines="full" v-if="activeConversationDisplay">
+                <ion-avatar @click="router.push('/user/' + activeConversationDisplay.username)" class="recipient-avatar">
+                  <img :src="activeConversationDisplay.avatarUrl || defaultAvatar" alt="Recipient avatar">
+                </ion-avatar>
+                <ion-label class="conversation-username"
+                  @click="router.push('/user/' + activeConversationDisplay.username)">{{
+                    activeConversationDisplay.username
+                  }}</ion-label>
+                <ion-button class="" size="large" fill="clear" @click="backToConversations">
+                  <ion-icon :icon="arrowBack"></ion-icon>
+                </ion-button>
+              </ion-list-header>
+              <!-- Messages  -->
+              <div v-for="message in messages" :key="message.id" class="message-item">
                 <ion-label>
-                  <h2>{{ conversation.recipientUsername }}
-                    <span v-if="conversation.unreadCounts[currentUser?.uid] > 0" class="unread-count"> ({{
-                      conversation.unreadCounts[currentUser?.uid] }} unread) </span>
-                  </h2>
-                  <p class="truncate-text">{{ conversation.lastMessageSender === currentUser.uid ? currentUsername :
-                    conversation.recipientUsername }}: {{ formattedMessage(conversation) || 'Cannot load message.' }}</p>
-                  <p>{{ formatTimestamp(conversation.lastMessageTimestamp) || 'Timestamp loading...' }}</p>
+                  <ion-grid class="ion-no-padding">
+                    <ion-row class="ion-align-items-center" style="flex-grow: 1;">
+                      <ion-col size="auto"> <!-- sender username -->
+                        <b class="message-username conversation-username" @click="navigateToUserProfile(message)">
+                          {{ currentUser.uid === message.senderId ? currentUsername : activeConversationDisplay.username
+                          }}
+                        </b>
+                      </ion-col>
+                      <ion-col suze="auto"> <!-- timestamp -->
+                        <p v-if="message.timestamp" class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</p>
+                      </ion-col>
+                      <ion-col v-if="message.timestamp" size="auto" class="ion-text-end" style="flex-shrink: 0;">
+                        <!-- read receipt icon -->
+                        <ion-icon class="message-receipt" :icon="message.readStatus ? checkmark : mailOutline"></ion-icon>
+                      </ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col>
+                        <p class="message-content">{{ message.content }}</p>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
                 </ion-label>
               </div>
-            </ion-item>
-          </ion-list>
-        </div>
-        <!-- Conversation View -->
-        <div class="conversation-view" v-if="currentView === 'conversation'">
-          <ion-list class="message-list ion-no-padding">
-            <!-- Conversation header -->
-            <ion-list-header class="conversation-header" lines="full" v-if="activeConversationDisplay">
-              <ion-avatar @click="router.push('/user/' + activeConversationDisplay.username)" class="recipient-avatar">
-                <img :src="activeConversationDisplay.avatarUrl || defaultAvatar" alt="Recipient avatar">
-              </ion-avatar>
-              <ion-label class="conversation-username"
-                @click="router.push('/user/' + activeConversationDisplay.username)">{{ activeConversationDisplay.username
-                }}</ion-label>
-              <ion-button class="" size="large" fill="clear" @click="backToConversations">
-                <ion-icon :icon="arrowBack"></ion-icon>
-              </ion-button>
-            </ion-list-header>
-            <!-- Messages  -->
-            <div v-for="message in messages" :key="message.id" class="message-item">
-              <ion-label>
-                <ion-grid class="ion-no-padding">
-                  <ion-row class="ion-align-items-center" style="flex-grow: 1;">
-                    <ion-col size="auto"> <!-- sender username -->
-                      <b class="message-username conversation-username" @click="navigateToUserProfile(message)">
-                        {{ currentUser.uid === message.senderId ? currentUsername : activeConversationDisplay.username }}
-                      </b>
-                    </ion-col>
-                    <ion-col suze="auto"> <!-- timestamp -->
-                      <p v-if="message.timestamp" class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</p>
-                    </ion-col>
-                    <ion-col v-if="message.timestamp" size="auto" class="ion-text-end" style="flex-shrink: 0;">
-                      <!-- read receipt icon -->
-                      <ion-icon class="message-receipt" :icon="message.readStatus ? checkmark : mailOutline"></ion-icon>
-                    </ion-col>
-                  </ion-row>
-                  <ion-row>
-                    <ion-col>
-                      <p class="message-content">{{ message.content }}</p>
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </ion-label>
+            </ion-list>
+            <div class="message-input-box">
+              <ion-item lines="none">
+                <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage"
+                  :maxlength="MAX_CHATMESSAGE_LENGTH"></ion-input>
+                <ion-button fill="clear" @click="sendMessage">
+                  <ion-icon slot="icon-only" :icon="send"></ion-icon>
+                </ion-button>
+              </ion-item>
             </div>
-          </ion-list>
-          <div class="message-input-box">
-            <ion-item lines="none">
-              <ion-input placeholder="Type a message..." v-model="messageContent" @keyup.enter="sendMessage"
-                :maxlength="MAX_CHATMESSAGE_LENGTH"></ion-input>
-              <ion-button fill="clear" @click="sendMessage">
-                <ion-icon slot="icon-only" :icon="send"></ion-icon>
-              </ion-button>
-            </ion-item>
           </div>
         </div>
       </div>
     </ion-fab-list>
     <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="3000" :color="toast.color"></ion-toast>
-  </ion-fab>
-</template>
+  </ion-fab></template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
@@ -288,7 +292,11 @@ const formattedMessage = (conversation): string => {
   right: 3px;
 }
 
-.chat-fab-list,
+.background-color {
+  background-color: var(--ion-background-color);
+  display: block;
+}
+
 .search-view,
 .conversation-view {
   background-color: var(--ion-background-color);

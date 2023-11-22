@@ -114,7 +114,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { alertController, IonCard, IonLabel, IonButton, IonCardContent, IonGrid, IonIcon, IonInput, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonNote, IonList, IonItem } from '@ionic/vue';
 import { trash, pencil, checkmark, close } from 'ionicons/icons';
-import { collection, query, where, doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
 import { useRouter } from 'vue-router';
 import { MAX_DESCRIPTION_LENGTH } from "../util/constants"

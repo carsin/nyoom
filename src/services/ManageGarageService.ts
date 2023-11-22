@@ -84,7 +84,7 @@ class ManageGarageService {
   // Modify existing modifications
   async updateMods(userId: string, vehicleId: string, newMods: Map<string, string>, oldMods: Map<string, string>) {
     // Ensure newMods and oldMods are not null or undefined
-    if (!newMods || !oldMods || !this.areMapsEqual(newMods, oldMods)) {
+    if (!newMods || !oldMods || newMods == oldMods) {
       return { success: false, message: "You have entered the same mods or invalid data!" };
     }
 
@@ -96,9 +96,7 @@ class ManageGarageService {
         const vehicleData = vehicleDoc.data();
 
         if (this.user && vehicleData.userId === this.user.uid) {
-          // Convert Map to Object
-          const modsObject = Object.fromEntries(newMods);
-          await updateDoc(vehicleRef, { carMods: modsObject });
+          await updateDoc(vehicleRef, { carMods: newMods });
           return { success: true, message: "Modifications edit confirmed!" };
         } else {
           return { success: false, message: "You are not authorized to edit this vehicle's modifications." };

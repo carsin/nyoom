@@ -8,10 +8,10 @@
       <ion-row>
         <ion-col class="ion-justify-content-center ion-align-items-bottom ion-text-end">
           <div v-if="isPostOwner">
-            <ion-button fill="clear" v-if="!editingDescription" @click="editingDescription = true">
+            <ion-button fill="clear" v-if="!editingVehicle" @click="editingVehicle = true">
               <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
             </ion-button>
-            <ion-button v-if="editingDescription" color="danger" fill="clear" @click="editingDescription = false">
+            <ion-button v-if="editingVehicle" color="danger" fill="clear" @click="editingVehicle = false">
               <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
             </ion-button>
             <ion-button fill="clear" @click="handlePostDelete">
@@ -42,14 +42,14 @@
       </ion-row>
 
       <!-- Condtional description editing menu -->
-      <ion-row v-if="editingDescription" class="ion-align-items-center">
+      <ion-row v-if="editingVehicle" class="ion-align-items-center">
         <ion-col class="ion-text-left" size="11">
           <ion-label position="stacked" color="primary"><b>Edit Description</b> </ion-label>
           <ion-textarea v-model="newDescription" :maxlength="MAX_DESCRIPTION_LENGTH" placeholder="Exude genius here"
             aria-label="Edit description input" :counter="true" :autoGrow="true" />
         </ion-col>
         <ion-col size="1" class="ion-text-right">
-          <ion-button :disabled="newDescription.length > MAX_DESCRIPTION_LENGTH" v-if="editingDescription" color="success"
+          <ion-button :disabled="newDescription.length > MAX_DESCRIPTION_LENGTH" v-if="editingVehicle" color="success"
             @click="handleDescriptionUpdate">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />
           </ion-button>
@@ -67,12 +67,12 @@
       <ion-row>
         <ion-col>
           <ion-list>
-            <ion-item v-for="(value, key) in carMods" :key="key">
-              <ion-label>{{ key }}:</ion-label>
-              <ion-input v-model="editableMods[key]" type="text"></ion-input>
+            <ion-item v-for="(value, key) in vehicleMods" :key="key">
+              <ion-label>{{ key }}: <span v-if="!editingVehicle">{{ value }} </span></ion-label>
+              <ion-input v-if="editingVehicle" v-model="editableMods[key]" :value="value" type="text"></ion-input>
             </ion-item>
           </ion-list>
-          <ion-button @click="handleModsUpdate">Update Modifications</ion-button>
+          <ion-button v-if="editingVehicle" @click="handleModsUpdate">Update Modifications</ion-button>
         </ion-col>
       </ion-row>
 
@@ -112,7 +112,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { alertController, IonCard, IonLabel, IonButton, IonCardContent, IonGrid, IonIcon, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonNote, IonList, IonItem } from '@ionic/vue';
+import { alertController, IonCard, IonLabel, IonButton, IonCardContent, IonGrid, IonIcon, IonInput, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonNote, IonList, IonItem } from '@ionic/vue';
 import { trash, pencil, checkmark, close } from 'ionicons/icons';
 import { getDocs, collection, query, where, doc, onSnapshot } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
@@ -131,30 +131,30 @@ const props = defineProps({
   make: { type: String, default: '' },
   model: { type: String, default: '' },
   year: { type: String, default: '' },
-  carMods: { type: Map, default: '' },
+  carMods: { type: Map<string, string>, default: '' },
 });
 
 const router = useRouter();
 const isLoading = ref(true);
 const postDescription = ref(props.description);
-const avatarUrl = ref('');
 const isPostOwner = ref(false);
-const editingDescription = ref(false); // State to manage the description editing mode
+const editingVehicle = ref(false); // State to manage the description editing mode
 const newDescription = ref(props.description || ""); // Reactive variable to store the new description
 const toast = ref({ isOpen: false, message: '', color: '' });
 const user = firebaseAuth.currentUser;
 
 // Convert the carMods prop to a reactive object for editing
 const editableMods = ref({});
+const vehicleMods = ref<Map<string, string>>(new Map<string, string>);
 
 // Method to handle modifications update
 
 onMounted(async () => {
   editableMods.value = { ...props.carMods };
+  vehicleMods.value = props.carMods;
 
   // Query Firestore based on the username to get avatar URL
   const userQuery = query(collection(db, 'users'), where('username', '==', props.username));
-  const querySnapshot = await getDocs(userQuery);
 
   // check if post belongs to currently authenticated user
   if (user && user.uid === props.userId) {
@@ -216,18 +216,20 @@ const handleDescriptionUpdate = async () => {
   const result = await garageManager.updateDescription(props.userId, props.vehicleId, newDescription.value, props.description);
   if (result.success) {
     toast.value = { isOpen: true, color: 'success', message: result.message };
-    editingDescription.value = false;
+    editingVehicle.value = false;
   } else {
     toast.value = { isOpen: true, color: 'danger', message: result.message };
   }
 };
 
 const handleModsUpdate = async () => {
+  console.log(editableMods);
   const result = await garageManager.updateMods(props.userId, props.vehicleId, editableMods.value, props.carMods);
   if (result.success) {
     toast.value = { isOpen: true, color: 'success', message: result.message };
     // Update the original carMods prop to reflect the changes
-    props.carMods = { ...editableMods.value };
+    vehicleMods.value = editableMods.value;
+    editingVehicle.value = false;
   } else {
     toast.value = { isOpen: true, color: 'danger', message: result.message };
   }

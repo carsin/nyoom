@@ -92,8 +92,7 @@
             <h3><i> @{{ username }} has no vehicles </i></h3>
           </div>
         </ion-text>
-        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000"
-          @didDismiss="toast.isOpen = false"></ion-toast>
+        <ion-toast :is-open="toast.isOpen" :message="toast.message" :color="toast.color" :duration="3000" @didDismiss="toast.isOpen = false"></ion-toast>
       </div>
     </ion-content>
   </ion-page>

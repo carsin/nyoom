@@ -13,12 +13,11 @@
         </ion-buttons>
         <ion-title>Add Vehicle</ion-title>
       </ion-toolbar>
+      <ion-toolbar>
+        <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100" ></ion-progress-bar>
+      </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <ion-progress-bar
-        v-if="isUploading"
-        :value="uploadProgress / 100"
-      ></ion-progress-bar>
       <ion-grid>
         <ion-row>
           <ion-col size-md="6" offset-md="3">
@@ -195,6 +194,7 @@ const uploadProgress = ref(0);
 const toast = ref({ isOpen: false, message: "", color: "" });
 const router = useRouter();
 let imageURL = "";
+
 
 const uploadImage = async (event: any) => {
   const imageFile = event.target.files[0];

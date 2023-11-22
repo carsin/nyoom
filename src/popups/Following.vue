@@ -4,7 +4,9 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button color="medium" @click="cancel"> X </ion-button>
+          <ion-button color="medium" @click="cancel"> 
+            <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
+          </ion-button>
         </ion-buttons>
         <ion-title>{{ type }}</ion-title>
       </ion-toolbar>
@@ -74,7 +76,7 @@ import {
   IonToast,
 } from "@ionic/vue";
 import { onMounted, ref } from "vue";
-import { personAddSharp, personRemoveSharp } from "ionicons/icons";
+import { personAddSharp, personRemoveSharp, close } from "ionicons/icons";
 import { doc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 
 const props = defineProps({

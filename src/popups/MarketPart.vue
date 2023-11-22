@@ -17,7 +17,7 @@
         <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
       </ion-button>
       <ion-button v-if="editingPart" color="danger" @click="editingPart = false">
-        X
+        <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
       </ion-button>
       <ion-button fill="clear" @click="handlePartDelete">
         <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
@@ -78,8 +78,7 @@ import {
   alertController,
 } from "@ionic/vue";
 import { ref } from "vue";
-import { trash, pencil, checkmark } from "ionicons/icons";
-import { arrowBack } from "ionicons/icons";
+import { trash, pencil, checkmark, close, arrowBack } from "ionicons/icons";
 
 // Define the expected 'part' prop
 const props = defineProps({

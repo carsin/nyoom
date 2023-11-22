@@ -4,7 +4,7 @@
       <ion-icon :icon="isChatOpen ? close : chatbubbles"></ion-icon>
       <span v-if="totalUnreadCount > 0"> {{ totalUnreadCount }}</span>
     </ion-fab-button>
-    <ion-fab-list side="top" v-show="isChatOpen">
+    <ion-fab-list class="chat-fab-list" side="top" v-show="isChatOpen">
       <div class="chat-container">
         <!-- Search View -->
         <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
@@ -288,6 +288,7 @@ const formattedMessage = (conversation): string => {
   right: 3px;
 }
 
+.chat-fab-list,
 .search-view,
 .conversation-view {
   background-color: var(--ion-background-color);

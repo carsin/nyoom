@@ -74,7 +74,7 @@
         <div v-if="posts.length > 0">
           <ion-grid>
             <ion-row>
-              <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="post in posts" :key="post.id">
+              <ion-col size="12" v-for="post in posts" :key="post.id">
                 <PostCardComponent :imageId="post.id" :username="post.username" :caption="post.caption"
                   :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl"
                   :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted"

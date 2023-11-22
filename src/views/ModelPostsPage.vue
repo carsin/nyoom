@@ -2,6 +2,11 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button @click="goBack">
+            <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
+          </ion-button>
+        </ion-buttons>
         <ion-title>Posts of {{ make }} {{ model }}</ion-title>
       </ion-toolbar>
       <ion-toolbar v-if="isLoading">
@@ -25,14 +30,16 @@
   </ion-page></template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonContent, IonToolbar, IonGrid, IonRow, IonCol, IonTitle, IonProgressBar } from '@ionic/vue';
+import { IonPage, IonHeader, IonContent, IonToolbar, IonGrid, IonRow, IonCol, IonTitle, IonProgressBar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { firebaseAuth } from "../firebase-service";
+import { arrowBack } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 
 const route = useRoute();
+const router = useRouter();
 const db = getFirestore();
 const make = route.params.make;
 const model = route.params.model;
@@ -57,6 +64,10 @@ const fetchPosts = async () => {
   });
   
   isLoading.value = false;
+};
+
+const goBack = () => {
+  router.back();
 };
 
 onMounted(fetchPosts);

@@ -4,12 +4,14 @@
         <ion-toolbar>
           <ion-title>Create Event</ion-title>
           <router-link slot="end" to="/events">
-            <ion-button class="ion-padding-end">Back</ion-button>
+            <ion-button class="ion-padding-end">
+              <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
+            </ion-button>
           </router-link>
+        <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100"></ion-progress-bar>
         </ion-toolbar>
       </ion-header>
       <ion-content :fullscreen="true">
-        <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100"></ion-progress-bar>
         <ion-grid>
           <ion-row>
             <ion-col size-md="6" offset-md="3">
@@ -86,6 +88,7 @@
   import { useRouter } from 'vue-router';
   import { uploadImageToFirebase } from '@/util/uploadImage';
   import { MAX_CAPTION_LENGTH, MAX_EVENT_NAME_LENGTH } from "../util/constants"
+import { arrowBack } from 'ionicons/icons';
   
   const isUploading = ref(false);
   const uploadProgress = ref(0);

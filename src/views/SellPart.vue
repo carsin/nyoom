@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button @click="goBack" class="back-button">
-            <ion-icon slot="icon-only" name="arrow-back" class="icon-color"></ion-icon>
+            <ion-icon slot="icon-only" :icon="arrowBack" class="icon-color"></ion-icon>
           </ion-button>
         </ion-buttons>
         <ion-title>Sell Part</ion-title>
@@ -82,6 +82,7 @@ import {
   ref as storageRef,
 } from "firebase/storage";
 import { useRouter } from "vue-router";
+import { arrowBack } from 'ionicons/icons';
 
 const isUploading = ref(false);
 const uploadProgress = ref(0);

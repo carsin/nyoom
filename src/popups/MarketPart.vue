@@ -3,7 +3,9 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button color="medium" @click="cancel"> X </ion-button>
+          <ion-button color="medium" @click="cancel">
+            <ion-icon :icon="arrowBack"></ion-icon>
+          </ion-button>
         </ion-buttons>
         <ion-title>Part Details</ion-title>
       </ion-toolbar>
@@ -77,6 +79,7 @@ import {
 } from "@ionic/vue";
 import { ref } from "vue";
 import { trash, pencil, checkmark } from "ionicons/icons";
+import { arrowBack } from "ionicons/icons";
 
 // Define the expected 'part' prop
 const props = defineProps({

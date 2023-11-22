@@ -2,6 +2,11 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button @click="goBack">
+            <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
+          </ion-button>
+        </ion-buttons>
         <ion-title>Search: Choose {{ make }} Model</ion-title>
       </ion-toolbar>
       <ion-toolbar v-if="isLoading">
@@ -29,10 +34,11 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonProgressBar } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonProgressBar, IonButtons, IonIcon, IonButton } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter  } from 'vue-router';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { arrowBack } from 'ionicons/icons';
 
 const route = useRoute();
 const db = getFirestore();
@@ -68,4 +74,8 @@ const fetchModelsWithPosts = async () => {
 };
 
 onMounted(fetchModelsWithPosts);
+
+const goBack = () => {
+  router.back();
+};
 </script>

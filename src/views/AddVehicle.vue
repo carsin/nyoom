@@ -3,8 +3,8 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button @click="goBack" class="back-button">
-            <ion-icon slot="icon-only" :icon="arrowBack" class="icon-color"></ion-icon>
+          <ion-button @click="goBack">
+            <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
           </ion-button>
         </ion-buttons>
         <ion-title>Add Vehicle</ion-title>

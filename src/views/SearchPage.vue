@@ -29,9 +29,9 @@
           <ion-row>
             <ion-col size="6" v-for="make in vehicleSearchResults" :key="make">
               <ion-card class="hover-item" @click="navigateToModels(make)">
-                <img :alt="`${make} logo`" :src="logos[make]" height='100' max-width='100' />
-                <ion-card-header>
-                  <ion-card-subtitle>{{ make }}</ion-card-subtitle>
+                <img class="centered-image" :alt="`${make} logo`" :src="logos[make]" height='100' max-width='100'/>
+                <ion-card-header class="ion-text-center">
+                  {{ make }}
                 </ion-card-header>
               </ion-card>
             </ion-col>
@@ -43,21 +43,19 @@
 </template>
 
 <style>
-.back {
-  padding-right: 15px;
-}
-
-.center-align {
-  padding-top: 25px;
-}
-
-.wider {
-  padding-inline: 0;
+.centered-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 8px;
+  height: 100px;
+  max-width: 100%;
+  object-fit: contain;
 }
 </style>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonSearchbar, IonItem, IonList, IonAvatar, IonLabel } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonSearchbar, IonItem, IonList, IonAvatar, IonLabel } from '@ionic/vue';
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, query, getDocs, where, limit } from 'firebase/firestore';

@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button color="medium" @click="cancel">
-            <ion-icon :icon="arrowBackOutline"></ion-icon>
+            <ion-icon :icon="arrowBack"></ion-icon>
           </ion-button>
         </ion-buttons>
         <ion-title>{{ selectedOffer?.deal }}</ion-title>
@@ -29,7 +29,7 @@ import {
   IonButton,
   modalController,
 } from "@ionic/vue";
-import { arrowBackOutline } from "ionicons/icons";
+import { arrowBack } from "ionicons/icons";
 import { ref } from "vue";
 
 // Define the expected 'offer' prop

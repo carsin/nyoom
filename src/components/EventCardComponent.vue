@@ -26,16 +26,7 @@
             <ion-card-subtitle> {{ formattedTimestamp }} </ion-card-subtitle>
           </ion-col>
           <ion-col class="ion-justify-content-center ion-align-items-bottom ion-text-end">
-            <!-- <div class="ion-float-right">
-              
-            </div> -->
             <div v-if="isPostOwner">
-              <!-- <ion-button fill="clear" v-if="!editingCaption" @click="editingCaption = true">
-                <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
-              </ion-button>
-              <ion-button v-if="editingCaption" color="danger" fill="clear" @click="editingCaption = false">
-                <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
-              </ion-button> -->
               <ion-button fill="clear" size="large" @click="setOpen(true); setDismiss(false)">
                 <ion-icon slot="icon-only" :icon="informationCircleOutline" />
               </ion-button>
@@ -89,10 +80,6 @@
             </ion-modal>
             
           </ion-col>
-          <!-- <ion-col class="ion-justify-content-center ion-align-items-bottom ion-text-end">
-            
-          </ion-col> -->
-          <!-- <ion-card-title>@{{ username }}</ion-card-title> -->
         </ion-row>
           
         <ion-row class="ion-justify-content-center">
@@ -158,8 +145,7 @@
     IonCardHeader, 
     IonProgressBar, 
     IonAvatar, 
-    IonCardTitle, 
-    modalController, 
+    IonCardTitle,  
     IonButtons,
     IonHeader,
     IonModal,
@@ -173,10 +159,10 @@
   } from '@ionic/vue';
   import { firebaseAuth, db } from "../firebase-service";
   import { onMounted, onUnmounted, computed, ref } from 'vue';
-  import { doc, getDoc, getDocs, query, collection, where, onSnapshot, orderBy, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
+  import { doc, getDocs, query, collection, where, onSnapshot, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
   import { useRouter } from 'vue-router';
   import { eventManager } from '@/services/ManageEventService';
-  import { trash, pencil, close, informationCircleOutline, checkmarkCircle, addCircle } from 'ionicons/icons';
+  import { trash, informationCircleOutline, checkmarkCircle, addCircle } from 'ionicons/icons';
 
   // vue props
   const props = defineProps({
@@ -211,8 +197,6 @@
   const isOpen = ref(false);
   const onDismiss = ref(false);
 
-  // address.value = `https://www.google.com/maps/dir/${encodeURIComponent(startingAddress)}/${encodeURIComponent(this.destinationAddress)}`
-
 const setOpen = (open: boolean) => (isOpen.value = open);
 const setDismiss = (dismiss: boolean) => (onDismiss.value = dismiss);
 
@@ -235,7 +219,6 @@ onMounted(async () => {
     }
   }
   
-
   // Calling the function to handle real-time updates
   isLoading.value = false;
   handleRealtimeUpdates();
@@ -294,7 +277,6 @@ const handleSubscribe = async () => {
   const currentUser = firebaseAuth.currentUser;
   try {
     if (currentUser && eventId.value) {
-      // const eventDocRef = doc(db, 'events', eventData.value.uid);
       const currentUserDocRef = doc(db, 'users', currentUser.uid);
 
       if (isSubscribed.value) {
@@ -329,10 +311,6 @@ const formattedTimestamp = computed(() => {
 });
 
 const googleMapsLink = () => {
-      // Use the Geolocation API to get the current user's location
-      // Note: Geolocation may not work on insecure origins (non-HTTPS)
-      const startingAddress = "current location"; // Replace with actual geolocation logic
-
       // Construct the Google Maps URL with the starting and destination addresses
       const googleMapsLink =  `https://www.google.com/maps?q=${encodeURIComponent(address.value)}`;
       window.open(googleMapsLink, "_blank");

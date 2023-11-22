@@ -18,7 +18,7 @@
         <ion-row>
           <ion-col size="6" v-for="model in modelsWithPosts" :key="model.name">
             <ion-card class="hover-item" @click="navigateToModelPosts(model.name)">
-              <img :src="model.thumbnail" alt="Thumbnail" />
+              <img class="model-thumbnail" :src="model.thumbnail" alt="Thumbnail" />
               <ion-card-header class="ion-text-center">
                 {{ make }} {{ model.name }}
               </ion-card-header>
@@ -79,3 +79,13 @@ const goBack = () => {
   router.back();
 };
 </script>
+
+<style>
+.model-thumbnail {
+  width: auto; /* maintain the aspect ratio */
+  height: auto; /* maintain the aspect ratio */
+  max-height: 30rem;
+  display: block; /* remove bottom space */
+  max-width: 100%; /* ensure the image does not overflow the padding */
+}
+</style>

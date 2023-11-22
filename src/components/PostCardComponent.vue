@@ -130,7 +130,7 @@
   border-radius: 0.5rem;
   width: auto; /* maintain the aspect ratio */
   height: auto; /* maintain the aspect ratio */
-  max-height: 35rem;
+  max-height: 30rem;
   display: block; /* remove bottom space */
   max-width: 100%; /* ensure the image does not overflow the padding */
 }

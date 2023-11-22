@@ -17,18 +17,22 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/onboard",
     component: () => import("@/views/TitlePage.vue"),
+    meta: { hideChatbox: true }
   },
   {
     path: "/login",
     component: () => import("@/views/LoginPage.vue"),
+    meta: { hideChatbox: true }
   },
   {
     path: "/register",
     component: () => import("@/views/RegisterPage.vue"),
+    meta: { hideChatbox: true }
   },
   {
     path: "/verify-email",
     component: () => import("@/views/VerifyEmail.vue"),
+    meta: { hideChatbox: true }
   },
   {
     path: "/tabs",
@@ -61,6 +65,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/user/:username",
         component: () => import("@/views/ProfilePage.vue"),
+        name: "UserProfile",
         meta: { requiresAuth: true },
       },
       {
@@ -88,18 +93,29 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/views/AddVehicle.vue"),
         meta: { requiresAuth: true },
       },
-      {
-        path: "/audiModels",
-        component: () => import("@/views/AudiModelsPage.vue"),
+        path: "/create-event",
+        component: () => import("@/views/CreateEvent.vue"),
         meta: { requiresAuth: true },
+      },
+      {
+        path: '/models/:make',
+        name: 'ModelList',
+        component: () => import("@/views/SearchModelPage.vue"),
+      },
+      {
+        path: '/posts/:make/:model',
+        name: 'ModelPosts',
+        component: () => import("@/views/ModelPostsPage.vue"),
       },
       {
         path: "/404",
         component: () => import("@/views/404Page.vue"),
-      },
+        meta: { hideChatbox: true }
+     },
       {
         path: "/:catchAll(.*)",
         component: () => import("@/views/404Page.vue"),
+        meta: { hideChatbox: true }
       },
     ],
   },

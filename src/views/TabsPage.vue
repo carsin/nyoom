@@ -48,32 +48,14 @@
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 import { home, search, balloon, cart, person } from 'ionicons/icons';
 import { onMounted, ref } from 'vue';
-import { firebaseAuth, db } from "../firebase-service";
-import { doc, getDoc } from "firebase/firestore";
-import { useRoute } from 'vue-router';
+import { userInfoService } from "../services/UserInfoService";
 
 const userProfileTabHref = ref('/login'); // Default to login
-const isOwnProfile = ref(false); // Variable to determine whether it's the user’s own profile
-const route = useRoute();
 
 const updateUserProfileHref = async () => {
-  const user = firebaseAuth.currentUser;
-  if (user) {
-    const userDocRef = doc(db, 'users', user.uid);
-    const userDoc = await getDoc(userDocRef);
-    if (userDoc.exists()) {
-      const authenticatedUsername = userDoc.data().username;
-      userProfileTabHref.value = `/user/${authenticatedUsername}`;
-    }
-  }
+  const currentUsername = await userInfoService.getCurrentUserUsername();
+  userProfileTabHref.value = `/user/${currentUsername}`;
 };
-
-// FIX: this breaks the my profile button sometimes, taking the L for now
-// Check if the current route matches the authenticated user's profile and update isOwnProfile accordingly
-// watch(route, () => {
-//   isOwnProfile.value = (route.path == userProfileTabHref.value);
-//   // console.log(route.path + ", " + userProfileTabHref.value + ", " + isOwnProfile.value);
-// }, { immediate: true });
 
 onMounted(() => {
   updateUserProfileHref();

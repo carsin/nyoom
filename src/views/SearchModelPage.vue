@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonProgressBar, IonButtons, IonIcon, IonButton } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonProgressBar, IonButtons, IonIcon, IonButton } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter  } from 'vue-router';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';

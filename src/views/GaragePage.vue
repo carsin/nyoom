@@ -76,7 +76,7 @@
         <div v-if="vehicles.length > 0">
           <ion-grid>
             <ion-row>
-              <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="vehicle in vehicles" :key="vehicle.id">
+              <ion-col size-xs="12" size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="vehicle in vehicles" :key="vehicle.id">
                 <VehicleComponent :description="vehicle.description" :vehicleId="vehicle.id" :image_src="vehicle.imageUrl"
                   :userId="vehicle.userId" :make="vehicle.make" :model="vehicle.model" :year="vehicle.year"
                   :carMods="vehicle.carMods" />

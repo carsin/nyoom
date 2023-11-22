@@ -39,7 +39,7 @@
           <div v-if="events.length > 0">
             <ion-grid>
               <ion-row>
-                <ion-col size-sm="12" size-md="12" size-lg="6" v-for="event in events" :key="event.id">
+                <ion-col size-xs="12" size-sm="12" size-md="12" size-lg="6" v-for="event in events" :key="event.id">
                   <EventCardComponent :eventId="event.id" :username="event.username" :eventDescription="event.eventDescription"
                     :image_src="event.imageUrl" :imagePath="event.imagePath" :userId="event.userId" :timestamp="event.timestamp"
                     :eventName="event.eventName" :eventType="event.eventType" :datetime="event.datetime" showAvatar />
@@ -68,7 +68,7 @@
           <div v-if="subEvents.length > 0">
             <ion-grid>
               <ion-row>
-                <ion-col size-sm="12" size-md="12" size-lg="6" v-for="event in subEvents" :key="event.id">
+                <ion-col size-xs="12" size-sm="12" size-md="12" size-lg="6" v-for="event in subEvents" :key="event.id">
                   <EventCardComponent :eventId="event.id" :username="event.username" :eventDescription="event.eventDescription"
                     :image_src="event.imageUrl" :imagePath="event.imagePath" :userId="event.userId" :timestamp="event.timestamp"
                     :eventName="event.eventName" :eventType="event.eventType" :datetime="event.datetime" showAvatar />

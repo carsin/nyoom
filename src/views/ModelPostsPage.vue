@@ -17,7 +17,7 @@
       <div>
         <ion-grid>
           <ion-row>
-            <ion-col size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="post in posts" :key="post.id">
+            <ion-col size-xs="12" size-sm="12" size-md="12" size-lg="6" size-xl="4" v-for="post in posts" :key="post.id">
               <PostCardComponent :imageId="post.id" :username="post.username" :caption="post.caption"
                 :upvotes="post.upvoteCount" :downvotes="post.downvoteCount" :image_src="post.imageUrl"
                 :imagePath="post.imagePath" :userId="post.userId" :timestamp="post.timestamp" :isUpvoted="post.isUpvoted"

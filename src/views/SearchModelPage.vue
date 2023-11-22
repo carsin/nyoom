@@ -19,8 +19,8 @@
           <ion-col size="6" v-for="model in modelsWithPosts" :key="model.name">
             <ion-card class="hover-item" @click="navigateToModelPosts(model.name)">
               <img :src="model.thumbnail" alt="Thumbnail" />
-              <ion-card-header>
-                <ion-card-title> {{make }} {{ model.name }}</ion-card-title>
+              <ion-card-header class="ion-text-center">
+                {{ make }} {{ model.name }}
               </ion-card-header>
             </ion-card>
           </ion-col>

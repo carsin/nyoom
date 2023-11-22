@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Register</ion-title>
-        <ion-button class="ion-margin-end" slot="end" fill="outline" href="/">Back</ion-button>
+        <ion-button class="ion-margin-end" slot="end" href="/">Back</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -42,7 +42,7 @@
           <ion-item class="form-error-note" v-if="showErrors && confirmPasswordError">
             <ion-note color="danger" class="">{{ confirmPasswordError }}</ion-note>
           </ion-item>
-          <ion-button :disabled="registerRequested" type="submit" expand="block" fill="outline" class="ion-margin-top">
+          <ion-button :disabled="registerRequested" type="submit" expand="block" class="ion-margin-top">
             Register </ion-button>
         </ion-list>
       </form>

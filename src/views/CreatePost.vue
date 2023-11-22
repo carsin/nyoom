@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-title>Create Post</ion-title>
         <router-link slot="end" to="/feed">
-          <ion-button fill="outline" class="ion-padding-end">Back</ion-button>
+          <ion-button class="ion-padding-end">Back</ion-button>
         </router-link>
       </ion-toolbar>
     </ion-header>

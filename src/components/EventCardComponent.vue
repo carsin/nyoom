@@ -28,7 +28,7 @@
           <ion-col class="ion-justify-content-center ion-align-items-bottom ion-text-end">
             <div v-if="isPostOwner">
               <ion-button fill="clear" size="large" @click="setOpen(true); setDismiss(false)">
-                <ion-icon slot="icon-only" :icon="informationCircleOutline" />
+                <ion-icon slot="icon-only" :icon="informationCircle" />
               </ion-button>
               <ion-button fill="clear" @click="handleEventDelete">
                 <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
@@ -36,7 +36,7 @@
             </div>
             <div v-else>
               <ion-button fill="clear" size="large" @click="setOpen(true); setDismiss(false)">
-                <ion-icon slot="icon-only" :icon="informationCircleOutline" />
+                <ion-icon slot="icon-only" :icon="informationCircle" />
               </ion-button>
             </div>
 
@@ -162,7 +162,7 @@
   import { doc, getDocs, query, collection, where, onSnapshot, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
   import { useRouter } from 'vue-router';
   import { eventManager } from '@/services/ManageEventService';
-  import { trash, informationCircleOutline, checkmarkCircle, addCircle } from 'ionicons/icons';
+  import { trash, informationCircle, checkmarkCircle, addCircle } from 'ionicons/icons';
 
   // vue props
   const props = defineProps({

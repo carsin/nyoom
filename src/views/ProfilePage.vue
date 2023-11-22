@@ -7,7 +7,7 @@
       </ion-toolbar>
       <ion-toolbar v-else>
         <ion-title> @{{ username }}'s Profile </ion-title>
-        <ion-button v-if="isCurrentUser" @click="handleLogout" class="ion-padding-end" slot="end" fill="outline">Log
+        <ion-button v-if="isCurrentUser" @click="handleLogout" class="ion-padding-end" slot="end">Log
           Out</ion-button>
       </ion-toolbar>
     </ion-header>

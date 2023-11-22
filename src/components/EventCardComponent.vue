@@ -159,7 +159,7 @@
   } from '@ionic/vue';
   import { firebaseAuth, db } from "../firebase-service";
   import { onMounted, onUnmounted, computed, ref } from 'vue';
-  import { doc, getDocs, query, collection, where, onSnapshot, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
+  import { doc, getDocs, getDoc, query, collection, where, onSnapshot, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
   import { useRouter } from 'vue-router';
   import { eventManager } from '@/services/ManageEventService';
   import { trash, informationCircle, checkmarkCircle, addCircle } from 'ionicons/icons';
@@ -204,6 +204,17 @@ onMounted(async () => {
   // Query Firestore based on the username to get avatar URL
   const userQuery = query(collection(db, 'users'), where('username', '==', props.username));
   const querySnapshot = await getDocs(userQuery);
+  const currentUser = firebaseAuth.currentUser;
+  if(currentUser){
+    const currentUserDocRef = doc(db, 'users', currentUser.uid);
+    const currentUserDoc = await getDoc(currentUserDocRef);
+    if(currentUserDoc.exists()) {
+      const currentUserData = currentUserDoc.data();
+      if(currentUserData.subscribedEvents.includes(eventId.value)) {
+      isSubscribed.value = true;
+      }
+    }
+  }
 
   // check if post belongs to currently authenticated user
   if (user && user.uid === props.userId) {
@@ -214,9 +225,6 @@ onMounted(async () => {
   if (!querySnapshot.empty) {
     const userData = querySnapshot.docs[0].data();
     avatarUrl.value = userData.avatarUrl || ''; // Set avatar URL
-    if(userData.subscribedEvents.includes(eventId.value)) {
-      isSubscribed.value = true;
-    }
   }
   
   // Calling the function to handle real-time updates

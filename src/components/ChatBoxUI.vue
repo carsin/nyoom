@@ -371,7 +371,7 @@ const formattedMessage = (conversation): string => {
 
 .enter-chat-button {
   position: absolute;
-  bottom: 65px;
+  bottom: 70px;
   right: 3px;
 }
 

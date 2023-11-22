@@ -43,12 +43,12 @@
 
       <!-- Condtional description editing menu -->
       <ion-row v-if="editingVehicle" class="ion-align-items-center">
-        <ion-col class="ion-text-left" size="11">
+        <ion-col class="ion-text-left" size="9">
           <ion-label position="stacked" color="primary"><b>Edit Description</b> </ion-label>
           <ion-textarea v-model="newDescription" :maxlength="MAX_DESCRIPTION_LENGTH" placeholder="Exude genius here"
             aria-label="Edit description input" :counter="true" :autoGrow="true" />
         </ion-col>
-        <ion-col size="1" class="ion-text-right">
+        <ion-col size="3" class="ion-text-right">
           <ion-button :disabled="newDescription.length > MAX_DESCRIPTION_LENGTH" v-if="editingVehicle" color="success"
             @click="handleDescriptionUpdate">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />

@@ -46,12 +46,12 @@
       </ion-row>
       <!-- Condtional caption editing menu -->
       <ion-row v-if="editingCaption" class="ion-align-items-center">
-        <ion-col class="ion-text-left" size="11">
+        <ion-col class="ion-text-left" size="9">
           <ion-label position="stacked" color="primary"><b>Edit Caption</b> </ion-label>
           <ion-textarea v-model="newCaption" :maxlength="MAX_CAPTION_LENGTH" placeholder="Exude genius here"
             aria-label="Edit caption input" :counter="true" :autoGrow="true" />
         </ion-col>
-        <ion-col size="1" class="ion-text-right">
+        <ion-col size="3" class="ion-text-right">
           <ion-button :disabled="newCaption.length > MAX_CAPTION_LENGTH" v-if="editingCaption" color="success"
             @click="handleCaptionUpdate">
             <ion-icon aria-hidden="true" slot="icon-only" :icon="checkmark" />

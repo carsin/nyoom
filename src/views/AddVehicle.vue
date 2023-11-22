@@ -135,11 +135,10 @@ import {
   IonButtons,
   IonSegmentButton,
 } from "@ionic/vue";
-import { firebaseAuth, db, storage } from "../firebase-service";
+import { firebaseAuth, db } from "../firebase-service";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
 import { arrowBack } from 'ionicons/icons';
 import { uploadImageToFirebase } from '@/util/uploadImage';
-import { uploadBytesResumable, getDownloadURL, ref as storageRef, } from "firebase/storage";
 import { useRouter } from "vue-router";
 
 const selectedVehicleType = ref('');
@@ -218,14 +217,11 @@ const uploadImage = async (event: any) => {
 };
 
 // sending post to posts firestore collection
-const owner = ref("");
-const ownerID = ref("");
 const type = ref(""); // This will store the user's choice ('Car' or 'Motorcycle')
 const make = ref("");
 const model = ref("");
 const year = ref<number | null>(null);
 const description = ref("");
-const images = ref([]);
 
 const addVehicle = async () => {
   const user = firebaseAuth.currentUser;
@@ -286,7 +282,7 @@ const addVehicle = async () => {
           message: "Vehicle added successfully!",
           color: "success",
         };
-        router.push("/user/" + docSnap.data().username + "/garage");
+        router.go(-1);
       } else {
         throw new Error("User data does not exist.");
       }

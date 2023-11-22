@@ -30,8 +30,14 @@
 
       <!-- Vehicle details (Make, Model, Year) -->
       <ion-row>
-        <ion-col class="ion-text-center">
-          <ion-note color="primary"><b>{{ make }}</b> {{ model }} {{ year }}</ion-note>
+        <ion-col size="4" class="ion-text-left">
+          <ion-note color="primary"><b>Make: </b>{{ make }}</ion-note>
+        </ion-col>
+        <ion-col size="4" class="ion-text-center">
+          <ion-note color="primary"><b>Model: </b>{{ model }}</ion-note>
+        </ion-col>
+        <ion-col size="4" class="ion-text-right">
+          <ion-note color="primary"><b>Year: </b>{{ year }}</ion-note>
         </ion-col>
       </ion-row>
 

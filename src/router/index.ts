@@ -84,6 +84,15 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true },
       },
       {
+        path: "/user/:username/garage",
+        component: () => import("@/views/GaragePage.vue"),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/add-vehicle",
+        component: () => import("@/views/AddVehicle.vue"),
+        meta: { requiresAuth: true },
+      },
         path: "/create-event",
         component: () => import("@/views/CreateEvent.vue"),
         meta: { requiresAuth: true },

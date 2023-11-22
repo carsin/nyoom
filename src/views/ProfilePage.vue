@@ -35,13 +35,11 @@
               </ion-col>
               <ion-col size="1">
                 <ion-buttons class="ion-float-right">
-                  <ion-list>
-                    <ion-item>
-                      <ion-button>
-                        <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
-                      </ion-button>
-                    </ion-item>
-                  </ion-list>
+                  <router-link :to="userGarageHREF">
+                    <ion-button>
+                      <ion-icon slot="icon-only" :icon="carSportSharp"></ion-icon>
+                    </ion-button>
+                  </router-link>
                 </ion-buttons>
               </ion-col>
             </ion-row>
@@ -98,47 +96,11 @@
 </template>
 
 <script setup lang="ts">
-import {
-  IonText,
-  IonToast,
-  IonChip,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonIcon,
-  IonProgressBar,
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonButtons,
-  IonButton,
-  IonList,
-  IonItem,
-  modalController,
-} from "@ionic/vue";
-import {
-  settingsSharp,
-  carSportSharp,
-  personAddSharp,
-  personRemoveSharp,
-} from "ionicons/icons";
-import PostCardComponent from "@/components/PostCardComponent.vue";
-import { ref, onMounted, onUnmounted } from "vue";
-import {
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  collection,
-  where,
-  onSnapshot,
-  orderBy,
-  updateDoc,
-  arrayRemove,
-  arrayUnion,
-} from "firebase/firestore";
+import { IonText, IonToast, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
+import { settingsSharp, carSportSharp, personAddSharp, personRemoveSharp } from 'ionicons/icons';
+import PostCardComponent from '@/components/PostCardComponent.vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { doc, getDoc, getDocs, query, collection, where, onSnapshot, orderBy, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
 import { signOut } from "firebase/auth";
 import { useRouter, useRoute } from "vue-router";
@@ -155,6 +117,7 @@ const toast = ref({ isOpen: false, message: "", color: "" });
 const menuTitle = ref(""); // To dynamically set the menu title
 const userList = ref([]); // To store the list of users to display in the menu
 const user = firebaseAuth.currentUser;
+const userGarageHREF = ref("/user/" + username.value + "/garage");
 
 onMounted(async () => {
   // Fetch data for the user whose profile is being visited

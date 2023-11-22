@@ -127,7 +127,6 @@
           </div>
         </div>
       </div>
-      </div>
     </ion-fab-list>
     <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="3000" :color="toast.color"></ion-toast>
   </ion-fab>
@@ -294,7 +293,6 @@ const searchUsers = async () => {
       color: "danger",
     };
   }
-  background - color: var(--ion - background - color); isLoading.value = false;
 };
 
 const totalUnreadCount = computed(() => {

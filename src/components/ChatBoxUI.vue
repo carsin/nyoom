@@ -80,7 +80,7 @@
               </ion-button>
             </ion-list-header>
             <!-- Messages  -->
-            <div :key="message.id" class="message-item">
+            <div v-for="message in messages" :key="message.id" class="message-item">
               <ion-label>
                 <ion-grid class="ion-no-padding">
                   <ion-row class="ion-align-items-center" style="flex-grow: 1">
@@ -94,7 +94,7 @@
                         }}
                       </b>
                     </ion-col>
-                    <ion-col suze="auto">
+                    <ion-col>
                       <!-- timestamp -->
                       <p v-if="message.timestamp" class="message-timestamp">
                         {{ formatTimestamp(message.timestamp) }}
@@ -134,15 +134,8 @@
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { IonFab, IonFabButton, IonFabList, IonIcon, IonItem, IonAvatar, IonLabel, IonSearchbar, IonInput, IonButton, IonToast, IonList, IonListHeader, IonProgressBar, IonGrid, IonCol, IonRow, } from "@ionic/vue";
-import {
-  chatbubbles,
-  close,
-  send,
-  arrowBack,
-  mailOutline,
-  checkmark,
-} from "ionicons/icons";
-import { firebaseAuth } from "../firebase-service"; // Import your Firebase configuration
+import { chatbubbles, close, send, arrowBack, mailOutline, checkmark } from "ionicons/icons";
+import { firebaseAuth } from "../firebase-service";
 import { format } from "date-fns";
 import { MAX_CHATMESSAGE_LENGTH } from "../util/constants";
 import { userInfoService } from "../services/UserInfoService";

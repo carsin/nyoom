@@ -84,16 +84,16 @@
                   <img :src="comment.avatarUrl || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="Comment avatar image"/>
                 </ion-avatar>
               </router-link>
-              <ion-label>
+              <ion-label class="ion-text-wrap">
                 <router-link class="avatar-header-link" style="text-decoration: none;" :to="{ path: `/user/${comment.username}` }">
                   <ion-card-subtitle color="primary">@{{ comment.username }}</ion-card-subtitle>
                 </router-link>
                 <p>{{ comment.text }}</p>
+                <ion-note class="comment-timestamp">{{ comment.timestamp }}</ion-note>
               </ion-label>
               <ion-button v-if="comment.canDelete" fill="clear" slot="end" @click="handleCommentDelete(comment.id)">
                 <ion-icon slot="icon-only" color="danger" :icon="trash" />
               </ion-button>
-              <ion-note slot="end" class="ion-no-margin">{{ comment.timestamp }}</ion-note>
             </ion-item>
           </ion-list>
         </ion-col>
@@ -143,6 +143,12 @@
   height: 3.2rem;
   width: 3.2rem;
   margin-right: 8px;
+}
+
+.comment-timestamp {
+  display: block; /* Ensures it starts on a new line */
+  color: var(--ion-color-medium); /* Optional: styling color */
+  font-size: 0.8rem; /* Optional: smaller font size */
 }
 </style>
 

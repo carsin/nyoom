@@ -4,15 +4,15 @@
       <ion-toolbar v-if="isLoading">
         <ion-progress-bar type="indeterminate"></ion-progress-bar>
       </ion-toolbar>
-      <ion-toolbar v-if="isCurrentUser">
-        <ion-title> My Garage </ion-title>
-        <ion-button v-if="isCurrentUser" @click="handleLogout" class="ion-padding-end" slot="end" fill="outline">Log
-          Out</ion-button>
-      </ion-toolbar>
-      <ion-toolbar v-else>
-        <ion-title> @{{ username }}'s Garage </ion-title>
-        <ion-button v-if="isCurrentUser" @click="handleLogout" class="ion-padding-end" slot="end" fill="outline">Log
-          Out</ion-button>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button @click="goBack">
+            <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title v-if="isCurrentUser"> @{{ username }}'s Garage </ion-title>
+        <ion-title v-else> My Garage </ion-title>
+        <ion-button v-if="isCurrentUser" @click="handleLogout" class="ion-padding-end" slot="end" fill="outline">Logout</ion-button>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -100,7 +100,7 @@
 
 <script setup lang="ts">
 import { IonText, IonToast, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem, modalController } from '@ionic/vue';
-import { settingsSharp, addCircleOutline, personAddSharp, personRemoveSharp } from 'ionicons/icons';
+import { settingsSharp, addCircleOutline, personAddSharp, personRemoveSharp, arrowBack } from 'ionicons/icons';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { doc, getDoc, getDocs, query, collection, where, updateDoc, arrayRemove, arrayUnion, onSnapshot, orderBy } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
@@ -118,7 +118,6 @@ const isLoading = ref(true); // Variable to manage loading state
 const username = ref(route.params.username);
 const userData = ref({}); // Reactive variable to store user data
 const toast = ref({ isOpen: false, message: '', color: '' });
-const menuTitle = ref(''); // To dynamically set the menu title
 const userList = ref([]); // To store the list of users to display in the menu
 const user = firebaseAuth.currentUser;
 
@@ -326,6 +325,10 @@ const handleFollow = async () => {
       color: "danger",
     };
   }
+};
+
+const goBack = () => {
+  router.push("/user/" + username.value + "");
 };
 
 </script>

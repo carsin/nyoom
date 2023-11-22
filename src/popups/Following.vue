@@ -11,7 +11,7 @@
         <ion-title>{{ type }}</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-list>
+    <ion-list v-if="following?.value.length > 0">
       <ion-item v-for="account in following?.value" :key="account.uid">
         <router-link
           class="avatar-header-link"
@@ -48,6 +48,13 @@
         </ion-button>
       </ion-item>
     </ion-list>
+    <div v-else class="ion-text-center">
+      <ion-text>
+        <h4>
+          No one :(
+        </h4>
+      </ion-text>
+    </div>
     <ion-toast
       :is-open="toast.isOpen"
       :message="toast.message"
@@ -60,21 +67,7 @@
 
 <script lang="ts" setup>
 import { db, firebaseAuth } from "@/firebase-service";
-import {
-  IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
-  IonButtons,
-  IonButton,
-  modalController,
-  IonList,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonAvatar,
-  IonToast,
-} from "@ionic/vue";
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, modalController, IonList, IonIcon, IonItem, IonLabel, IonAvatar, IonToast, IonText, } from "@ionic/vue";
 import { onMounted, ref } from "vue";
 import { personAddSharp, personRemoveSharp, close } from "ionicons/icons";
 import { doc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";

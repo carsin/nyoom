@@ -10,7 +10,7 @@
       <p>This page will redirect once you have verified your email. If it
         doesn't, please ensure you are verified and <a href="login">login here.</a></p>
       <ion-button :disabled="isButtonDisabled" @click="sendVerificationEmail">Send Another Email</ion-button>
-      <ion-button @click="handleLogout" class="ion-padding-end"> Log Out</ion-button>
+      <ion-button @click="handleLogout" class="ion-padding-end"> Logout</ion-button>
       <p v-if="timer > 0">You can resend the email in {{ timer }} seconds.</p>
       <ion-toast :is-open="toast.isOpen" :message="toast.message" :duration="2000" @didDismiss="toast.isOpen = false" :color="toast.color">
       </ion-toast>

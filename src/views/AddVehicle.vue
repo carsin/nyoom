@@ -6,7 +6,7 @@
           <ion-button @click="goBack" class="back-button">
             <ion-icon
               slot="icon-only"
-              name="arrow-back"
+              :icon="arrowBack"
               class="icon-color"
             ></ion-icon>
           </ion-button>
@@ -132,15 +132,15 @@ import {
   IonButton,
   IonToast,
   IonSegment,
+  IonIcon,
+  IonButtons,
+  IonSegmentButton,
 } from "@ionic/vue";
-
 import { firebaseAuth, db, storage } from "../firebase-service";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
-import {
-  uploadBytesResumable,
-  getDownloadURL,
-  ref as storageRef,
-} from "firebase/storage";
+import { arrowBack } from 'ionicons/icons';
+import { uploadImageToFirebase } from '@/util/uploadImage';
+import { uploadBytesResumable, getDownloadURL, ref as storageRef, } from "firebase/storage";
 import { useRouter } from "vue-router";
 
 const selectedVehicleType = ref('');
@@ -196,39 +196,25 @@ const toast = ref({ isOpen: false, message: "", color: "" });
 const router = useRouter();
 let imageURL = "";
 
-// upload image to firebase storage before creating post
 const uploadImage = async (event: any) => {
+  const imageFile = event.target.files[0];
   isUploading.value = true;
-  const file = event.target.files[0];
-  const storageReference = storageRef(storage, "posts/" + file.name);
-  const uploadTask = uploadBytesResumable(storageReference, file);
+  if (!imageFile) { // no image uploaded
+    toast.value = { isOpen: true, message: "You haven't uploaded an image!", color: "danger" };
+    return;
+  }
 
-  uploadTask.on(
-    "state_changed",
-    (snapshot) => {
-      const progress = snapshot.bytesTransferred / snapshot.totalBytes;
+  try {
+    const imageData = await uploadImageToFirebase(imageFile, 'vehicles', (progress: number) => {
       uploadProgress.value = progress;
-    },
-    (error) => {
-      toast.value = {
-        isOpen: true,
-        message: "Upload failed: " + error.message,
-        color: "danger",
-      };
-      isUploading.value = false;
-    },
-    () => {
-      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-        imageURL = downloadURL;
-        isUploading.value = false;
-        toast.value = {
-          isOpen: true,
-          message: "Image uploaded successfully!",
-          color: "success",
-        };
-      });
-    }
-  );
+    });
+    imageURL = imageData.downloadURL;
+    toast.value = { isOpen: true, message: "Successfully uploaded image!", color: "success" };
+    isUploading.value = false;
+  } catch (error: any) {
+    toast.value = { isOpen: true, message: "Error while uploading image: " + error.message, color: "danger" };
+    isUploading.value = false;
+  }
 };
 
 // sending post to posts firestore collection

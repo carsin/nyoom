@@ -93,6 +93,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/views/AddVehicle.vue"),
         meta: { requiresAuth: true },
       },
+      {
         path: "/create-event",
         component: () => import("@/views/CreateEvent.vue"),
         meta: { requiresAuth: true },
@@ -111,7 +112,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "/404",
         component: () => import("@/views/404Page.vue"),
         meta: { hideChatbox: true }
-     },
+      },
       {
         path: "/:catchAll(.*)",
         component: () => import("@/views/404Page.vue"),

@@ -96,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonText, IonToast, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonList, IonItem } from '@ionic/vue';
+import { IonText, IonToast, IonChip, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, modalController } from '@ionic/vue';
 import { settingsSharp, carSportSharp, personAddSharp, personRemoveSharp } from 'ionicons/icons';
 import PostCardComponent from '@/components/PostCardComponent.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
@@ -114,7 +114,6 @@ const username = ref(route.params.username);
 const userData = ref({}); // Reactive variable to store user data
 const posts = ref([]); // Variable to hold the user's posts
 const toast = ref({ isOpen: false, message: "", color: "" });
-const menuTitle = ref(""); // To dynamically set the menu title
 const userList = ref([]); // To store the list of users to display in the menu
 const user = firebaseAuth.currentUser;
 const userGarageHREF = ref("/user/" + username.value + "/garage");

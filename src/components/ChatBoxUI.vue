@@ -288,7 +288,10 @@ const formattedMessage = (conversation): string => {
   right: 3px;
 }
 
-.chat-fab-list,
+.chat-fab-list {
+  background-color: var(--ion-background-color);
+}
+
 .search-view,
 .conversation-view {
   background-color: var(--ion-background-color);

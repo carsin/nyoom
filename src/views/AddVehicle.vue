@@ -8,8 +8,6 @@
           </ion-button>
         </ion-buttons>
         <ion-title>Add Vehicle</ion-title>
-      </ion-toolbar>
-      <ion-toolbar>
         <ion-progress-bar v-if="isUploading" :value="uploadProgress / 100"></ion-progress-bar>
       </ion-toolbar>
     </ion-header>
@@ -40,7 +38,7 @@
                   <div v-for="option in modCategory.options" :key="option">
                     <ion-item>
                       <ion-label>{{ option }}</ion-label>
-                      <ion-input type="text" placeholder="Enter details" v-model="carModDetails[option]" />
+                      <ion-input type="text" placeholder="Enter details" v-model="carModDetails[option]" aria-label="Car mod details" />
                     </ion-item>
                   </div>
                 </div>
@@ -57,7 +55,7 @@
                   <div v-for="option in modCategory.options" :key="option">
                     <ion-item>
                       <ion-label>{{ option }}</ion-label>
-                      <ion-input type="text" placeholder="Enter details" v-model="motorcycleModDetails[option]" />
+                      <ion-input type="text" placeholder="Enter details" v-model="motorcycleModDetails[option]" aria-label="Motorcycle mod details" />
                     </ion-item>
                   </div>
                 </div>
@@ -66,19 +64,19 @@
 
             <ion-item>
               <ion-label position="floating">Make: </ion-label>
-              <ion-input v-model="make" />
+              <ion-input v-model="make" aria-label="Vehicle make" />
             </ion-item>
             <ion-item>
               <ion-label position="floating">Model: </ion-label>
-              <ion-input v-model="model" />
+              <ion-input v-model="model" aria-label="Vehicle model" />
             </ion-item>
             <ion-item>
               <ion-label position="floating">Year: </ion-label>
-              <ion-input v-model="year" />
+              <ion-input v-model="year" aria-label="Vehicle year" />
             </ion-item>
             <ion-item>
-              <ion-label position="floating">Description: </ion-label>
-              <ion-input v-model="description" />
+              <ion-label position="floating">Description (optional): </ion-label>
+              <ion-input v-model="description" aria-label="Vehicle description" />
             </ion-item>
             <ion-item v-if="imageURL">
               <img :src="imageURL" alt="Uploaded Image" />
@@ -185,78 +183,46 @@ const uploadImage = async (event: any) => {
 
 const addVehicle = async () => {
   const user = firebaseAuth.currentUser;
+  if (!user) {
+    toast.value = { isOpen: true, message: "User is not authenticated.", color: "danger" };
+    return;
+  }
 
   try {
-    // Check if the imageURL is empty
-    if (!imageURL) {
-      toast.value = {
-        isOpen: true,
-        message: "Please upload an image for your vehicle.",
-        color: "danger",
-      };
-      return; // Don't proceed if the image is empty
-    }
+    // Validation
+    if (!imageURL) throw new Error("Please upload an image for your vehicle.");
+    if (!selectedVehicleType.value || !make.value || !model.value || !year.value) throw new Error("All fields are required.");
+    if (isNaN(year.value)) throw new Error("Year must be a valid number.");
 
-    if (type.value === null || make.value === "") {
-      throw new Error("Choose a type.");
-    }
+    // Database operations
+    const userDocRef = doc(db, "users", user.uid);
+    const vehiclesSubcollectionRef = collection(userDocRef, "vehicles");
+    const docSnap = await getDoc(userDocRef);
 
-    if (make.value === null || make.value === "") {
-      throw new Error("Make cannot be empty.");
-    }
+    if (!docSnap.exists()) throw new Error("User data does not exist.");
 
-    if (model.value === null || model.value === "") {
-      throw new Error("Model cannot be empty.");
-    }
+    let carModsWithDetails = validateAndMapDetails(carModDetails.value);
+    let motorcycleModsWithDetails = validateAndMapDetails(motorcycleModDetails.value);
 
-    if (isNaN(year.value)) {
-      throw new Error("Year must be a valid number.");
-    }
+    await addDoc(vehiclesSubcollectionRef, {
+      userId: user.uid,
+      type: selectedVehicleType.value.toLowerCase(),
+      make: make.value,
+      model: model.value,
+      year: year.value,
+      description: description.value,
+      carMods: Object.fromEntries(carModsWithDetails),
+      motorcycleMods: Object.fromEntries(motorcycleModsWithDetails),
+      imageUrl: imageURL,
+      timestamp: serverTimestamp(),
+    });
 
-    if (year.value === null || year.value === "") {
-      throw new Error("Year cannot be empty.");
-    }
+    toast.value = { isOpen: true, message: "Vehicle added successfully!", color: "success" };
+    router.go(-1);
 
-    if (user) {
-      // get user data
-      const userDocRef = doc(db, "users", user.uid);
-      const vehiclesSubcollectionRef = collection(userDocRef, "vehicles");
-      const docSnap = await getDoc(userDocRef);
-      let carModsWithDetails = validateAndMapDetails(carModDetails.value);
-      let motorcycleModsWithDetails = validateAndMapDetails(motorcycleModDetails.value);
-
-      if  (docSnap.exists()) {
-        await addDoc(vehiclesSubcollectionRef, {
-          userId: user.uid,
-          type: selectedVehicleType.value.toLocaleLowerCase(),
-          make: make.value,
-          model: model.value,
-          year: year.value,
-          description: description.value,
-          carMods: Object.fromEntries(carModsWithDetails),
-          motorcycleMods: Object.fromEntries(motorcycleModsWithDetails),
-          imageUrl: imageURL,
-          timestamp: serverTimestamp(),
-        });
-        toast.value = {
-          isOpen: true,
-          message: "Vehicle added successfully!",
-          color: "success",
-        };
-        router.go(-1);
-      } else {
-        throw new Error("User data does not exist.");
-      }
-    } else {
-      throw new Error("User is not authenticated.");
-    }
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error adding vehicle:", error.message);
-    toast.value = {
-      isOpen: true,
-      message: "Error adding vehicle: " + error.message,
-      color: "danger",
-    };
+    toast.value = { isOpen: true, message: `Error adding vehicle: ${error.message}`, color: "danger" };
   }
 };
 

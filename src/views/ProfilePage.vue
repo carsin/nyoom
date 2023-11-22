@@ -224,7 +224,7 @@ const followingModal = (following: any, type: string) => {
         following: following,
         type: type,
       },
-      cssClass: "your-modal-css-class", // TODO: Add a custom CSS class
+      cssClass: "your-modal-css-class",
     })
     .then((modal) => {
       modal.present();

@@ -80,7 +80,7 @@
   
   <script setup lang="ts">
   import { ref } from 'vue';
-  import { IonPage, IonList, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonTextarea, IonButton, IonToast, IonDatetimeButton, IonDatetime, IonModal, IonButtons } from '@ionic/vue';
+  import { IonPage, IonList, IonHeader, IonToolbar, IonTitle, IonProgressBar, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonTextarea, IonButton, IonToast, IonDatetimeButton, IonDatetime, IonModal } from '@ionic/vue';
   import { firebaseAuth, db } from "../firebase-service";
   import { doc, getDoc, collection, addDoc } from "firebase/firestore";
   import { useRouter } from 'vue-router';

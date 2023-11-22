@@ -350,7 +350,7 @@ const partModal = (part: any) => {
       componentProps: {
         part: part,
       },
-      cssClass: "your-modal-css-class", // TODO: Add a custom CSS class
+      cssClass: "your-modal-css-class",
     })
     .then((modal) => {
       modal.present();
@@ -364,7 +364,7 @@ const offerModal = (offer: any) => {
       componentProps: {
         offer: offer,
       },
-      cssClass: "your-modal-css-class", // TODO: Add a custom CSS class
+      cssClass: "your-modal-css-class",
     })
     .then((modal) => {
       modal.present();

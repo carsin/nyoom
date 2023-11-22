@@ -91,10 +91,9 @@
 </style>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { doc, getDoc, getDocs, query, collection, orderBy} from "firebase/firestore";
 import { useStore } from "vuex";
-import { computed } from "vue";
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSearchbar, IonButton, 
         IonSegment, IonSegmentButton, IonLabel, IonButtons, IonIcon, IonText, IonRefresher, IonRefresherContent } from '@ionic/vue';
 import { funnel } from "ionicons/icons";
@@ -180,11 +179,10 @@ watch(() => route.path, async (newPath, oldPath) => {
   }
 });
 
-const selectTab = (tab: String) => {
+const selectTab = (tab: string) => {
   store.commit("eventTabs/setSelectedTab", tab);
 };
 
 const isRecommendedTab = computed(() => selectedTab.value === "recommended");
 const isSubscribedTab = computed(() => selectedTab.value === "subscribed");
-// import ExploreContainer from '@/components/ExampleExploreComponent.vue';
 </script>

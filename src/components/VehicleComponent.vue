@@ -114,7 +114,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { alertController, IonCard, IonLabel, IonButton, IonCardContent, IonGrid, IonIcon, IonInput, IonProgressBar, IonCardHeader, IonTextarea, IonRow, IonCol, IonToast, IonNote, IonList, IonItem } from '@ionic/vue';
 import { trash, pencil, checkmark, close } from 'ionicons/icons';
-import { getDocs, collection, query, where, doc, onSnapshot } from "firebase/firestore";
+import { collection, query, where, doc, onSnapshot } from "firebase/firestore";
 import { firebaseAuth, db } from "../firebase-service";
 import { useRouter } from 'vue-router';
 import { MAX_DESCRIPTION_LENGTH } from "../util/constants"
@@ -152,9 +152,6 @@ const vehicleMods = ref<Map<string, string>>(new Map<string, string>);
 onMounted(async () => {
   editableMods.value = { ...props.carMods };
   vehicleMods.value = props.carMods;
-
-  // Query Firestore based on the username to get avatar URL
-  const userQuery = query(collection(db, 'users'), where('username', '==', props.username));
 
   // check if post belongs to currently authenticated user
   if (user && user.uid === props.userId) {

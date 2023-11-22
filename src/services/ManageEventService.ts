@@ -1,8 +1,6 @@
-import { doc, collection, query, orderBy, getDocs, getDoc, addDoc, deleteDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { ref as storageRef, deleteObject } from "firebase/storage"
 import { firebaseAuth, db, storage } from "../firebase-service";
-import { MAX_CAPTION_LENGTH } from "../util/constants";
-
 
 class ManageEventService {
   user: any;

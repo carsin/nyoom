@@ -18,8 +18,6 @@ document.title = 'Nyoom';
 
 // initialize auth for services
 authHandler.addService(chatService); 
-// TODO: integrate authHandler into all services
-
 authHandler.initialize();
 
 const route = useRoute();

@@ -29,7 +29,7 @@
           <ion-row>
             <ion-col size="6" v-for="make in vehicleSearchResults" :key="make">
               <ion-card class="hover-item" @click="navigateToModels(make)">
-                <img :alt="`${make} logo`" :src="getMakeLogo(make)" height='100' max-width='100' />
+                <img :alt="`${make} logo`" :src="logos[make]" height='100' max-width='100' />
                 <ion-card-header>
                   <ion-card-subtitle>{{ make }}</ion-card-subtitle>
                 </ion-card-header>
@@ -61,16 +61,31 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, 
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, query, getDocs, where, limit } from 'firebase/firestore';
-import { db } from "../firebase-service";
+import { db, storage } from "../firebase-service";
+import { ref as storageRef, getDownloadURL } from 'firebase/storage';
 
 const postedMakes = ref([]);
 const searchQuery = ref<string>('');
 const router = useRouter();
 const userSearchResults = ref([]);
 const vehicleSearchResults = ref([]);
+const logos = ref({});
 
-const getMakeLogo = (make: string) => {
-  return `../src/assets/logos/${make.toLowerCase()}.png`;
+const fetchLogos = async (vehicleMakes) => {
+  try {
+    const logoPromises = vehicleMakes.map(make => {
+      const logoRef = storageRef(storage, `logos/${make.toLowerCase()}.png`);
+      return getDownloadURL(logoRef).then(url => {
+        logos.value[make] = url;
+      }).catch(() => {
+        logos.value[make] = 'https://static.vecteezy.com/system/resources/thumbnails/017/178/563/small/cross-check-icon-symbol-on-transparent-background-free-png.png';
+      });
+    });
+
+    await Promise.all(logoPromises);
+  } catch (error) {
+    console.error("Error fetching logos:", error);
+  }
 };
 
 // Fetching vehicle makes
@@ -130,6 +145,7 @@ const navigateToUser = (username) => {
 
 onMounted(async () => {
   postedMakes.value = await fetchPostedMakes();
+  fetchLogos(postedMakes.value);
   vehicleSearchResults.value = postedMakes.value; // Initialize vehicle search results
 });
 </script>

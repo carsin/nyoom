@@ -42,7 +42,7 @@ jest.mock('@/firebase-service', () => ({
   orderBy: jest.fn()
 }));
 
-describe('FeedPage', () => {
+describe('ChatBoxUI', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

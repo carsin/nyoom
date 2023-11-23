@@ -45,7 +45,7 @@
         </div>
       </ion-row>
       <!-- Condtional caption editing menu -->
-      <ion-row v-if="editingCaption" class="ion-align-items-center" class="edit-caption-area">
+      <ion-row v-if="editingCaption" class="ion-align-items-center edit-caption-area">
         <ion-col class="ion-text-left" size="9">
           <ion-label position="stacked" color="primary"><b>Edit Caption</b> </ion-label>
           <ion-textarea v-model="newCaption" :maxlength="MAX_CAPTION_LENGTH" placeholder="Exude genius here"

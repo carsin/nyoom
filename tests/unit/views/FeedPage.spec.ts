@@ -91,23 +91,6 @@ function createMockPost(id: string, overrides: object) {
   };
 }
 
-// helper function to mock Firestore data
-const mockFirestoreData = (data) => {
-  getDocs.mockImplementation(() => Promise.resolve({
-    docs: data.map(item => ({ id: item.id, data: () => item }))
-  }));
-};
-
-function mockFetchPosts(postsData, currentUserUid = null) {
-  const enrichedPostsData = postsData.map(post => ({
-    ...post,
-    isUpvoted: post.upvoters.includes(currentUserUid),
-    isDownvoted: post.downvoters.includes(currentUserUid)
-  }));
-
-  mockFirestoreData(enrichedPostsData);
-}
-
 describe('FeedPage', () => {
   afterEach(() => {
     jest.clearAllMocks();

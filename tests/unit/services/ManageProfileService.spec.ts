@@ -1,7 +1,6 @@
 import { ManageProfileService } from '@/services/ManageProfileService';
-import { firebaseAuth, db, storage } from "@/firebase-service";
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { ref, deleteObject } from 'firebase/storage';
+import { updateDoc, getDoc } from 'firebase/firestore';
+import { deleteObject } from 'firebase/storage';
 import { uploadImageToFirebase } from '../util/uploadImage';
 
 jest.mock('@/firebase-service');

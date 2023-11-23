@@ -1,6 +1,5 @@
 import { ChatService } from '@/services/ChatService';
-import { firebaseAuth, db } from "@/firebase-service";
-import { writeBatch, collection, query, updateDoc, onSnapshot, orderBy, limit, doc, where, getDocs, serverTimestamp, increment } from 'firebase/firestore';
+import { writeBatch, onSnapshot, getDocs, serverTimestamp, } from 'firebase/firestore';
 import { userInfoService } from '../services/UserInfoService';
 
 jest.mock('@/firebase-service');

@@ -1,6 +1,6 @@
 import { ManageGarageService } from '@/services/ManageGarageService';
-import { firebaseAuth, db, storage } from "@/firebase-service";
-import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { storage } from "@/firebase-service";
+import { getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { ref as storageRef, deleteObject } from "firebase/storage";
 
 jest.mock('@/firebase-service');

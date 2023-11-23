@@ -3,7 +3,6 @@ import RegisterPage from '@/views/RegisterPage.vue';
 import { firebaseAuth, db } from "@/firebase-service";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { getDocs, setDoc } from "firebase/firestore";
-import { useRouter } from 'vue-router';
 
 jest.mock('@/firebase-service');
 jest.mock("firebase/auth", () => ({

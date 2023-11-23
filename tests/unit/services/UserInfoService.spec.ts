@@ -1,6 +1,6 @@
 import { UserInfoService } from '@/services/UserInfoService';
-import { firebaseAuth, db } from "@/firebase-service";
-import { doc, getDoc } from "firebase/firestore";
+import { firebaseAuth } from "@/firebase-service";
+import { getDoc } from "firebase/firestore";
 
 jest.mock('@/firebase-service');
 jest.mock("firebase/firestore", () => ({

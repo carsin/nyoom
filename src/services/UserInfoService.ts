@@ -1,4 +1,3 @@
-// UserInfoService.ts
 import { firebaseAuth, db } from "../firebase-service";
 import { doc, getDoc, DocumentData } from "firebase/firestore";
 

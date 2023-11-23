@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import VerifyEmail from '@/views/VerifyEmail.vue';
 import { firebaseAuth } from '@/firebase-service';
-import { sendEmailVerification, signOut, onAuthStateChanged } from "firebase/auth";
+import { sendEmailVerification, signOut } from "firebase/auth";
 import { useRouter } from 'vue-router';
 
 jest.mock('@/firebase-service');

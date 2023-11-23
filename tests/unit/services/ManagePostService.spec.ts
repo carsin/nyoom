@@ -1,7 +1,5 @@
 import { ManagePostService } from '@/services/ManagePostService';
-import { db, firebaseAuth, storage } from "@/firebase-service";
-import { doc, getDoc, addDoc, deleteDoc, updateDoc, getDocs, collection, query, orderBy, serverTimestamp } from "firebase/firestore";
-import { ref as storageRef, deleteObject } from "firebase/storage";
+import { getDoc, addDoc, deleteDoc, updateDoc, getDocs } from "firebase/firestore";
 
 jest.mock('@/firebase-service');
 

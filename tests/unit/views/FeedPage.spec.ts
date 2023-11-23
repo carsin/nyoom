@@ -1,7 +1,6 @@
 import { mount } from '@vue/test-utils';
 import FeedPage from '@/views/FeedPage.vue';
 import PostCardComponent from '@/components/PostCardComponent.vue';
-import { getDocs, query, collection, orderBy } from '@/firebase-service';
 
 const n = 5;
 const mockPosts = Array.from({ length: n + 1 }, (_, i) => createMockPost(`${i}`, {

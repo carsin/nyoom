@@ -59,7 +59,7 @@ describe('VerifyEmail', () => {
   it('enables the send button after cooldown', async () => {
     jest.useFakeTimers();
     const wrapper = mountVerifyEmail();
-    jest.advanceTimersByTime(60000); // Advance time by 60 seconds
+    jest.advanceTimersByTime(60000);
     await wrapper.vm.$nextTick();
     expect(wrapper.find('ion-button').attributes('disabled')).toBeFalsy();
     jest.useRealTimers();

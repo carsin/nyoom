@@ -27,14 +27,14 @@ function createMockMessage(id: string, overrides: object) {
   };
 }
 
-// helper function to mock Firestore data
+// helper function to mock firestore data
 const mockFirestoreData = (data) => {
   getDocs.mockImplementation(() => Promise.resolve({
     docs: data.map(item => ({ id: item.id, data: () => item }))
   }));
 };
 
-// Mocking Firebase Firestore
+// mocking firebase firestore
 jest.mock('@/firebase-service', () => ({
   getDocs: jest.fn(),
   query: jest.fn(),

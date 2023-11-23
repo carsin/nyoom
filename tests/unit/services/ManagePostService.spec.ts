@@ -5,7 +5,7 @@ import { ref as storageRef, deleteObject } from "firebase/storage";
 
 jest.mock('@/firebase-service');
 
-// Mock Firestore functions
+// mock firestore functions
 jest.mock("firebase/firestore", () => ({
   getDocs: jest.fn(),
   getDoc: jest.fn(),
@@ -19,13 +19,13 @@ jest.mock("firebase/firestore", () => ({
   serverTimestamp: jest.fn(),
 }));
 
-// Mock Storage functions
+// mock storage functions
 jest.mock("firebase/storage", () => ({
   ref: jest.fn(),
   deleteObject: jest.fn(),
 }));
 
-// Mock User
+// mock user
 const mockUser = { uid: "testUserId" };
 const service = new ManagePostService(mockUser);
 

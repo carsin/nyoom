@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils';
 import PostCardComponent from '@/components/PostCardComponent.vue';
-import { firebaseAuth, db } from "@/firebase-service"; // Mock as necessary
+import { firebaseAuth, db } from "@/firebase-service";
 import { useRouter } from 'vue-router';
 import { postManager } from '../services/ManagePostService';
 
-jest.mock('@/firebase-service'); // Mock Firebase service
+jest.mock('@/firebase-service'); // mock firebase service
 jest.mock('vue-router', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
@@ -50,7 +50,7 @@ describe('PostCardComponent', () => {
     const wrapper = createComponent();
     await wrapper.find('.upvote-button').trigger('click');
 
-    // Check if voting function was called
+    // check if voting function was called
     expect(postManager.sendVote).toHaveBeenCalledWith('defaultImageId', true);
   });
 
@@ -58,7 +58,7 @@ describe('PostCardComponent', () => {
     const wrapper = createComponent({ isPostOwner: true });
     await wrapper.find('.delete-post-button').trigger('click');
 
-    // Check if delete function was called
+    // check if delete function was called
     expect(postManager.deletePost).toHaveBeenCalledWith('defaultImageId');
   });
 
@@ -66,7 +66,7 @@ describe('PostCardComponent', () => {
     const wrapper = createComponent({ isPostOwner: true });
     await wrapper.find('.edit-caption-button').trigger('click');
 
-    // Check if caption editing mode is enabled
+    // check if caption editing mode is enabled
     expect(wrapper.find('.edit-caption-area').exists()).toBe(true);
   });
 });

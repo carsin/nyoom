@@ -20,7 +20,7 @@ jest.mock("firebase/firestore", () => ({
   increment: jest.fn(),
 }));
 
-// Mock User
+// mock user
 const mockUser = { uid: "testUserId" };
 const service = new ChatService(mockUser);
 

@@ -64,7 +64,7 @@ const mockPost3 = createMockPost('3', {
   timestamp: new Date('2022-01-03T18:30:00')
 });
 
-// Mocking Firebase Firestore
+// mocking firebase firestore
 jest.mock('@/firebase-service', () => ({
   getDocs: jest.fn(),
   query: jest.fn(),
@@ -147,7 +147,7 @@ describe('FeedPage', () => {
       props: { posts: mockPosts }
     });
 
-    // The component should render all the posts, even if their number exceeds 'n'
+    // component should render all the posts, even if their number exceeds 'n'
     expect(wrapper.findAllComponents(PostCardComponent).length).toBe(mockPosts.length);
   });
 });

@@ -25,7 +25,7 @@ beforeEach(() => {
 
 describe('ManageGarageService', () => {
   it('updates the vehicle description', async () => {
-    const vehicleRef = {}; // Mock vehicle reference
+    const vehicleRef = {}; // mock vehicle reference
     getDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ userId: mockUser.uid }) });
     updateDoc.mockResolvedValueOnce({});
 
@@ -35,7 +35,7 @@ describe('ManageGarageService', () => {
   });
 
   it('deletes a vehicle', async () => {
-    const vehicleRef = {}; // Mock vehicle reference
+    const vehicleRef = {}; // mock vehicle reference
     getDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ imageUrl: "imageURL" }) });
     deleteDoc.mockResolvedValueOnce({});
     deleteObject.mockResolvedValueOnce({});
@@ -55,7 +55,7 @@ describe('ManageGarageService', () => {
   });
 
   it('updates the vehicle modifications', async () => {
-    const vehicleRef = {}; // Mock vehicle reference
+    const vehicleRef = {}; // mock vehicle reference
     const newMods = new Map([["mod1", "value1"], ["mod2", "value2"]]);
     const oldMods = new Map([["mod1", "value1"]]);
     getDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ userId: mockUser.uid }) });

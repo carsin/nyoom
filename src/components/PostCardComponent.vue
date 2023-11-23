@@ -26,13 +26,13 @@
         </ion-col>
         <ion-col class="ion-justify-content-center ion-align-items-bottom ion-text-end">
           <div v-if="isPostOwner">
-            <ion-button fill="clear" v-if="!editingCaption" @click="editingCaption = true">
+            <ion-button fill="clear" v-if="!editingCaption" @click="editingCaption = true" class="edit-caption-button">
               <ion-icon aria-hidden="true" slot="icon-only" :icon="pencil" />
             </ion-button>
             <ion-button v-if="editingCaption" color="danger" fill="clear" @click="editingCaption = false">
               <ion-icon aria-hidden="true" slot="icon-only" :icon="close" />
             </ion-button>
-            <ion-button fill="clear" @click="handlePostDelete">
+            <ion-button fill="clear" @click="handlePostDelete" class="delete-post-button">
               <ion-icon aria-hidden="true" color="danger" slot="icon-only" :icon="trash" />
             </ion-button>
           </div>
@@ -45,7 +45,7 @@
         </div>
       </ion-row>
       <!-- Condtional caption editing menu -->
-      <ion-row v-if="editingCaption" class="ion-align-items-center">
+      <ion-row v-if="editingCaption" class="ion-align-items-center" class="edit-caption-area">
         <ion-col class="ion-text-left" size="9">
           <ion-label position="stacked" color="primary"><b>Edit Caption</b> </ion-label>
           <ion-textarea v-model="newCaption" :maxlength="MAX_CAPTION_LENGTH" placeholder="Exude genius here"
@@ -64,11 +64,11 @@
           <ion-card-content> {{ postCaption }} </ion-card-content>
         </ion-col>
         <ion-col class="ion-text-end ion-align-self-top" size="4">
-          <ion-chip :outline="isUpvoted ? false : true" color="success" @click="handleVote(true)">
+          <ion-chip :outline="isUpvoted ? false : true" color="success" class="upvote-button" @click="handleVote(true)">
             <ion-label :class="{ voted: isUpvoted }"> {{ upvoteCount?.toString() }}</ion-label>
             <ion-icon aria-hidden="true" :icon="arrowUpCircle" />
           </ion-chip>
-          <ion-chip :outline="isDownvoted ? false : true" color="danger" @click="handleVote(false)">
+          <ion-chip :outline="isDownvoted ? false : true" color="danger" class="downvote-button" @click="handleVote(false)">
             <ion-label :class="{ voted: isDownvoted }"> {{ downvoteCount?.toString() }}</ion-label>
             <ion-icon aria-hidden="true" :icon="arrowDownCircle" />
           </ion-chip>

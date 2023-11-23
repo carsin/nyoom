@@ -1,4 +1,3 @@
-<!-- NEEDS TO HAVE REFRESH WHEN NAVIGATED TO FROM FOLLOWERS SCREEN -->
 <template>
   <ion-page id="main-content">
     <ion-header>

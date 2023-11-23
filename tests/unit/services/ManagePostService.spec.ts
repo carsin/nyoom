@@ -4,8 +4,6 @@ import { doc, getDoc, addDoc, deleteDoc, updateDoc, getDocs, collection, query, 
 import { ref as storageRef, deleteObject } from "firebase/storage";
 
 jest.mock('@/firebase-service');
-jest.mock('firebase/firestore');
-jest.mock('firebase/storage');
 
 // Mock Firestore functions
 jest.mock("firebase/firestore", () => ({

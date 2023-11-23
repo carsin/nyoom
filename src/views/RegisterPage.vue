@@ -183,7 +183,7 @@ const handleRegister = async () => {
     router.push("/verify-email");
   } catch (error: any) {
     if (error.code === 'auth/email-already-in-use') {
-      emailError.value = 'The email address is already in use';
+      emailError.value = 'That email address is already in use';
       toast.value = { isOpen: true, message: emailError.value, color: 'danger' }
     } else {
       toast.value = { isOpen: true, message: "Error creating account: " + error.message, color: 'danger' }
